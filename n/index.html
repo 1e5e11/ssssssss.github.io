@@ -1,0 +1,28 @@
+<html>
+
+<head>
+    <link rel="shortcut  icon" href="" type="image/x-icon" />
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>AZNumberChecker</title>
+    <style type="text/css">
+    </style>
+    <script type="text/javascript">
+        var Fibonacci = [1, 1]; function gFibonacci(r) { for (let e = Fibonacci.length - 1; r >= Fibonacci[e - 1]; e++)Fibonacci.push(Fibonacci[e] + Fibonacci[e - 1]) } function factorial(r) { return 0 == r ? 1 : factorial(r - 1) * r } function p(r, e) { return function (r) { const e = BigInt(Math.floor(Math.sqrt(Number(r)))), t = [], i = function (r) { const e = new Array(r + 1).fill(!0); e[0] = e[1] = !1; for (let t = 2; t * t <= r; t++)if (e[t]) for (let i = t * t; i <= r; i += t)e[i] = !1; return e.reduce((r, e, t) => e ? [...r, BigInt(t)] : r, []) }(Number(e)), n = Number((r - BigInt(1)) / BigInt(1e6)) + 1; for (let e = 0; e < n; e++) { const n = BigInt(1e6 * e), o = n + BigInt(1e6) > r ? r : n + BigInt(1e6), a = new Array(Number(o - n) + 1).fill(!0); for (const r of i) { const e = r * r; if (e > o) break; let t = n / r * r; t < n && (t += r), t < e && (t = e); for (let e = t; e <= o; e += r)a[Number(e - n)] = !1 } for (let r = 0; r < a.length; r++) { const e = n + BigInt(r); e < BigInt(2) || a[r] && t.push(e) } } return t }(BigInt(r)) } factorials = [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800, 39916800, 479001600, 6227020800, 87178291200, 1307674368e3, 20922789888e3, 355687428096e3, 6402373705728e3, 0x1b02b9306890000, 243290200817664e4, 5109094217170944e4], gFibonacci(1e12); var primes = p(1e4, [2, 3, 5, 7, 11]), factors = []; function Divisors(r) { factors = []; for (let e = 1; e <= Math.sqrt(r); e++)r % e == 0 && (e === r / e ? factors.push(e) : factors.push(e, r / e)); return factors.sort((r, e) => r - e), factors.join(",") } function factor(r) { var e = []; if (1 == r) return "1"; var t = ""; for (let n = 0; Number(primes[n]) <= r; n++) { var i = 0; for (let e = 1; ; e++)if (r % Math.pow(Number(primes[n]), e)) { i = e - 1; break } i && (e.push([Number(primes[n]), i]), t = 1 == i ? t + "*" + Number(primes[n]) : t + "*" + Number(primes[n]) + "^" + i) } return t.substring(1, t.length) } function isinarr(r, e) { for (let t = 0; t < r.length; t++)if (r[t] == e) return { r: !0, s: t }; return { r: !1 } } function isPerfectSquare(r) { let e = Math.floor(Math.sqrt(r)); return e * e === r } function isFibonacciNumber(r) { return isPerfectSquare(5 * r * r + 4) || isPerfectSquare(5 * r * r - 4) } function s() { document.getElementById("a").innerHTML = ""; var r = Number(document.getElementById("inp").value); if (r && !(r > 1e9)) { r > .9 * primes.length && (primes = p(Math.floor(1.1 * r))), add("因式分解 Factorization", factor(r)), add("因数 Divisors", Divisors(r)), add("因数个数 Factorization", factors.length); var e = 0; for (let r = 0; r < factors.length; r++)e += factors[r]; add("因数和 Factorization", e), function (r) { var e = 0; for (let t = 0; t < primes.length; t++)if (primes[t] === r && (e = t), primes[t] < r && primes[t + 1] >= r && add("上一个素数 Previous prime", Number(primes[t])), primes[t] <= r && primes[t + 1] > r) { add("下一个素数 Next prime", Number(primes[t + 1])); break } add("素数？ Is prime?", e ? "<h style='color:green'>YES</h> (" + (e + 1) + "th prime)" : "<h style='color:red'>NO</h>") }(BigInt(r)), isPerfectSquare(r) ? add("完全平方数？ Is Perfect Square?", "<h style='color:green'>YES</h> (" + Math.sqrt(r) + "^2)") : add("完全平方数？ Is Perfect Square?", "<h style='color:red'>NO</h>"), add("平方 Square", BigInt(r) * BigInt(r)), isinarr(Fibonacci, r).r ? add("斐波那契数？ Is Fibonacci?", "<h style='color:green'>YES</h> (" + (isinarr(Fibonacci, r).s + 1) + "th Fibonacci)") : add("斐波那契数？ Is Fibonacci?", "<h style='color:red'>NO</h>"), isinarr(factorials, r).r ? add("阶乘？ Is Factorial?", "<h style='color:green'>YES</h> (" + isinarr(factorials, r).s + "!)") : add("阶乘？ Is Factorial?", "<h style='color:red'>NO</h>") } } function add(r, e) { var t = document.getElementById("a").innerHTML; document.getElementById("a").innerHTML = t + '<div style="position:relative;width: 500;height: 30;"><div style="position:absolute;top: 0;left:0;width: 250;height: 30;">' + r + '</div><div style="position:absolute;top: 0;right:0;width: 250;height: 30;">' + e + "</div></div>" }
+    </script>
+</head>
+
+<body>
+    <div style="position: fixed;overflow:auto;left: 0px;top: 0px;width: 100%;height: 100%;">
+        <h5>AZNumberChecker</h5>
+        <br>
+        <input placeholder="Enter an integer" id="inp" />
+        <input type="button" value="Lookup" onclick="s()">
+        <br>
+        <div style="position:absolute;width: 500;height: 1000;" id="a">
+        </div>
+    </div>
+</body>
+
+</html>
