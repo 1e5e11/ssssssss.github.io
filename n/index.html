@@ -3,29 +3,98 @@
 <head>
     <link rel="shortcut  icon" href="" type="image/x-icon" />
     <meta charset="utf-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <title>AZNumberChecker</title>
     <style type="text/css">
+
     </style>
     <script type="text/javascript">
-       
-var Fibonacci=[1,1];function gFibonacci(e){for(let r=Fibonacci.length-1;e>=Fibonacci[r-1];r++)Fibonacci.push(Fibonacci[r]+Fibonacci[r-1])}function factorial(e){return 0==e?1:factorial(e-1)*e}function p(e){const r=new Array(e+1).fill(!0);r[0]=r[1]=!1;for(let i=2;i*i<=e;i++)if(r[i])for(let t=i*i;t<=e;t+=i)r[t]=!1;const i=[];for(let t=2;t<=e;t++)r[t]&&i.push(t);return i}factorials=[1,1,2,6,24,120,720,5040,40320,362880,3628800,39916800,479001600,6227020800,87178291200,1307674368e3,20922789888e3,355687428096e3,6402373705728e3,0x1b02b9306890000,243290200817664e4,5109094217170944e4],gFibonacci(1e12);var primes=p(1e4,[2,3,5,7,11]),factors=[];function Divisors(e){factors=[];for(let r=1;r<=Math.sqrt(e);r++)e%r==0&&(r===e/r?factors.push(r):factors.push(r,e/r));return factors.sort((e,r)=>e-r),factors.join(",")}function factor(e){var r=[];if(1==e)return"1";var i="";for(let o=0;Number(primes[o])<=e;o++){var t=0;for(let r=1;;r++)if(e%Math.pow(Number(primes[o]),r)){t=r-1;break}t&&(r.push([Number(primes[o]),t]),i=1==t?i+"*"+Number(primes[o]):i+"*"+Number(primes[o])+"^"+t)}return i.substring(1,i.length)}function isinarr(e,r){for(let i=0;i<e.length;i++)if(e[i]==r)return{r:!0,s:i};return{r:!1}}function isPerfectSquare(e){let r=Math.floor(Math.sqrt(e));return r*r===e}function isFibonacciNumber(e){return isPerfectSquare(5*e*e+4)||isPerfectSquare(5*e*e-4)}function s(){document.getElementById("a").innerHTML="";var e=Number(document.getElementById("inp").value);if(e&&!(e>1e9)){e>primes.length&&(primes=p(Math.floor(1.1*e))),add("因式分解 Factorization",factor(e)),add("因数 Divisors",Divisors(e)),add("因数个数 Factorization",factors.length);var r=0;for(let e=0;e<factors.length;e++)r+=factors[e];add("因数和 Factorization",r),function(e){var r=-1;for(let i=0;i<primes.length;i++)if(primes[i]===e&&(r=i),primes[i]<e&&primes[i+1]>=e&&add("上一个素数 Previous prime",Number(primes[i])),primes[i]<=e&&primes[i+1]>e){add("下一个素数 Next prime",Number(primes[i+1]));break}if(-1==r)add("素数？ Is prime?","<h style='color:red'>NO</h>");else{var i=(r+1)%36e3;add("素数？ Is prime?","<h style='color:green'>YES</h> ("+(r+1)+"th prime)<a style='color:blue;cursor:pointer' onclick='redirectToBilibili("+((r+1-i)/36e3+1)+","+(i-.5)+")'>转跳bilibili</a>")}}(e),isPerfectSquare(e)?add("完全平方数？ Is Perfect Square?","<h style='color:green'>YES</h> ("+Math.sqrt(e)+"^2)"):add("完全平方数？ Is Perfect Square?","<h style='color:red'>NO</h>"),add("平方 Square",e*e),isinarr(Fibonacci,e).r?add("斐波那契数？ Is Fibonacci?","<h style='color:green'>YES</h> ("+(isinarr(Fibonacci,e).s+1)+"th Fibonacci)"):add("斐波那契数？ Is Fibonacci?","<h style='color:red'>NO</h>"),isinarr(factorials,e).r?add("阶乘？ Is Factorial?","<h style='color:green'>YES</h> ("+isinarr(factorials,e).s+"!)"):add("阶乘？ Is Factorial?","<h style='color:red'>NO</h>")}}function add(e,r){var i=document.getElementById("a").innerHTML;document.getElementById("a").innerHTML=i+'<div style="position:relative;width: 500;height: 30;">\n                <div style="position:absolute;top: 0;left:0;width: 250;height: 30;">'+e+'</div>\n                <div style="position:absolute;top: 0;right:0;width: 250;height: 30;">'+r+"</div>\n            </div>"}function isMobileDevice(){const e=navigator.userAgent.toLowerCase();return/iphone|ipad|ipod|android|mobile/.test(e)}function redirectToBilibili(e,r){const i=e,t=r;if(isMobileDevice())alert("请在电脑浏览器打开");else{const e=`https://www.bilibili.com/video/BV1jotCz3EQR?p=${i}&t=${t}`;window.open(e)}}   
+var Fibonacci=[1,1]
+function gFibonacci(l){for(let i=Fibonacci.length-1;l>=Fibonacci[i-1];i++){Fibonacci.push(Fibonacci[i]+Fibonacci[i-1])}}
+function factorial(l){if(l==0){return 1}else{return factorial(l-1)*l}}
+factorials=[1,1,2,6,24,120,720,5040,40320,362880,3628800,39916800,479001600,6227020800,87178291200,1307674368000,20922789888000,355687428096000,6402373705728000,121645100408832000,2432902008176640000,51090942171709440000]
+function p(n){const sieve=new Array(n+1).fill(true);sieve[0]=sieve[1]=false;for(let i=2;i*i<=n;i++){if(sieve[i]){for(let j=i*i;j<=n;j+=i){sieve[j]=false;}}}
+const primes=[];for(let i=2;i<=n;i++){if(sieve[i]){primes.push(i);}}
+return primes;}
+function isProbablePrime(n,k=40){n=BigInt(n);if(n<2n)return false;const small=[2n,3n,5n,7n,11n,13n,17n,19n,23n,29n];if(small.includes(n))return true;for(let p of small)if(n%p===0n)return false;let d=n-1n,s=0;while((d&1n)===0n){d>>=1n;s++;}
+const modPow=(a,e,m)=>{let r=1n;while(e>0n){if(e&1n)r=(r*a)%m;a=(a*a)%m;e>>=1n;}
+return r;};for(let i=0;i<k;i++){const a=BigInt(2+Math.floor(Math.random()*(Number(n-3n))));let x=modPow(a,d,n);if(x===1n||x===n-1n)continue;let composite=true;for(let j=1;j<s;j++){x=(x*x)%n;if(x===n-1n){composite=false;break;}}
+if(composite)return false;}
+return true;}
+gFibonacci(1000000000000)
+var primes=p(10000,[2,3,5,7,11])
+var factors=[]
+function Divisors(num){factors=[];for(let i=1;i<=Math.sqrt(num);i++){if(num%i===0){if(i===num/i){factors.push(i);}else{factors.push(i,num/i);}}}
+factors.sort((a,b)=>a-b);return factors.join(",")}
+function factor(n){var b=[]
+if(n==1){return'1'}
+var r=''
+for(let i=0;Number(primes[i])<=n;i++){var z=0
+for(let j=1;1;j++){if(n%Math.pow(Number(primes[i]),j)){z=j-1
+break}}
+if(z){b.push([Number(primes[i]),z])
+if(z==1){r=r+"*"+Number(primes[i])}else{r=r+"*"+Number(primes[i])+"^"+z}}}
+return r.substring(1,r.length)}
+function isinarr(array,s){for(let i=0;i<array.length;i++){if(array[i]==s){return{r:true,s:i}}}
+return{r:false}}
+function isPerfectSquare(x){let s=Math.floor(Math.sqrt(x));return s*s===x;}
+function isFibonacciNumber(n){return isPerfectSquare(5*n*n+4)||isPerfectSquare(5*n*n-4);}
+function s(){var start=new Date().getTime()
+document.getElementById("a").innerHTML=''
+var t=Number(document.getElementById("inp").value)
+if(!t||t>1000000000){return}
+if(t>primes.length){primes=p(Math.floor(t*1.1))}
+add("因式分解 Factorization",factor(t))
+add("因数 Divisors",Divisors(t))
+add("因数个数 Count of divisors",factors.length)
+var sum=0
+for(let i=0;i<factors.length;i++){sum=sum+factors[i]}
+add("因数和 Sum of divisors",sum)
+function ap(t){var r=-1
+for(let i=0;i<primes.length;i++){if(primes[i]===t){r=i}
+if(primes[i]<t&&primes[i+1]>=t){add("上一个素数 Previous prime",Number(primes[i]))}
+if(primes[i]<=t&&primes[i+1]>t){add("下一个素数 Next prime",Number(primes[i+1]))
+break}}
+if(r==-1){add("素数？ Is prime?","<h style='color:red'>NO</h>")}else{var ss=(r+1)%36000
+var fp=(r+1-ss)/36000+1
+var h="redirectToBilibili("+fp+","+(ss-0.5)+")"
+add("素数？ Is prime?","<h style='color:green'>YES</h> ("+(r+1)+"th prime)<a style='color:blue;cursor:pointer' onclick='"+h+"'>转跳bilibili</a>")}}
+ap((t))
+if(isPerfectSquare(t)){add("完全平方数？ Is Perfect Square?","<h style='color:green'>YES</h> ("+Math.sqrt(t)+"^2)")}else{add("完全平方数？ Is Perfect Square?","<h style='color:red'>NO</h>")}
+add("平方 Square",(t)*(t))
+if(isinarr(Fibonacci,t).r){add("斐波那契数？ Is Fibonacci?","<h style='color:green'>YES</h> ("+(isinarr(Fibonacci,t).s+1)+"th Fibonacci)")}else{add("斐波那契数？ Is Fibonacci?","<h style='color:red'>NO</h>")}
+if(isinarr(factorials,t).r){add("阶乘？ Is Factorial?","<h style='color:green'>YES</h> ("+(isinarr(factorials,t).s)+"!)")}else{add("阶乘？ Is Factorial?","<h style='color:red'>NO</h>")}
+var end=new Date().getTime()
+document.getElementById("usedtime").innerHTML="用时："+(end-start)/1000+"s"}
+function add(a,b){var e=document.getElementById("a").innerHTML
+document.getElementById("a").innerHTML=e+`<div style="position:relative;width: 500;height: 30;">
+                <div style="position:absolute;top: 0;left:0;width: 250;height: 30;">`+a+`</div>
+                <div style="position:absolute;top: 0;right:0;width: 250;height: 30;">`+b+`</div>
+            </div>`}
+function qcp(){var r=document.getElementById("inp").value
+if(isProbablePrime(r)){document.getElementById("iisPrime").style.display="block"}else{document.getElementById("iisPrime").style.display="none"}}
+function isMobileDevice(){const ua=navigator.userAgent.toLowerCase();const mobileKeywords=/iphone|ipad|ipod|android|mobile/;return mobileKeywords.test(ua);}
+function redirectToBilibili(fp,ss){const bvid="BV1jotCz3EQR";const targetP=fp;const targetTime=ss;if(!isMobileDevice()){const url=`https://www.bilibili.com/video/${bvid}?p=${targetP}&t=${targetTime}`;window.open(url)
+return;}
+alert("请在电脑浏览器打开")}
     </script>
+
 </head>
 
 <body>
     <div style="position: fixed;overflow:auto;left: 0px;top: 0px;width: 100%;height: 100%;">
         <h5>AZNumberChecker</h5>
         <br>
-        <input placeholder="Enter an integer" id="inp" />
+        <input placeholder="Enter an integer" id="inp" onchange="qcp()" />
         <input type="button" value="Lookup" onclick="s()">
+        <div id="iisPrime" style="display: none;color: green;">Probable Prime</div>
+        
+        <div id="usedtime"></div>
         <br>
         <div style="position:absolute;width: 500;height: 1000;" id="a">
+
         </div>
+
     </div>
 </body>
 
-
 </html>
-
