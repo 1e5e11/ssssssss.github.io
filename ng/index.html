@@ -202,7 +202,18 @@
 
             return [union, intersection, difference];
         }
+        function isProductOfConsecutiveFactorials(n) {
+            if (!Number.isInteger(n) || n <= 0) return false;
 
+            let fact = 1;
+            for (let k = 1; ; k++) {
+                fact *= k; // k!
+                let product = fact * fact * (k + 1); // (k+1)*(k!)^2
+
+                if (product === n) return true;
+                if (product > n) return false;
+            }
+        }
 
         function checkPropertiesOfNumber(t) {
 
@@ -231,7 +242,10 @@
                 }
             }
 
+            for (let i = 0; i < factors.length; i++) {
+                properties.push("具有因子 Has a factor of " + factors[i]);
 
+            }
             properties.push("因数个数 Count of divisors :" + factors.length)
             if (pfactor.length > 1) {
                 properties.push("素因子个数 Count of prime divisors " + pfactor.length)
@@ -239,10 +253,7 @@
                     //properties.push("具有素因子 Has a prime factor of " + pfactor[i]);
 
                 }
-                for (let i = 0; i < factors.length; i++) {
-                    properties.push("具有因子 Has a factor of " + factors[i]);
 
-                }
             }
             if (t % 2 == 0) {
                 properties.push("偶数 Even")
@@ -313,10 +324,114 @@
                 properties.push("阶乘 Is Factorial")
 
             }
+            if (isProductOfConsecutiveFactorials(t)) {
+                properties.push("相邻两数阶乘之积 The product of the factorials of two adjacent numbers")
 
+            }
+            var fcs = findConsecutiveSquareSums(t)
+            if (fcs.result) {
+                for (let i = 0; i < fcs.list.length; i++) {
+                    properties.push("连续" + fcs.list[i].n + "个整数平方和 The sum of the squares of " + fcs.list[i].n + " consecutive integers")
+                }
+            }
+
+            var fcs = findConsecutiveCubeSums(t)
+            if (fcs.result) {
+                for (let i = 0; i < fcs.list.length; i++) {
+                    properties.push("连续" + fcs.list[i].n + "个整数立方和 The sum of the cubes of " + fcs.list[i].n + " consecutive integers")
+                }
+            }
+
+
+            var fcs = isFactorialPlusMinusOne(t)
+            if (fcs.result) {
+                if (fcs.type) {
+                    properties.push("阶乘加一数 Add one number to the factorial")
+                } else {
+                    properties.push("阶乘减一数 Subtract one number to the factorial")
+                }
+
+
+
+            }
             return properties
 
         }
+
+
+        function isFactorialPlusMinusOne(num) {
+            num = BigInt(num);
+            let fact = 1n;
+            let n = 1n;
+
+            while (fact <= num + 1n) { // 避免溢出死循环
+                if (fact + 1n === num) return { result: true, type: 1, n: n };
+                if (fact - 1n === num) return { result: true, type: 0, n: n };
+                n++;
+                fact *= n;
+            }
+
+            return { result: false };
+        }
+
+
+
+        function sumOfSquares(m) {
+            // 平方和公式 S(m) = m*(m+1)*(2m+1)/6
+            return m * (m + 1) * (2 * m + 1) / 6;
+        }
+        function cubeSum(m) {
+            // 立方和公式 S(m) = (m*(m+1)/2)^2
+            return ((m * (m + 1)) / 2) ** 2;
+        }
+
+        function findConsecutiveCubeSums(num, maxN = 10000000) {
+            if (!Number.isInteger(num) || num <= 0)
+                return { result: false, list: [] };
+
+            const results = [];
+
+            for (let n = 2; n <= maxN; n++) {
+                for (let a = 1; ; a++) {
+                    const end = a + n - 1;
+                    const sum = cubeSum(end) - cubeSum(a - 1);
+
+                    if (sum === num) {
+                        results.push({ start: a, n });
+                    }
+                    if (sum > num) break; // 超出则不必继续
+                }
+            }
+
+            return {
+                result: results.length > 0,
+                list: results
+            };
+        }
+        function findConsecutiveSquareSums(num, maxN = 10000000) {
+            if (!Number.isInteger(num) || num <= 0)
+                return { result: false, list: [] };
+
+            const results = [];
+
+            for (let n = 2; n <= maxN; n++) {
+                for (let a = 1; ; a++) {
+                    const end = a + n - 1;
+                    const sum = sumOfSquares(end) - sumOfSquares(a - 1);
+
+                    if (sum === num) {
+                        results.push({ start: a, n });
+                    }
+                    if (sum > num) break; // 再往后只会更大
+                }
+            }
+
+            return {
+                result: results.length > 0,
+                list: results
+            };
+        }
+
 
         var tproperty = []
         var inpproperty = []
@@ -325,6 +440,28 @@
         var Times = 0
         var aarr = []
 
+        function calcExpression(expr) {
+            try {
+                // 替换 ^ 为 ** 以支持幂运算（JavaScript 的指数运算符）
+                expr = expr.replace(/\^/g, '**');
+
+                // 限制只允许数字、运算符、小数点、括号和空格，防止执行恶意代码
+                if (!/^[0-9+\-*/().\s**]+$/.test(expr)) {
+                    throw new Error("非法字符");
+                }
+
+                // 使用 Function 而不是 eval，避免污染作用域
+                const result = Function(`"use strict"; return (${expr})`)();
+
+                if (typeof result !== 'number' || !isFinite(result)) {
+                    throw new Error("表达式无效");
+                }
+
+                return result;
+            } catch (e) {
+                return `错误：${e.message}`;
+            }
+        }
 
         function sj(min, max) { //随机
             return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -337,6 +474,7 @@
             var start = new Date().getTime()
             Times++
             document.getElementById("a").innerHTML = ''
+            qcp()
             var t = Number(document.getElementById("inp").value)
             if (!t || t > 10000000) {
                 return
@@ -358,7 +496,7 @@
                     var u1 = unionIntersectionDifference(u, aproperty)[2]
 
 
-                  //  console.log(u, u1)
+                    //  console.log(u, u1)
 
                     if (u1.length > 0) {
                         r = u1[sj(0, u1.length - 1)]
@@ -398,7 +536,8 @@
 
 
         function qcp() {
-
+            document.getElementById("inp").value =
+                calcExpression(document.getElementById("inp").value)
         }
 
 
