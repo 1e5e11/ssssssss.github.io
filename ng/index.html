@@ -1,0 +1,453 @@
+<html>
+
+<head>
+    <link rel="shortcut  icon" href="" type="image/x-icon" />
+    <meta charset="utf-8">
+    <title>AZNumberGuess</title>
+    <style type="text/css">
+        .a {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 50%;
+            text-align: center;
+            line-height: 40px;
+            border: 1px solid black;
+        }
+    </style>
+    <script type="text/javascript">
+
+        var Fibonacci = [1, 1]
+        function gFibonacci(l) {
+            for (let i = Fibonacci.length - 1; l >= Fibonacci[i - 1]; i++) {
+                Fibonacci.push(Fibonacci[i] + Fibonacci[i - 1])
+            }
+        }
+
+        function factorial(l) {
+            if (l == 0) {
+                return 1
+            } else {
+                return factorial(l - 1) * l
+            }
+        }
+        factorials = [
+            1,
+            1,
+            2,
+            6,
+            24,
+            120,
+            720,
+            5040,
+            40320,
+            362880,
+            3628800,
+            39916800,
+            479001600,
+            6227020800,
+            87178291200,
+            1307674368000,
+            20922789888000,
+            355687428096000,
+            6402373705728000,
+            121645100408832000,
+            2432902008176640000,
+            51090942171709440000
+        ]
+
+
+
+        function p(n) {
+            const sieve = new Array(n + 1).fill(true);
+            sieve[0] = sieve[1] = false;  // 0 和 1 不是素数
+
+            for (let i = 2; i * i <= n; i++) {
+                if (sieve[i]) {
+                    for (let j = i * i; j <= n; j += i) {
+                        sieve[j] = false;
+                    }
+                }
+            }
+
+            const primes = [];
+            for (let i = 2; i <= n; i++) {
+                if (sieve[i]) {
+                    primes.push(i);
+                }
+            }
+
+            return primes;
+        }
+
+
+        function isProbablePrime(n, k = 40) {
+            n = BigInt(n);
+            if (n < 2n) return false;
+            const small = [2n, 3n, 5n, 7n, 11n, 13n, 17n, 19n, 23n, 29n];
+            if (small.includes(n)) return true;
+            for (let p of small) if (n % p === 0n) return false;
+
+            // 分解 n - 1 = d * 2^s
+            let d = n - 1n, s = 0;
+            while ((d & 1n) === 0n) { d >>= 1n; s++; }
+
+            // 快速幂取模
+            const modPow = (a, e, m) => {
+                let r = 1n;
+                while (e > 0n) {
+                    if (e & 1n) r = (r * a) % m;
+                    a = (a * a) % m;
+                    e >>= 1n;
+                }
+                return r;
+            };
+
+            // Miller–Rabin 检验
+            for (let i = 0; i < k; i++) {
+                const a = BigInt(2 + Math.floor(Math.random() * (Number(n - 3n)))); // 随机基
+                let x = modPow(a, d, n);
+                if (x === 1n || x === n - 1n) continue;
+                let composite = true;
+                for (let j = 1; j < s; j++) {
+                    x = (x * x) % n;
+                    if (x === n - 1n) { composite = false; break; }
+                }
+                if (composite) return false;
+            }
+            return true; // 通过所有测试 => 极可能是素数
+        }
+
+
+        gFibonacci(1000000000000)
+
+        var primes = p(100000, [2, 3, 5, 7, 11])
+        var factors = []
+        function Divisors(num) {
+            factors = [];
+            for (let i = 1; i <= Math.sqrt(num); i++) {
+                if (num % i === 0) {
+                    if (i === num / i) {
+                        factors.push(i);
+                    } else {
+                        factors.push(i, num / i);
+                    }
+                }
+            }
+            factors.sort((a, b) => a - b);
+            return factors
+        }
+
+
+
+        function factor(n) {
+            var b = []
+            if (n == 1) {
+                return '1'
+            }
+            var r = ''
+            for (let i = 0; Number(primes[i]) <= n; i++) {
+                var z = 0
+                for (let j = 1; 1; j++) {
+                    if (n % Math.pow(Number(primes[i]), j)) {
+                        z = j - 1
+                        break
+                    }
+                }
+                if (z) {
+                    b.push([Number(primes[i]), z])
+                    if (z == 1) {
+                        r = r + "*" + Number(primes[i])
+                    } else {
+                        r = r + "*" + Number(primes[i]) + "^" + z
+                    }
+                }
+            }
+            return r.substring(1, r.length)
+        }
+        function isinarr(array, s) {
+            for (let i = 0; i < array.length; i++) {
+                if (array[i] == s) {
+                    return { r: true, s: i }
+                }
+            }
+            return { r: false }
+        }
+        function isPerfectSquare(x) {
+            let s = Math.floor(Math.sqrt(x));
+            return s * s === x;
+        }
+        function isPerfectCube(x) {
+            let s = Math.floor(Math.cbrt(x));
+            return s * s * s === x;
+        }
+        function isFibonacciNumber(n) {
+            return isPerfectSquare(5 * n * n + 4) || isPerfectSquare(5 * n * n - 4);
+        }
+
+
+
+        function unionIntersectionDifference(arr1, arr2) {
+            const set1 = new Set(arr1);
+            const set2 = new Set(arr2);
+
+            // 并集
+            const union = [...new Set([...set1, ...set2])];
+
+            // 交集
+            const intersection = [...set1].filter(x => set2.has(x));
+
+            // 差集（arr1中有，但arr2中没有）
+            const difference = [...set1].filter(x => !set2.has(x));
+
+            return [union, intersection, difference];
+        }
+
+
+        function checkPropertiesOfNumber(t) {
+
+
+            var properties = []
+
+
+            //add("因式分解 Factorization", factor(t))
+
+            if (factor(t).split("^").length == 1) {
+                properties.push("无平方因子 Square-free")
+            }
+            //        add("因数 Divisors", Divisors(t))
+            Divisors(t)
+            var pfactor = []
+
+            var tt = String(t)
+            for (let i = 0; i < tt.length; i++) {
+                properties.push("具有数码 Has a digital " + tt[i])
+
+            }
+            for (let i = 0; Number(primes[i]) <= t; i++) {
+                if (t % primes[i] == 0) {
+                    pfactor.push(primes[i])
+
+                }
+            }
+
+
+            properties.push("因数个数 Count of divisors :" + factors.length)
+            if (pfactor.length > 1) {
+                properties.push("素因子个数 Count of prime divisors " + pfactor.length)
+                for (let i = 0; i < pfactor.length; i++) {
+                    //properties.push("具有素因子 Has a prime factor of " + pfactor[i]);
+
+                }
+                for (let i = 0; i < factors.length; i++) {
+                    properties.push("具有因子 Has a factor of " + factors[i]);
+
+                }
+            }
+            if (t % 2 == 0) {
+                properties.push("偶数 Even")
+            } else {
+                properties.push("奇数 Odd")
+            }
+
+            var sum = 0
+            for (let i = 0; i < factors.length; i++) {
+                sum = sum + factors[i]
+            }
+
+            properties.push("因数和 Sum of divisors :" + sum)
+
+
+            /*
+                        if (isinarr(primes, t).r) {
+                            add("素数？ Is prime?", "<h style='color:green'>YES</h> (" + (isinarr(primes, t).s + 1) + "th prime)")
+            
+                        } else {
+                            add("素数？ Is prime?", "<h style='color:red'>NO</h>")
+                        }
+            */
+
+            function ap(t) {
+                var r = -1
+                for (let i = 0; i < primes.length; i++) {
+                    if (primes[i] === t) {
+                        r = i
+                        break
+                    }
+                }
+                if (r == -1) {
+                    if (t !== 1) {
+                        properties.push("合数 Composite Number")
+                    }
+
+                    // add("素数？ Is prime?", "<h style='color:red'>NO</h>")
+                } else {
+
+                    properties.push("素数 Is prime")
+                    //add("素数？ Is prime?", "<h style='color:green'>YES</h> (" + (r + 1) + "th prime)<a style='color:blue;cursor:pointer' onclick='" + h + "'>转跳bilibili</a>")
+                }
+
+            }
+            ap((t))
+
+
+            if (isPerfectSquare(t)) {
+                properties.push("完全平方数 Is Perfect Square")
+
+            }
+            if (isPerfectCube(t)) {
+                properties.push("完全立方数 Is Perfect Cube")
+
+            }
+
+            //add("平方 Square", (t) * (t))
+
+
+            if (isinarr(Fibonacci, t).r) {
+                properties.push("斐波那契数 Is Fibonacci")
+                //add("斐波那契数？ Is Fibonacci?", "<h style='color:green'>YES</h> (" + (isinarr(Fibonacci, t).s + 1) + "th Fibonacci)")
+            }
+
+
+            if (isinarr(factorials, t).r) {
+                properties.push("阶乘 Is Factorial")
+
+            }
+
+            return properties
+
+        }
+
+        var tproperty = []
+        var inpproperty = []
+        var aproperty = []
+        var tn = 0
+        var Times = 0
+        var aarr = []
+
+
+        function sj(min, max) { //随机
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+        window.onload = function () {
+            tn = sj(1, 1000)
+            tproperty = checkPropertiesOfNumber(tn)
+        }
+        function s() {
+            var start = new Date().getTime()
+            Times++
+            document.getElementById("a").innerHTML = ''
+            var t = Number(document.getElementById("inp").value)
+            if (!t || t > 10000000) {
+                return
+            }
+            if (t > primes.length) {
+                primes = p(Math.floor(t * 1.1))
+            }
+
+            inpproperty = checkPropertiesOfNumber(t)
+
+            var u = unionIntersectionDifference(inpproperty, tproperty)[1]
+            var r = ''
+            if (t == tn) {
+                r = "恭喜你猜对了，" + t + "是对的"
+            } else
+                if (u.length == 0) {
+                    r = '无匹配性质 No matching properties'
+                } else {
+                    var u1 = unionIntersectionDifference(u, aproperty)[2]
+
+
+                  //  console.log(u, u1)
+
+                    if (u1.length > 0) {
+                        r = u1[sj(0, u1.length - 1)]
+                    } else {
+                        r = u[sj(0, u.length - 1)]
+                    }
+
+                }
+            aarr.push([t, r])
+            aproperty.push(r)
+            add(aarr)
+
+
+
+
+            var end = new Date().getTime()
+            document.getElementById("usedtime").innerHTML = "猜测次数 Number of guesses :" + Times
+        }
+
+
+
+
+        function add(arr) {
+            var e = ''
+            for (let i = arr.length - 1; i >= 0; i--) {
+                e = e + `
+<div style="position: relative;width: 100%; height: 40px;">
+    <div class="a" style="left: 0;">`+ arr[i][0] + `</div>
+    <div class="a" style="left: 50%;">`+ arr[i][1] + `</div>
+</div>
+`
+            }
+            // var e = document.getElementById("a").innerHTML
+            document.getElementById("a").innerHTML = e
+        }
+
+
+
+        function qcp() {
+
+        }
+
+
+
+
+        function isMobileDevice() {
+            const ua = navigator.userAgent.toLowerCase();
+            const mobileKeywords = /iphone|ipad|ipod|android|mobile/;
+            return mobileKeywords.test(ua);
+        }
+
+        // 2. 跳转至B站指定位置
+        function redirectToBilibili(fp, ss) {
+
+
+            const bvid = "BV1jotCz3EQR"; // 替换为实际BV号
+            const targetP = fp; // 目标分集序号
+            const targetTime = ss; // 目标时间（秒）
+
+            // 可选：添加用户确认
+            if (!isMobileDevice()) {
+
+                const url = `https://www.bilibili.com/video/${bvid}?p=${targetP}&t=${targetTime}`;
+                window.open(url)
+
+                return;
+            }
+            alert("请在电脑浏览器打开")
+        }
+    </script>
+
+</head>
+
+<body>
+    <div style="position: fixed;overflow:auto;left: 0px;top: 0px;width: 100%;height: 100%;">
+        <h5>AZNumberGuess</h5>
+        <br>
+        <input placeholder="Enter an integer" id="inp" onchange="qcp()" />
+        <input type="button" value="Guess" onclick="s()">
+
+
+        <div id="usedtime">猜测次数 Number of guesses : 0</div>
+        <br>
+        <div style="position:absolute;width: 1000;height: 1000;" id="a">
+
+
+        </div>
+
+    </div>
+</body>
+
+</html>
