@@ -49,37 +49,21 @@ function isPerfectCube(x){let s=Math.floor(Math.cbrt(x));return s*s*s===x}
 function isFibonacciNumber(n){return isPerfectSquare(5*n*n+4)||isPerfectSquare(5*n*n-4)}
 function unionIntersectionDifference(arr1,arr2){const set1=new Set(arr1);const set2=new Set(arr2);const union=[...new Set([...set1,...set2])];const intersection=[...set1].filter(x=>set2.has(x));const difference=[...set1].filter(x=>!set2.has(x));return[union,intersection,difference]}
 function isProductOfConsecutiveFactorials(n){if(!Number.isInteger(n)||n<=0)return!1;let fact=1;for(let k=1;;k++){fact*=k;let product=fact*fact*(k+1);if(product===n)return!0;if(product>n)return!1}}
-function checkPropertiesOfNumber(t){var properties=[]
-if(factor(t).split("^").length==1){properties.push("无平方因子 Square-free")}
-Divisors(t)
-var pfactor=[]
-var tt=String(t)
-for(let i=0;i<tt.length;i++){properties.push("具有数码 Has a digital "+tt[i])}
-for(let i=0;Number(primes[i])<=t;i++){if(t%primes[i]==0){pfactor.push(primes[i])}}
-for(let i=0;i<factors.length;i++){properties.push("具有因子 Has a factor of "+factors[i])}
-properties.push("因数个数 Count of divisors :"+factors.length)
-if(pfactor.length>1){properties.push("素因子个数 Count of prime divisors "+pfactor.length)
-for(let i=0;i<pfactor.length;i++){}}
-if(t%2==0){properties.push("偶数 Even")}else{properties.push("奇数 Odd")}
-var sum=0
-for(let i=0;i<factors.length;i++){sum=sum+factors[i]}
-properties.push("因数和 Sum of divisors :"+sum)
-function ap(t){var r=-1
-for(let i=0;i<primes.length;i++){if(primes[i]===t){r=i
-break}}
-if(r==-1){if(t!==1){properties.push("合数 Composite Number")}}else{properties.push("素数 Is prime")}}
-ap((t))
-if(isPerfectSquare(t)){properties.push("完全平方数 Is Perfect Square")}
-if(isPerfectCube(t)){properties.push("完全立方数 Is Perfect Cube")}
-if(isinarr(Fibonacci,t).r){properties.push("斐波那契数 Is Fibonacci")}
-if(isinarr(factorials,t).r){properties.push("阶乘 Is Factorial")}
-if(isProductOfConsecutiveFactorials(t)){properties.push("相邻两数阶乘之积 The product of the factorials of two adjacent numbers")}
-var fcs=findConsecutiveSquareSums(t)
-if(fcs.result){for(let i=0;i<fcs.list.length;i++){properties.push("连续"+fcs.list[i].n+"个整数平方和 The sum of the squares of "+fcs.list[i].n+" consecutive integers")}}
-var fcs=findConsecutiveCubeSums(t)
-if(fcs.result){for(let i=0;i<fcs.list.length;i++){properties.push("连续"+fcs.list[i].n+"个整数立方和 The sum of the cubes of "+fcs.list[i].n+" consecutive integers")}}
-var fcs=isFactorialPlusMinusOne(t)
-if(fcs.result){if(fcs.type){properties.push("阶乘加一数 Add one number to the factorial")}else{properties.push("阶乘减一数 Subtract one number to the factorial")}}
+function checkPropertiesOfNumber(t){var properties=[];Divisors(t);if(isProductOfConsecutiveFactorials(t)){properties.push("相邻两数阶乘之积 Product of factorials of two consecutive numbers")}
+var fcs=findConsecutiveSquareSums(t);if(fcs.result){for(let i=0;i<fcs.list.length;i++){properties.push("连续"+fcs.list[i].n+"个整数平方和 Sum of squares of "+fcs.list[i].n+" consecutive integers")}}
+fcs=findConsecutiveCubeSums(t);if(fcs.result){for(let i=0;i<fcs.list.length;i++){properties.push("连续"+fcs.list[i].n+"个整数立方和 Sum of cubes of "+fcs.list[i].n+" consecutive integers")}}
+var fm=isFactorialPlusMinusOne(t);if(fm.result){if(fm.type){properties.push("阶乘加一数 Factorial plus one")}else{properties.push("阶乘减一数 Factorial minus one")}}
+if(isinarr(factorials,t).r){properties.push("阶乘数 Factorial number")}
+if(isinarr(Fibonacci,t).r){properties.push("斐波那契数 Fibonacci number")}
+if(isPerfectSquare(t)){properties.push("完全平方数 Perfect square")}
+if(isPerfectCube(t)){properties.push("完全立方数 Perfect cube")}
+function ap(t){var r=primes.indexOf(t);if(r===-1){if(t!==1)properties.push("合数 Composite number");}else{properties.push("素数 Prime number")}}
+ap(t);if(factor(t).split("^").length==1){properties.push("无平方因子 Square-free number")}
+var pfactor=[];for(let i=0;Number(primes[i])<=t;i++){if(t%primes[i]==0){pfactor.push(primes[i])}}
+if(pfactor.length>1){properties.push("素因子个数 Count of prime divisors: "+pfactor.length)}
+var tt=String(t);for(let i=0;i<tt.length;i++){properties.push("具有数码 Has digit "+tt[i])}
+properties.push("数码位数 Number of digits: "+tt.length);properties.push("模3余数 Remainder mod 3 = "+(t%3));properties.push("模5余数 Remainder mod 5 = "+(t%5));properties.push("模7余数 Remainder mod 7 = "+(t%7));properties.push("模11余数 Remainder mod 11 = "+(t%11));properties.push("模13余数 Remainder mod 13 = "+(t%13));properties.push("模17余数 Remainder mod 17 = "+(t%17));for(let i=1;i<factors.length;i++){properties.push("具有因子 Has a factor of "+factors[i])}
+properties.push("因数个数 Count of divisors: "+factors.length);var sum=0;for(let i=0;i<factors.length;i++)sum+=factors[i];properties.push("因数和 Sum of divisors: "+sum);if(t%2==0){properties.push("偶数 Even number")}else{properties.push("奇数 Odd number")}
 return properties}
 function isFactorialPlusMinusOne(num){num=BigInt(num);let fact=1n;let n=1n;while(fact<=num+1n){if(fact+1n===num)return{result:!0,type:1,n:n};if(fact-1n===num)return{result:!0,type:0,n:n};n++;fact*=n}
 return{result:!1}}
@@ -116,7 +100,7 @@ inpproperty=checkPropertiesOfNumber(t)
 var u=unionIntersectionDifference(inpproperty,tproperty)[1]
 var r=''
 if(t==tn){r="恭喜你猜对了，"+t+"是对的"}else if(u.length==0){r='无匹配性质 No matching properties'}else{var u1=unionIntersectionDifference(u,aproperty)[2]
-if(u1.length>0){r=u1[sj(0,u1.length-1)]}else{r=u[sj(0,u.length-1)]}}
+if(u1.length>0){r=u1[0]}else{r=u[sj(0,u.length-1)]}}
 aarr.push([t,r])
 aproperty.push(r)
 add(aarr)
