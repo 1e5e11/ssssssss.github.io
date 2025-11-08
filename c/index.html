@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>控制台</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #eee;
+        }
+
+        button {
+            margin: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>控制台</h1>
+
+    <div id="loginDiv">
+        控制台密钥:<input id="key" /><br />
+        <button onclick="login()">登录</button>
+    </div>
+
+    <div id="mainDiv" style="display:none">
+        <button onclick="getOpenStatus()">获取OpenCheck状态</button>
+        <button onclick="toggleOpen()">切换OpenCheck</button>
+        <span id="status"></span>
+        <br />
+        <button onclick="getDailyFiles()">刷新近一天文件</button>
+        <span id="totalSize"></span>
+        <table id="filesTable">
+            <thead>
+                <tr>
+                    <th>文件名</th>
+                    <th>大小</th>
+                    <th>时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        var secretKey = ""
+        window.onload = function () {
+
+
+        }
+
+        const ws = new WebSocket("wss://server.ssssssss.eu.org:44664");
+        ws.onopen = () => {
+            console.log("连接成功");
+            const storedKey = localStorage.getItem('secretKey');
+            if (storedKey) {
+                secretKey = storedKey
+                document.getElementById("key").value = secretKey
+                login()
+            } else {
+
+            }
+        }
+        ws.onmessage = (msg) => {
+            const data = JSON.parse(msg.data);
+            if (data.type === "LOGIN_OK") {
+                document.getElementById("loginDiv").style.display = "none";
+                document.getElementById("mainDiv").style.display = "block";
+                localStorage.setItem('secretKey', secretKey)
+            }
+            if (data.type === "LOGIN_FAIL") {
+                alert("登录失败");
+                localStorage.setItem('secretKey', '')
+            }
+            if (data.type === "OPEN_STATUS") { document.getElementById("status").innerText = data.value; }
+            if (data.type === "OPEN_STATUS_SET") { document.getElementById("status").innerText = data.value; }
+            if (data.type === "DAILY_FILES") {
+                const tbody = document.querySelector("#filesTable tbody"); tbody.innerHTML = "";
+                data.files.forEach(f => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `<td>${f.name}</td><td>${(f.size / 1024).toFixed(2)} KB</td><td>${f.time}</td>
+        <td><button onclick="downloadFile('${f.name}')">下载</button></td>`;
+                    tbody.appendChild(tr);
+                });
+                console.log(data.files)
+                document.getElementById("totalSize").innerText = `文件个数：${data.files.length}总大小: ${(data.totalSize / 1024).toFixed(2)} KB`;
+            }
+            if (data.type === "FILE_DATA") {
+                const a = document.createElement("a");
+                a.href = "data:application/octet-stream;base64," + data.data;
+                a.download = data.name;
+                a.click();
+            }
+            if (data.type === "ERROR") { alert(data.message); }
+        };
+
+        function login() {
+            const key = document.getElementById("key").value;
+            ws.send(JSON.stringify({ type: "LOGIN", key }));
+            if (!secretKey) {
+                secretKey = document.getElementById("key").value
+            }
+        }
+
+        function getOpenStatus() { ws.send(JSON.stringify({ type: "GET_OPEN_STATUS" })); }
+        function toggleOpen() { ws.send(JSON.stringify({ type: "SET_OPEN_STATUS", value: document.getElementById("status").innerText !== "t" })); }
+        function getDailyFiles() { ws.send(JSON.stringify({ type: "GET_DAILY_FILES" })); }
+        function downloadFile(name) { ws.send(JSON.stringify({ type: "DOWNLOAD_FILE", name })); }
+    </script>
+</body>
+
+</html>
