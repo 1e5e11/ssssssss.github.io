@@ -88,12 +88,14 @@ const result=Function(`"use strict"; return (${expr})`)();if(typeof result!=='nu
 return result}catch(e){return `错误：${e.message}`}}
 function sj(min,max){return Math.floor(Math.random()*(max-min+1))+min}
 window.onload=function(){tn=sj(1,1000)
-tproperty=checkPropertiesOfNumber(tn)}
+tproperty=checkPropertiesOfNumber(tn)
+document.getElementById("inp").addEventListener('keyup',function(event){if(event.keyCode===13){s()}})}
 function s(){var start=new Date().getTime()
 Times++
 document.getElementById("a").innerHTML=''
 qcp()
 var t=Number(document.getElementById("inp").value)
+document.getElementById("inp").value=""
 if(!t||t>10000000){return}
 if(t>primes.length){primes=p(Math.floor(t*1.1))}
 inpproperty=checkPropertiesOfNumber(t)
