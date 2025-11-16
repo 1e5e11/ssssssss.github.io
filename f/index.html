@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>飞鼠 — 虚拟鼠标（陀螺仪 + 线性加速度）</title>
+  <style>
+    :root{--bg:#0f1724;--panel:#0b1220;--accent:#7dd3fc}
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    body{background:linear-gradient(180deg,var(--bg),#061022);color:#dbeafe;display:flex;align-items:center;justify-content:center}
+    .app{width:min(980px,96vw);background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:12px;padding:18px;box-shadow:0 8px 30px rgba(2,6,23,.6)}
+    header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+    h1{font-size:18px;margin:0}
+    .controls{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{background:transparent;border:1px solid rgba(255,255,255,0.08);padding:8px 10px;border-radius:8px;cursor:pointer}
+    .btn.primary{border-color:var(--accent);box-shadow:0 6px 18px rgba(125,211,252,.06)}
+    .panel{display:grid;grid-template-columns:1fr 280px;gap:14px}
+    .left{padding:12px}
+    .right{background:rgba(255,255,255,0.02);padding:12px;border-radius:10px}
+    .stage{position:relative;background:linear-gradient(180deg,#031227 0%, #081426 100%);height:480px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+    .cursor{position:absolute;width:22px;height:22px;border-radius:50%;background:var(--accent);box-shadow:0 6px 22px rgba(125,211,252,.18);transform:translate(-50%,-50%);pointer-events:none}
+    .center-target{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);opacity:.06}
+    label{display:block;font-size:13px;margin-top:8px}
+    input[type=range]{width:100%}
+    .kv{font-size:13px;display:flex;justify-content:space-between}
+    .debug{font-family:monospace;font-size:12px;white-space:pre-line;margin-top:8px}
+    footer{margin-top:10px;font-size:12px;opacity:.8}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>飞鼠 — 用陀螺仪和线性加速度控制虚拟鼠标</h1>
+      <div style="flex:1"></div>
+      <div class="controls">
+        <button id="btnStart" class="btn primary">启动传感器</button>
+        <button id="btnStop" class="btn">停止</button>
+        <button id="btnCal" class="btn">校准中心</button>
+      </div>
+    </header>
+
+    <div class="panel">
+      <div class="left">
+        <div class="stage" id="stage">
+          <div class="center-target">+</div>
+          <div id="cursor" class="cursor"></div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:10px">
+          <div style="flex:1">
+            <label>灵敏度（角速度映射） <span id="sensVal">1.0</span></label>
+            <input id="sens" type="range" min="0.1" max="5" step="0.1" value="1">
+          </div>
+          <div style="width:140px">
+            <label>平滑（低通） <span id="smoothVal">0.85</span></label>
+            <input id="smooth" type="range" min="0.6" max="0.99" step="0.01" value="0.85">
+          </div>
+        </div>
+
+        <div class="kv" style="margin-top:8px"><span>模式</span><span id="modeTag">自动融合</span></div>
+        <div class="debug" id="debug">传感器状态：未启动</div>
+      </div>
+
+      <div class="right">
+        <strong>说明（简要）</strong>
+        <p>这个页面使用浏览器的传感器 API（Generic Sensor API 或 deviceorientation/devicemotion 作为回退）读取陀螺仪（角速度）和线性加速度。它把角速度映射为虚拟指针速度，线性加速度用于短时加速感应。页面包含平滑、灵敏度和校准功能。</p>
+
+        <label>调试输出</label>
+        <div id="readouts" class="debug">——</div>
+
+        <hr/>
+        <label>注意</label>
+        <ul style="font-size:13px">
+          <li>传感器在多数浏览器需要 HTTPS 或 localhost。</li>
+          <li>iOS Safari 需先通过用户手势调用 DeviceMotionEvent.requestPermission()</li>
+          <li>长期积分加速度会产生漂移，本演示使用角速度作为主控制信号以减少漂移。</li>
+        </ul>
+      </div>
+    </div>
+
+    <footer>实现者提示：在真实应用中，你可能需要把虚拟鼠标事件桥接到系统或目标元素（例如用 postMessage / WebSocket 发送到远端）。</footer>
+  </div>
+
+  <script>
+    // Flying mouse implementation (single-file demo).
+    // 主要思路：使用陀螺仪角速度作为速度输入，线性加速度作为短时突发补偿。
+    // 如果没有 Generic Sensor API，会回退到 window.DeviceMotionEvent 和 deviceorientation。
+
+    const stage = document.getElementById('stage');
+    const cursor = document.getElementById('cursor');
+    const debug = document.getElementById('debug');
+    const readouts = document.getElementById('readouts');
+    const btnStart = document.getElementById('btnStart');
+    const btnStop = document.getElementById('btnStop');
+    const btnCal = document.getElementById('btnCal');
+    const sens = document.getElementById('sens');
+    const smooth = document.getElementById('smooth');
+    const sensVal = document.getElementById('sensVal');
+    const smoothVal = document.getElementById('smoothVal');
+    const modeTag = document.getElementById('modeTag');
+
+    let width, height; function updateWH(){width = stage.clientWidth; height = stage.clientHeight}
+    window.addEventListener('resize', updateWH); updateWH();
+
+    // 状态
+    let running = false;
+    let lastTs = null;
+    let vx = 0, vy = 0; // 虚拟指针速度（px/s）
+    let px = width/2, py = height/2; // 指针位置
+    let alpha = parseFloat(smooth.value); // 低通系数
+    let sensitivity = parseFloat(sens.value);
+
+    sens.addEventListener('input', ()=>{sensitivity=parseFloat(sens.value); sensVal.textContent=sensitivity.toFixed(1)})
+    smooth.addEventListener('input', ()=>{alpha=parseFloat(smooth.value); smoothVal.textContent=alpha.toFixed(2)})
+
+    btnCal.addEventListener('click', ()=>{
+      px = width/2; py = height/2; vx=0; vy=0; renderCursor();
+    })
+
+    btnStart.addEventListener('click', startSensors);
+    btnStop.addEventListener('click', stopSensors);
+
+    // Generic Sensor API -> Gyroscope + LinearAccelerationSensor
+    let gyroSensor = null;
+    let linSensor = null;
+
+    let lastGyro = {x:0,y:0,z:0};
+    let lastAcc = {x:0,y:0,z:0};
+
+    async function startSensors(){
+      if (running) return;
+      running = true; lastTs = null; updateDebug('正在尝试启动传感器...');
+
+      // iOS permission for legacy DeviceMotion
+      if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function'){
+        try{
+          const perm = await DeviceMotionEvent.requestPermission();
+          if (perm !== 'granted'){
+            updateDebug('用户拒绝 DeviceMotion 权限');
+            // 仍尝试 Generic Sensor API below
+          }
+        }catch(e){console.warn(e)}
+      }
+
+      // Try Generic Sensor API
+      try{
+        if ('Gyroscope' in window && 'LinearAccelerationSensor' in window){
+          gyroSensor = new Gyroscope({frequency:60});
+          linSensor = new LinearAccelerationSensor({frequency:60});
+
+          gyroSensor.addEventListener('reading', ()=>{
+            lastGyro.x = gyroSensor.x || 0;
+            lastGyro.y = gyroSensor.y || 0;
+            lastGyro.z = gyroSensor.z || 0;
+          });
+          linSensor.addEventListener('reading', ()=>{
+            lastAcc.x = linSensor.x || 0;
+            lastAcc.y = linSensor.y || 0;
+            lastAcc.z = linSensor.z || 0;
+          });
+          gyroSensor.start(); linSensor.start();
+          modeTag.textContent = 'Generic Sensor API';
+          updateDebug('使用 Generic Sensor API（Gyroscope + LinearAccelerationSensor）');
+        }else{
+          throw new Error('Generic sensor 不可用，回退');
+        }
+      }catch(err){
+        updateDebug('Generic Sensor API 不可用或启动失败，尝试回退: ' + (err && err.message));
+
+        // Fallback to DeviceMotion (legacy)
+        window.addEventListener('devicemotion', onDeviceMotion);
+        modeTag.textContent = 'DeviceMotion 回退';
+      }
+
+      // 开始渲染循环
+      requestAnimationFrame(step);
+    }
+
+    function stopSensors(){
+      if (!running) return;
+      running = false;
+      if (gyroSensor){try{gyroSensor.stop()}catch(e){}
+        gyroSensor = null
+      }
+      if (linSensor){try{linSensor.stop()}catch(e){}
+        linSensor = null
+      }
+      window.removeEventListener('devicemotion', onDeviceMotion);
+      updateDebug('已停止传感器');
+    }
+
+    function onDeviceMotion(e){
+      // e.rotationRate: alpha, beta, gamma (deg/s)
+      if (e.rotationRate){
+        // convert deg/s to rad/s for consistency with Gyroscope (optional)
+        lastGyro.x = (e.rotationRate.beta || 0) * Math.PI/180; // note: mapping may vary by device
+        lastGyro.y = (e.rotationRate.gamma || 0) * Math.PI/180;
+        lastGyro.z = (e.rotationRate.alpha || 0) * Math.PI/180;
+      }
+      if (e.accelerationIncludingGravity){
+        // try to approximate linear accel by subtracting gravity - rough
+        const acc = e.acceleration || e.accelerationIncludingGravity;
+        lastAcc.x = acc.x || 0;
+        lastAcc.y = acc.y || 0;
+        lastAcc.z = acc.z || 0;
+      }
+    }
+
+    function step(ts){
+      if (!running) return;
+      if (!lastTs) lastTs = ts;
+      const dt = Math.min((ts - lastTs)/1000, 0.05); // 秒，限制以稳健
+      lastTs = ts;
+
+      // 简单控制器：把陀螺角速度映射到屏幕速度
+      // 注意：不同设备的轴映射可能不同，需要在真实设备上调试
+      // 使用 y (pitch/gamma) 控制横向， x 控制纵向 — 这里做了常见的映射但可能与设备反向
+
+      // 按灵敏度缩放
+      const gx = lastGyro.x || 0; // rad/s
+      const gy = lastGyro.y || 0;
+
+      // 将角速度（rad/s）转换为像素/秒速度。系数经验值：sensitivity * 150
+      const baseFactor = 150;
+      const desiredVx = -gy * sensitivity * baseFactor; // 横向
+      const desiredVy = gx * sensitivity * baseFactor;  // 纵向
+
+      // 把线性加速度做为短时推力：acc (m/s^2) -> px/s 添加
+      const ax = lastAcc.x || 0;
+      const ay = lastAcc.y || 0;
+      const accBoostX = -ax * 40; // 经验系数
+      const accBoostY = ay * 40;
+
+      // 融合并做低通平滑
+      vx = vx * alpha + (desiredVx + accBoostX) * (1 - alpha);
+      vy = vy * alpha + (desiredVy + accBoostY) * (1 - alpha);
+
+      // 更新位置
+      px += vx * dt;
+      py += vy * dt;
+
+      // 限制到舞台
+      px = Math.max(8, Math.min(width-8, px));
+      py = Math.max(8, Math.min(height-8, py));
+
+      renderCursor();
+
+      // 更新调试文本（每帧）
+      readouts.textContent = `px=${px.toFixed(1)} py=${py.toFixed(1)}\nvx=${vx.toFixed(1)} vy=${vy.toFixed(1)}\ngyro(rad/s): x=${gx.toFixed(3)} y=${gy.toFixed(3)} z=${(lastGyro.z||0).toFixed(3)}\nacc(m/s²): x=${ax.toFixed(2)} y=${ay.toFixed(2)} z=${(lastAcc.z||0).toFixed(2)}`;
+
+      requestAnimationFrame(step);
+    }
+
+    function renderCursor(){
+      cursor.style.left = px + 'px';
+      cursor.style.top = py + 'px';
+    }
+
+    function updateDebug(txt){debug.textContent = '传感器状态：' + txt}
+
+    // 当页面获得焦点/尺寸变更时，保持位置合理
+    document.addEventListener('visibilitychange', ()=>{ if (document.visibilityState === 'visible') updateWH(); })
+
+    // 自动对舞台进行初始居中
+    px = width/2; py = height/2; renderCursor();
+
+    // 清理：离开页面时停止
+    window.addEventListener('pagehide', stopSensors);
+  </script>
+</body>
+</html>
