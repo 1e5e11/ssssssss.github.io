@@ -93,6 +93,7 @@
                 localStorage.setItem('secretKey', '')
             }
             if (data.type === "OPEN_STATUS") {alert(data.value); document.getElementById("status").innerText = data.value; }
+            if (data.type === "WITE_TIME") {alert(data.value); document.getElementById("status").innerText = data.value; }
             if (data.type === "CLIENT_STATUS") {alert(data.value); document.getElementById("status").innerText = data.value; }
             if (data.type === "OPEN_STATUS_SET") { document.getElementById("status").innerText = data.value; }
             if (data.type === "DAILY_FILES") {
@@ -125,6 +126,8 @@
 
         function getOpenStatus() { ws.send(JSON.stringify({ type: "GET_OPEN_STATUS" })); }
         function toggleOpen() { ws.send(JSON.stringify({ type: "SET_OPEN_STATUS", value: document.getElementById("status").innerText !== "t" })); }
+          function set_WITE_TIME() { ws.send(JSON.stringify({ type: "SET_WITE_TIME", value: prompt("SET_WITE_TIME:0 or")}))}
+ 
         function getDailyFiles() { ws.send(JSON.stringify({ type: "GET_DAILY_FILES" })); }
         function downloadFile(name) { ws.send(JSON.stringify({ type: "DOWNLOAD_FILE", name })); }
         function getClientStatus() { ws.send(JSON.stringify({ type: "GET_CLIENT_STATUS" })); }
