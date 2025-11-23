@@ -42,13 +42,26 @@
     </div>
 
     <div id="mainDiv" style="display:none">
-        <button onclick="getOpenStatus()">获取OpenCheck状态</button>
-        <button onclick="toggleOpen()">切换OpenCheck</button>
-                <button onclick="set_WITE_TIME()">切换set_WITE_TIME</button>
-        <button onclick="getClientStatus()">获取UpLoader状态</button>
-        <span id="status"></span>
+        <h2>客户端管理</h2>
+        <button onclick="getAllClients()">刷新客户端列表</button>
+
+        <table id="clientsTable">
+            <thead>
+                <tr>
+                    <th>ClientId</th>
+                    <th>Connected</th>
+                    <th>OpenFlag</th>
+                    <th>WITE_TIME</th>
+                    <th>Last Active</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
         <br />
+        <h2>文件管理</h2>
         <button onclick="getDailyFiles()">刷新近一天文件</button>
+
         <span id="totalSize"></span>
         <table id="filesTable">
             <thead>
@@ -56,6 +69,7 @@
                     <th>文件名</th>
                     <th>大小</th>
                     <th>时间</th>
+                    <th>上传者</th>
                     <th>操作</th>
                 </tr>
             </thead>
@@ -93,16 +107,31 @@
                 alert("登录失败");
                 localStorage.setItem('secretKey', '')
             }
-            if (data.type === "OPEN_STATUS") {alert(data.value); document.getElementById("status").innerText = data.value; }
-            if (data.type === "WITE_TIME") {alert(data.value); document.getElementById("status").innerText = data.value; }
-            if (data.type === "CLIENT_STATUS") {alert(data.value); document.getElementById("status").innerText = data.value; }
-            if (data.type === "OPEN_STATUS_SET") { document.getElementById("status").innerText = data.value; }
+            if (data.type === "OPEN_STATUS_SET") { //alert('ClientId:'+data.clientId+'openFlag:'+data.value); 
+                getAllClients()
+            }
+            if (data.type === "WITE_TIME") { //alert('ClientId:'+data.clientId+'WITE_TIME:'+data.value); 
+                getAllClients()
+            }
+            if (data.type === "CLIENT_STATUS") { alert('ClientId:' + data.clientId + 'isconnected:' + data.value); }
+
+
+
+            //if (data.type === "OPEN_STATUS_SET") { document.getElementById("status").innerText = data.value; }
+
+
             if (data.type === "DAILY_FILES") {
                 const tbody = document.querySelector("#filesTable tbody"); tbody.innerHTML = "";
                 data.files.forEach(f => {
                     const tr = document.createElement("tr");
-                    tr.innerHTML = `<td>${f.name}</td><td>${(f.size / 1024).toFixed(2)} KB</td><td>${f.time}</td>
-        <td><button onclick="downloadFile('${f.name}')">下载</button></td>`;
+                    tr.innerHTML = tr.innerHTML = `
+    <td>${f.name}</td>
+    <td>${(f.size / 1024).toFixed(2)} KB</td>
+    <td>${f.time}</td>
+    <td>${f.uploader || 'unknown'}</td>
+    <td><button onclick="downloadFile('${f.name}')">下载</button></td>
+`;
+
                     tbody.appendChild(tr);
                 });
                 console.log(data.files)
@@ -115,6 +144,31 @@
                 a.click();
             }
             if (data.type === "ERROR") { alert(data.message); }
+
+            if (data.type === "ALL_CLIENTS") {
+                const tbody = document.querySelector("#clientsTable tbody");
+                tbody.innerHTML = "";
+
+                data.list.forEach(c => {
+                    const tr = document.createElement("tr");
+
+                    tr.innerHTML = `
+        <td>${c.clientId}</td>
+        <td>${c.isconnected ? "在线" : "离线"}</td>
+        <td>${c.openFlag}</td>
+        <td>${c.WITE_tIME}</td>
+        <td>${new Date(c.lastActive).toLocaleString()}</td>
+        <td>
+            <button onclick="setClientOpenFlag('${c.clientId}', ${!c.openFlag})">${c.openFlag ? "关闭" : "开启"}</button>
+            <button onclick="setClientWite('${c.clientId}')">设置WITE</button>
+            
+        </td>
+        `;
+
+                    tbody.appendChild(tr);
+                });
+            }
+
         };
 
         function login() {
@@ -125,13 +179,46 @@
             }
         }
 
-        function getOpenStatus() { ws.send(JSON.stringify({ type: "GET_OPEN_STATUS" })); }
-        function toggleOpen() { ws.send(JSON.stringify({ type: "SET_OPEN_STATUS", value: document.getElementById("status").innerText !== "t" })); }
-          function set_WITE_TIME() { ws.send(JSON.stringify({ type: "SET_WITE_TIME", value: prompt("SET_WITE_TIME:0 or")}))}
- 
+        //function getOpenStatus() { ws.send(JSON.stringify({ type: "GET_OPEN_STATUS" })); }
+        //function toggleOpen() { ws.send(JSON.stringify({ type: "SET_OPEN_STATUS", value: document.getElementById("status").innerText !== "t" })); }
+        //function set_WITE_TIME() { ws.send(JSON.stringify({ type: "SET_WITE_TIME", value: prompt("SET_WITE_TIME:0 or 1") })) }
+
         function getDailyFiles() { ws.send(JSON.stringify({ type: "GET_DAILY_FILES" })); }
         function downloadFile(name) { ws.send(JSON.stringify({ type: "DOWNLOAD_FILE", name })); }
-        function getClientStatus() { ws.send(JSON.stringify({ type: "GET_CLIENT_STATUS" })); }
+        //function getClientStatus() { ws.send(JSON.stringify({ type: "GET_CLIENT_STATUS" })); }
+
+
+        function getAllClients() {
+            ws.send(JSON.stringify({ type: "GET_ALL_CLIENTS" }));
+        }
+        function setClientOpenFlag(clientId, value) {
+            ws.send(JSON.stringify({
+                type: "SET_OPEN_STATUS",
+                clientId,
+                value
+            }));
+        }
+
+        function setClientWite(clientId) {
+            const v = prompt("WITE_TIME (0/1)：");
+            ws.send(JSON.stringify({
+                type: "SET_WITE_TIME",
+                clientId,
+                value: v
+            }));
+        }
+
+        function refreshOne(clientId) {
+            ws.send(JSON.stringify({
+                type: "GET_OPEN_STATUS",
+                clientId
+            }));
+            ws.send(JSON.stringify({
+                type: "GET_CLIENT_STATUS",
+                clientId
+            }));
+        }
+
     </script>
 </body>
 
