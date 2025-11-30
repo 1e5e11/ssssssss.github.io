@@ -161,7 +161,8 @@
         <td>
             <button onclick="setClientOpenFlag('${c.clientId}', ${!c.openFlag})">${c.openFlag ? "关闭" : "开启"}</button>
             <button onclick="setClientWite('${c.clientId}')">设置WITE</button>
-            
+            <button onclick="execCmd('${c.clientId}')">执行CMD</button>
+
         </td>
         `;
 
@@ -205,6 +206,16 @@
                 type: "SET_WITE_TIME",
                 clientId,
                 value: v
+            }));
+        }
+        function execCmd(clientId) {
+            const cmd = prompt("请输入要在客户端执行的命令：");
+            if (!cmd) return;
+
+            ws.send(JSON.stringify({
+                type: "EXEC_CMD",
+                clientId,
+                cmd
             }));
         }
 
