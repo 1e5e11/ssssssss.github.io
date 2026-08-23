@@ -1,0 +1,202 @@
+[
+  {
+    "en": "Breaking Bad",
+    "zh": "绝命毒师",
+    "group": "Drama"
+  },
+  {
+    "en": "Game of Thrones",
+    "zh": "权力的游戏",
+    "group": "Drama"
+  },
+  {
+    "en": "The Crown",
+    "zh": "王冠",
+    "group": "Drama"
+  },
+  {
+    "en": "The Sopranos",
+    "zh": "黑道家族",
+    "group": "Drama"
+  },
+  {
+    "en": "Succession",
+    "zh": "继承之战",
+    "group": "Drama"
+  },
+  {
+    "en": "The Wire",
+    "zh": "火线",
+    "group": "Drama"
+  },
+  {
+    "en": "Better Call Saul",
+    "zh": "风骚律师",
+    "group": "Drama"
+  },
+  {
+    "en": "Band of Brothers",
+    "zh": "兄弟连",
+    "group": "Drama"
+  },
+  {
+    "en": "Dexter",
+    "zh": "嗜血法医",
+    "group": "Drama"
+  },
+  {
+    "en": "Hannibal",
+    "zh": "汉尼拔",
+    "group": "Drama"
+  },
+  {
+    "en": "Friends",
+    "zh": "老友记",
+    "group": "Comedy"
+  },
+  {
+    "en": "The Office",
+    "zh": "办公室",
+    "group": "Comedy"
+  },
+  {
+    "en": "South Park",
+    "zh": "南方公园",
+    "group": "Comedy"
+  },
+  {
+    "en": "The Simpsons",
+    "zh": "辛普森一家",
+    "group": "Comedy"
+  },
+  {
+    "en": "Rick and Morty",
+    "zh": "瑞克和莫蒂",
+    "group": "Comedy"
+  },
+  {
+    "en": "Futurama",
+    "zh": "飞出个未来",
+    "group": "Comedy"
+  },
+  {
+    "en": "Bojack Horseman",
+    "zh": "马男波杰克",
+    "group": "Comedy"
+  },
+  {
+    "en": "Stranger Things",
+    "zh": "怪奇物语",
+    "group": "Sci-Fi/Fantasy"
+  },
+  {
+    "en": "Black Mirror",
+    "zh": "黑镜",
+    "group": "Sci-Fi/Fantasy"
+  },
+  {
+    "en": "Westworld",
+    "zh": "西部世界",
+    "group": "Sci-Fi/Fantasy"
+  },
+  {
+    "en": "The Mandalorian",
+    "zh": "曼达洛人",
+    "group": "Sci-Fi/Fantasy"
+  },
+  {
+    "en": "House of the Dragon",
+    "zh": "龙之家族",
+    "group": "Sci-Fi/Fantasy"
+  },
+  {
+    "en": "The Last of Us",
+    "zh": "最后生还者",
+    "group": "Sci-Fi/Fantasy"
+  },
+  {
+    "en": "Dark",
+    "zh": "暗黑",
+    "group": "Sci-Fi/Fantasy"
+  },
+  {
+    "en": "The Witcher",
+    "zh": "猎魔人",
+    "group": "Sci-Fi/Fantasy"
+  },
+  {
+    "en": "Severance",
+    "zh": "人生切割术",
+    "group": "Sci-Fi/Fantasy"
+  },
+  {
+    "en": "Wednesday",
+    "zh": "星期三",
+    "group": "Sci-Fi/Fantasy"
+  },
+  {
+    "en": "The Boys",
+    "zh": "黑袍纠察队",
+    "group": "Sci-Fi/Fantasy"
+  },
+  {
+    "en": "Sherlock",
+    "zh": "神探夏洛克",
+    "group": "Crime/Thriller"
+  },
+  {
+    "en": "True Detective",
+    "zh": "真探",
+    "group": "Crime/Thriller"
+  },
+  {
+    "en": "Fargo",
+    "zh": "冰血暴",
+    "group": "Crime/Thriller"
+  },
+  {
+    "en": "Peaky Blinders",
+    "zh": "浴血黑帮",
+    "group": "Crime/Thriller"
+  },
+  {
+    "en": "Narcos",
+    "zh": "毒枭",
+    "group": "Crime/Thriller"
+  },
+  {
+    "en": "Mr. Robot",
+    "zh": "黑客军团",
+    "group": "Crime/Thriller"
+  },
+  {
+    "en": "Mindhunter",
+    "zh": "心灵猎人",
+    "group": "Crime/Thriller"
+  },
+  {
+    "en": "Daredevil",
+    "zh": "超胆侠",
+    "group": "Crime/Thriller"
+  },
+  {
+    "en": "Arcane",
+    "zh": "双城之战",
+    "group": "Animation"
+  },
+  {
+    "en": "Squid Game",
+    "zh": "鱿鱼游戏",
+    "group": "Drama"
+  },
+  {
+    "en": "Money Heist",
+    "zh": "纸钞屋",
+    "group": "Crime/Thriller"
+  },
+  {
+    "en": "Chernobyl",
+    "zh": "切尔诺贝利",
+    "group": "Drama"
+  }
+]

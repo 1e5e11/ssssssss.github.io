@@ -1,0 +1,1252 @@
+[
+  {
+    "en": "Yesterday - The Beatles",
+    "zh": "Yesterday - The Beatles",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Hey Jude - The Beatles",
+    "zh": "Hey Jude - The Beatles",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Let It Be - The Beatles",
+    "zh": "Let It Be - The Beatles",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Come Together - The Beatles",
+    "zh": "Come Together - The Beatles",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Here Comes the Sun - The Beatles",
+    "zh": "Here Comes the Sun - The Beatles",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Something - The Beatles",
+    "zh": "Something - The Beatles",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "A Day in the Life - The Beatles",
+    "zh": "A Day in the Life - The Beatles",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Blackbird - The Beatles",
+    "zh": "Blackbird - The Beatles",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Help! - The Beatles",
+    "zh": "Help! - The Beatles",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Twist and Shout - The Beatles",
+    "zh": "Twist and Shout - The Beatles",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Bohemian Rhapsody - Queen",
+    "zh": "Bohemian Rhapsody - Queen",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "We Will Rock You - Queen",
+    "zh": "We Will Rock You - Queen",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "We Are the Champions - Queen",
+    "zh": "We Are the Champions - Queen",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Don't Stop Me Now - Queen",
+    "zh": "Don't Stop Me Now - Queen",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Another One Bites the Dust - Queen",
+    "zh": "Another One Bites the Dust - Queen",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Billie Jean - Michael Jackson",
+    "zh": "Billie Jean - Michael Jackson",
+    "group": "Pop"
+  },
+  {
+    "en": "Beat It - Michael Jackson",
+    "zh": "Beat It - Michael Jackson",
+    "group": "Pop"
+  },
+  {
+    "en": "Thriller - Michael Jackson",
+    "zh": "Thriller - Michael Jackson",
+    "group": "Pop"
+  },
+  {
+    "en": "Smooth Criminal - Michael Jackson",
+    "zh": "Smooth Criminal - Michael Jackson",
+    "group": "Pop"
+  },
+  {
+    "en": "Man in the Mirror - Michael Jackson",
+    "zh": "Man in the Mirror - Michael Jackson",
+    "group": "Pop"
+  },
+  {
+    "en": "Like a Rolling Stone - Bob Dylan",
+    "zh": "Like a Rolling Stone - Bob Dylan",
+    "group": "Folk/Blues"
+  },
+  {
+    "en": "Blowin' in the Wind - Bob Dylan",
+    "zh": "Blowin' in the Wind - Bob Dylan",
+    "group": "Folk/Blues"
+  },
+  {
+    "en": "Knockin' on Heaven's Door - Bob Dylan",
+    "zh": "Knockin' on Heaven's Door - Bob Dylan",
+    "group": "Folk/Blues"
+  },
+  {
+    "en": "Mr. Tambourine Man - Bob Dylan",
+    "zh": "Mr. Tambourine Man - Bob Dylan",
+    "group": "Folk/Blues"
+  },
+  {
+    "en": "Imagine - John Lennon",
+    "zh": "Imagine - John Lennon",
+    "group": "Folk/Blues"
+  },
+  {
+    "en": "What a Wonderful World - Louis Armstrong",
+    "zh": "What a Wonderful World - Louis Armstrong",
+    "group": "Folk/Blues"
+  },
+  {
+    "en": "My Way - Frank Sinatra",
+    "zh": "My Way - Frank Sinatra",
+    "group": "Pop"
+  },
+  {
+    "en": "New York, New York - Frank Sinatra",
+    "zh": "New York, New York - Frank Sinatra",
+    "group": "Pop"
+  },
+  {
+    "en": "Fly Me to the Moon - Frank Sinatra",
+    "zh": "Fly Me to the Moon - Frank Sinatra",
+    "group": "Pop"
+  },
+  {
+    "en": "Strangers in the Night - Frank Sinatra",
+    "zh": "Strangers in the Night - Frank Sinatra",
+    "group": "Pop"
+  },
+  {
+    "en": "Hotel California - Eagles",
+    "zh": "Hotel California - Eagles",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Stairway to Heaven - Led Zeppelin",
+    "zh": "Stairway to Heaven - Led Zeppelin",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Whole Lotta Love - Led Zeppelin",
+    "zh": "Whole Lotta Love - Led Zeppelin",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Kashmir - Led Zeppelin",
+    "zh": "Kashmir - Led Zeppelin",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Smoke on the Water - Deep Purple",
+    "zh": "Smoke on the Water - Deep Purple",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Sweet Child o' Mine - Guns N' Roses",
+    "zh": "Sweet Child o' Mine - Guns N' Roses",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "November Rain - Guns N' Roses",
+    "zh": "November Rain - Guns N' Roses",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Livin' on a Prayer - Bon Jovi",
+    "zh": "Livin' on a Prayer - Bon Jovi",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "It's My Life - Bon Jovi",
+    "zh": "It's My Life - Bon Jovi",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Nothing Else Matters - Metallica",
+    "zh": "Nothing Else Matters - Metallica",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Enter Sandman - Metallica",
+    "zh": "Enter Sandman - Metallica",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Smells Like Teen Spirit - Nirvana",
+    "zh": "Smells Like Teen Spirit - Nirvana",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Come as You Are - Nirvana",
+    "zh": "Come as You Are - Nirvana",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Wonderwall - Oasis",
+    "zh": "Wonderwall - Oasis",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Don't Look Back in Anger - Oasis",
+    "zh": "Don't Look Back in Anger - Oasis",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Viva la Vida - Coldplay",
+    "zh": "Viva la Vida - Coldplay",
+    "group": "Alternative"
+  },
+  {
+    "en": "Yellow - Coldplay",
+    "zh": "Yellow - Coldplay",
+    "group": "Alternative"
+  },
+  {
+    "en": "Fix You - Coldplay",
+    "zh": "Fix You - Coldplay",
+    "group": "Alternative"
+  },
+  {
+    "en": "Clocks - Coldplay",
+    "zh": "Clocks - Coldplay",
+    "group": "Alternative"
+  },
+  {
+    "en": "The Scientist - Coldplay",
+    "zh": "The Scientist - Coldplay",
+    "group": "Alternative"
+  },
+  {
+    "en": "Creep - Radiohead",
+    "zh": "Creep - Radiohead",
+    "group": "Alternative"
+  },
+  {
+    "en": "Karma Police - Radiohead",
+    "zh": "Karma Police - Radiohead",
+    "group": "Alternative"
+  },
+  {
+    "en": "No Surprises - Radiohead",
+    "zh": "No Surprises - Radiohead",
+    "group": "Alternative"
+  },
+  {
+    "en": "Paranoid Android - Radiohead",
+    "zh": "Paranoid Android - Radiohead",
+    "group": "Alternative"
+  },
+  {
+    "en": "Rolling in the Deep - Adele",
+    "zh": "Rolling in the Deep - Adele",
+    "group": "Pop"
+  },
+  {
+    "en": "Someone Like You - Adele",
+    "zh": "Someone Like You - Adele",
+    "group": "Pop"
+  },
+  {
+    "en": "Hello - Adele",
+    "zh": "Hello - Adele",
+    "group": "Pop"
+  },
+  {
+    "en": "Set Fire to the Rain - Adele",
+    "zh": "Set Fire to the Rain - Adele",
+    "group": "Pop"
+  },
+  {
+    "en": "Shape of You - Ed Sheeran",
+    "zh": "Shape of You - Ed Sheeran",
+    "group": "Pop"
+  },
+  {
+    "en": "Perfect - Ed Sheeran",
+    "zh": "Perfect - Ed Sheeran",
+    "group": "Pop"
+  },
+  {
+    "en": "Thinking Out Loud - Ed Sheeran",
+    "zh": "Thinking Out Loud - Ed Sheeran",
+    "group": "Pop"
+  },
+  {
+    "en": "Photograph - Ed Sheeran",
+    "zh": "Photograph - Ed Sheeran",
+    "group": "Pop"
+  },
+  {
+    "en": "Uptown Funk - Mark Ronson ft. Bruno Mars",
+    "zh": "Uptown Funk - Mark Ronson ft. Bruno Mars",
+    "group": "Pop"
+  },
+  {
+    "en": "Just the Way You Are - Bruno Mars",
+    "zh": "Just the Way You Are - Bruno Mars",
+    "group": "Pop"
+  },
+  {
+    "en": "Locked Out of Heaven - Bruno Mars",
+    "zh": "Locked Out of Heaven - Bruno Mars",
+    "group": "Pop"
+  },
+  {
+    "en": "Grenade - Bruno Mars",
+    "zh": "Grenade - Bruno Mars",
+    "group": "Pop"
+  },
+  {
+    "en": "Havana - Camila Cabello",
+    "zh": "Havana - Camila Cabello",
+    "group": "Pop"
+  },
+  {
+    "en": "Despacito - Luis Fonsi ft. Daddy Yankee",
+    "zh": "Despacito - Luis Fonsi ft. Daddy Yankee",
+    "group": "Other"
+  },
+  {
+    "en": "Gangnam Style - PSY",
+    "zh": "Gangnam Style - PSY",
+    "group": "Pop"
+  },
+  {
+    "en": "Dynamite - BTS",
+    "zh": "Dynamite - BTS",
+    "group": "Pop"
+  },
+  {
+    "en": "Bad Guy - Billie Eilish",
+    "zh": "Bad Guy - Billie Eilish",
+    "group": "Pop"
+  },
+  {
+    "en": "Lovely - Billie Eilish & Khalid",
+    "zh": "Lovely - Billie Eilish & Khalid",
+    "group": "Pop"
+  },
+  {
+    "en": "Happier Than Ever - Billie Eilish",
+    "zh": "Happier Than Ever - Billie Eilish",
+    "group": "Pop"
+  },
+  {
+    "en": "Birds of a Feather - Billie Eilish",
+    "zh": "Birds of a Feather - Billie Eilish",
+    "group": "Pop"
+  },
+  {
+    "en": "Shape of My Heart - Sting",
+    "zh": "Shape of My Heart - Sting",
+    "group": "Pop"
+  },
+  {
+    "en": "Englishman in New York - Sting",
+    "zh": "Englishman in New York - Sting",
+    "group": "Pop"
+  },
+  {
+    "en": "Every Breath You Take - The Police",
+    "zh": "Every Breath You Take - The Police",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Purple Rain - Prince",
+    "zh": "Purple Rain - Prince",
+    "group": "Pop"
+  },
+  {
+    "en": "Kiss - Prince",
+    "zh": "Kiss - Prince",
+    "group": "Pop"
+  },
+  {
+    "en": "When Doves Cry - Prince",
+    "zh": "When Doves Cry - Prince",
+    "group": "Pop"
+  },
+  {
+    "en": "Dancing Queen - ABBA",
+    "zh": "Dancing Queen - ABBA",
+    "group": "Pop"
+  },
+  {
+    "en": "Mamma Mia - ABBA",
+    "zh": "Mamma Mia - ABBA",
+    "group": "Pop"
+  },
+  {
+    "en": "Gimme! Gimme! Gimme! - ABBA",
+    "zh": "Gimme! Gimme! Gimme! - ABBA",
+    "group": "Pop"
+  },
+  {
+    "en": "The Winner Takes It All - ABBA",
+    "zh": "The Winner Takes It All - ABBA",
+    "group": "Pop"
+  },
+  {
+    "en": "I Will Always Love You - Whitney Houston",
+    "zh": "I Will Always Love You - Whitney Houston",
+    "group": "Pop"
+  },
+  {
+    "en": "Greatest Love of All - Whitney Houston",
+    "zh": "Greatest Love of All - Whitney Houston",
+    "group": "Pop"
+  },
+  {
+    "en": "I Wanna Dance with Somebody - Whitney Houston",
+    "zh": "I Wanna Dance with Somebody - Whitney Houston",
+    "group": "Pop"
+  },
+  {
+    "en": "Respect - Aretha Franklin",
+    "zh": "Respect - Aretha Franklin",
+    "group": "Folk/Blues"
+  },
+  {
+    "en": "Think - Aretha Franklin",
+    "zh": "Think - Aretha Franklin",
+    "group": "Folk/Blues"
+  },
+  {
+    "en": "Natural Woman - Aretha Franklin",
+    "zh": "Natural Woman - Aretha Franklin",
+    "group": "Folk/Blues"
+  },
+  {
+    "en": "Stand by Me - Ben E. King",
+    "zh": "Stand by Me - Ben E. King",
+    "group": "Folk/Blues"
+  },
+  {
+    "en": "Unchained Melody - The Righteous Brothers",
+    "zh": "Unchained Melody - The Righteous Brothers",
+    "group": "Folk/Blues"
+  },
+  {
+    "en": "California Dreamin' - The Mamas & the Papas",
+    "zh": "California Dreamin' - The Mamas & the Papas",
+    "group": "Folk/Blues"
+  },
+  {
+    "en": "House of the Rising Sun - The Animals",
+    "zh": "House of the Rising Sun - The Animals",
+    "group": "Folk/Blues"
+  },
+  {
+    "en": "Paint It, Black - The Rolling Stones",
+    "zh": "Paint It, Black - The Rolling Stones",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Satisfaction - The Rolling Stones",
+    "zh": "Satisfaction - The Rolling Stones",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Gimme Shelter - The Rolling Stones",
+    "zh": "Gimme Shelter - The Rolling Stones",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Born to Run - Bruce Springsteen",
+    "zh": "Born to Run - Bruce Springsteen",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Dancing in the Dark - Bruce Springsteen",
+    "zh": "Dancing in the Dark - Bruce Springsteen",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Thunder Road - Bruce Springsteen",
+    "zh": "Thunder Road - Bruce Springsteen",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "I Want to Break Free - Queen",
+    "zh": "I Want to Break Free - Queen",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "The Show Must Go On - Queen",
+    "zh": "The Show Must Go On - Queen",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Radio Ga Ga - Queen",
+    "zh": "Radio Ga Ga - Queen",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Losing My Religion - R.E.M.",
+    "zh": "Losing My Religion - R.E.M.",
+    "group": "Other"
+  },
+  {
+    "en": "Everybody Hurts - R.E.M.",
+    "zh": "Everybody Hurts - R.E.M.",
+    "group": "Other"
+  },
+  {
+    "en": "With or Without You - U2",
+    "zh": "With or Without You - U2",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "One - U2",
+    "zh": "One - U2",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Beautiful Day - U2",
+    "zh": "Beautiful Day - U2",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Sweet Dreams (Are Made of This) - Eurythmics",
+    "zh": "Sweet Dreams (Are Made of This) - Eurythmics",
+    "group": "Other"
+  },
+  {
+    "en": "Take on Me - a-ha",
+    "zh": "Take on Me - a-ha",
+    "group": "Other"
+  },
+  {
+    "en": "Africa - Toto",
+    "zh": "Africa - Toto",
+    "group": "Other"
+  },
+  {
+    "en": "The Final Countdown - Europe",
+    "zh": "The Final Countdown - Europe",
+    "group": "Other"
+  },
+  {
+    "en": "Wake Me Up Before You Go-Go - Wham!",
+    "zh": "Wake Me Up Before You Go-Go - Wham!",
+    "group": "Other"
+  },
+  {
+    "en": "Careless Whisper - George Michael",
+    "zh": "Careless Whisper - George Michael",
+    "group": "Other"
+  },
+  {
+    "en": "Faith - George Michael",
+    "zh": "Faith - George Michael",
+    "group": "Other"
+  },
+  {
+    "en": "Girls Just Want to Have Fun - Cyndi Lauper",
+    "zh": "Girls Just Want to Have Fun - Cyndi Lauper",
+    "group": "Other"
+  },
+  {
+    "en": "Time After Time - Cyndi Lauper",
+    "zh": "Time After Time - Cyndi Lauper",
+    "group": "Other"
+  },
+  {
+    "en": "Material Girl - Madonna",
+    "zh": "Material Girl - Madonna",
+    "group": "Pop"
+  },
+  {
+    "en": "Like a Prayer - Madonna",
+    "zh": "Like a Prayer - Madonna",
+    "group": "Pop"
+  },
+  {
+    "en": "Like a Virgin - Madonna",
+    "zh": "Like a Virgin - Madonna",
+    "group": "Pop"
+  },
+  {
+    "en": "Vogue - Madonna",
+    "zh": "Vogue - Madonna",
+    "group": "Pop"
+  },
+  {
+    "en": "Toxic - Britney Spears",
+    "zh": "Toxic - Britney Spears",
+    "group": "Pop"
+  },
+  {
+    "en": "...Baby One More Time - Britney Spears",
+    "zh": "...Baby One More Time - Britney Spears",
+    "group": "Pop"
+  },
+  {
+    "en": "Oops!... I Did It Again - Britney Spears",
+    "zh": "Oops!... I Did It Again - Britney Spears",
+    "group": "Pop"
+  },
+  {
+    "en": "Poker Face - Lady Gaga",
+    "zh": "Poker Face - Lady Gaga",
+    "group": "Pop"
+  },
+  {
+    "en": "Bad Romance - Lady Gaga",
+    "zh": "Bad Romance - Lady Gaga",
+    "group": "Pop"
+  },
+  {
+    "en": "Shallow - Lady Gaga & Bradley Cooper",
+    "zh": "Shallow - Lady Gaga & Bradley Cooper",
+    "group": "Pop"
+  },
+  {
+    "en": "Umbrella - Rihanna ft. Jay-Z",
+    "zh": "Umbrella - Rihanna ft. Jay-Z",
+    "group": "Pop"
+  },
+  {
+    "en": "Diamonds - Rihanna",
+    "zh": "Diamonds - Rihanna",
+    "group": "Pop"
+  },
+  {
+    "en": "We Found Love - Rihanna ft. Calvin Harris",
+    "zh": "We Found Love - Rihanna ft. Calvin Harris",
+    "group": "Pop"
+  },
+  {
+    "en": "Single Ladies - Beyoncé",
+    "zh": "Single Ladies - Beyoncé",
+    "group": "Pop"
+  },
+  {
+    "en": "Halo - Beyoncé",
+    "zh": "Halo - Beyoncé",
+    "group": "Pop"
+  },
+  {
+    "en": "Crazy in Love - Beyoncé ft. Jay-Z",
+    "zh": "Crazy in Love - Beyoncé ft. Jay-Z",
+    "group": "Pop"
+  },
+  {
+    "en": "Formation - Beyoncé",
+    "zh": "Formation - Beyoncé",
+    "group": "Pop"
+  },
+  {
+    "en": "No Woman, No Cry - Bob Marley & The Wailers",
+    "zh": "No Woman, No Cry - Bob Marley & The Wailers",
+    "group": "Folk/Blues"
+  },
+  {
+    "en": "Three Little Birds - Bob Marley & The Wailers",
+    "zh": "Three Little Birds - Bob Marley & The Wailers",
+    "group": "Folk/Blues"
+  },
+  {
+    "en": "One Love - Bob Marley & The Wailers",
+    "zh": "One Love - Bob Marley & The Wailers",
+    "group": "Folk/Blues"
+  },
+  {
+    "en": "What Is Love - Haddaway",
+    "zh": "What Is Love - Haddaway",
+    "group": "Other"
+  },
+  {
+    "en": "Freed from Desire - Gala",
+    "zh": "Freed from Desire - Gala",
+    "group": "Other"
+  },
+  {
+    "en": "Blue (Da Ba Dee) - Eiffel 65",
+    "zh": "Blue (Da Ba Dee) - Eiffel 65",
+    "group": "Other"
+  },
+  {
+    "en": "Around the World - Daft Punk",
+    "zh": "Around the World - Daft Punk",
+    "group": "Electronic"
+  },
+  {
+    "en": "Get Lucky - Daft Punk ft. Pharrell Williams",
+    "zh": "Get Lucky - Daft Punk ft. Pharrell Williams",
+    "group": "Electronic"
+  },
+  {
+    "en": "One More Time - Daft Punk",
+    "zh": "One More Time - Daft Punk",
+    "group": "Electronic"
+  },
+  {
+    "en": "Levels - Avicii",
+    "zh": "Levels - Avicii",
+    "group": "Electronic"
+  },
+  {
+    "en": "Wake Me Up - Avicii",
+    "zh": "Wake Me Up - Avicii",
+    "group": "Electronic"
+  },
+  {
+    "en": "The Nights - Avicii",
+    "zh": "The Nights - Avicii",
+    "group": "Electronic"
+  },
+  {
+    "en": "Sandstorm - Darude",
+    "zh": "Sandstorm - Darude",
+    "group": "Other"
+  },
+  {
+    "en": "Children - Robert Miles",
+    "zh": "Children - Robert Miles",
+    "group": "Other"
+  },
+  {
+    "en": "Titanium - David Guetta ft. Sia",
+    "zh": "Titanium - David Guetta ft. Sia",
+    "group": "Electronic"
+  },
+  {
+    "en": "Cheap Thrills - Sia",
+    "zh": "Cheap Thrills - Sia",
+    "group": "Other"
+  },
+  {
+    "en": "Chandelier - Sia",
+    "zh": "Chandelier - Sia",
+    "group": "Other"
+  },
+  {
+    "en": "Royals - Lorde",
+    "zh": "Royals - Lorde",
+    "group": "Other"
+  },
+  {
+    "en": "Team - Lorde",
+    "zh": "Team - Lorde",
+    "group": "Other"
+  },
+  {
+    "en": "Counting Stars - OneRepublic",
+    "zh": "Counting Stars - OneRepublic",
+    "group": "Other"
+  },
+  {
+    "en": "Apologize - OneRepublic",
+    "zh": "Apologize - OneRepublic",
+    "group": "Other"
+  },
+  {
+    "en": "Radioactive - Imagine Dragons",
+    "zh": "Radioactive - Imagine Dragons",
+    "group": "Alternative"
+  },
+  {
+    "en": "Demons - Imagine Dragons",
+    "zh": "Demons - Imagine Dragons",
+    "group": "Alternative"
+  },
+  {
+    "en": "Believer - Imagine Dragons",
+    "zh": "Believer - Imagine Dragons",
+    "group": "Alternative"
+  },
+  {
+    "en": "Numb - Linkin Park",
+    "zh": "Numb - Linkin Park",
+    "group": "Other"
+  },
+  {
+    "en": "In the End - Linkin Park",
+    "zh": "In the End - Linkin Park",
+    "group": "Other"
+  },
+  {
+    "en": "What I've Done - Linkin Park",
+    "zh": "What I've Done - Linkin Park",
+    "group": "Other"
+  },
+  {
+    "en": "Bring Me to Life - Evanescence",
+    "zh": "Bring Me to Life - Evanescence",
+    "group": "Other"
+  },
+  {
+    "en": "My Immortal - Evanescence",
+    "zh": "My Immortal - Evanescence",
+    "group": "Other"
+  },
+  {
+    "en": "Zombie - The Cranberries",
+    "zh": "Zombie - The Cranberries",
+    "group": "Other"
+  },
+  {
+    "en": "I Don't Want to Miss a Thing - Aerosmith",
+    "zh": "I Don't Want to Miss a Thing - Aerosmith",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Dream On - Aerosmith",
+    "zh": "Dream On - Aerosmith",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Crazy - Aerosmith",
+    "zh": "Crazy - Aerosmith",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "The Sound of Silence - Simon & Garfunkel",
+    "zh": "The Sound of Silence - Simon & Garfunkel",
+    "group": "Folk/Blues"
+  },
+  {
+    "en": "Mrs. Robinson - Simon & Garfunkel",
+    "zh": "Mrs. Robinson - Simon & Garfunkel",
+    "group": "Folk/Blues"
+  },
+  {
+    "en": "Bridge Over Troubled Water - Simon & Garfunkel",
+    "zh": "Bridge Over Troubled Water - Simon & Garfunkel",
+    "group": "Folk/Blues"
+  },
+  {
+    "en": "Your Song - Elton John",
+    "zh": "Your Song - Elton John",
+    "group": "Pop"
+  },
+  {
+    "en": "Rocket Man - Elton John",
+    "zh": "Rocket Man - Elton John",
+    "group": "Pop"
+  },
+  {
+    "en": "Tiny Dancer - Elton John",
+    "zh": "Tiny Dancer - Elton John",
+    "group": "Pop"
+  },
+  {
+    "en": "Candle in the Wind - Elton John",
+    "zh": "Candle in the Wind - Elton John",
+    "group": "Pop"
+  },
+  {
+    "en": "Piano Man - Billy Joel",
+    "zh": "Piano Man - Billy Joel",
+    "group": "Other"
+  },
+  {
+    "en": "We Didn't Start the Fire - Billy Joel",
+    "zh": "We Didn't Start the Fire - Billy Joel",
+    "group": "Other"
+  },
+  {
+    "en": "Uptown Girl - Billy Joel",
+    "zh": "Uptown Girl - Billy Joel",
+    "group": "Other"
+  },
+  {
+    "en": "Take Me Home, Country Roads - John Denver",
+    "zh": "Take Me Home, Country Roads - John Denver",
+    "group": "Other"
+  },
+  {
+    "en": "Leaving on a Jet Plane - John Denver",
+    "zh": "Leaving on a Jet Plane - John Denver",
+    "group": "Other"
+  },
+  {
+    "en": "Hallelujah - Leonard Cohen",
+    "zh": "Hallelujah - Leonard Cohen",
+    "group": "Folk/Blues"
+  },
+  {
+    "en": "Suzanne - Leonard Cohen",
+    "zh": "Suzanne - Leonard Cohen",
+    "group": "Folk/Blues"
+  },
+  {
+    "en": "Perfect Day - Lou Reed",
+    "zh": "Perfect Day - Lou Reed",
+    "group": "Other"
+  },
+  {
+    "en": "Space Oddity - David Bowie",
+    "zh": "Space Oddity - David Bowie",
+    "group": "Other"
+  },
+  {
+    "en": "Heroes - David Bowie",
+    "zh": "Heroes - David Bowie",
+    "group": "Other"
+  },
+  {
+    "en": "Life on Mars? - David Bowie",
+    "zh": "Life on Mars? - David Bowie",
+    "group": "Other"
+  },
+  {
+    "en": "Starman - David Bowie",
+    "zh": "Starman - David Bowie",
+    "group": "Other"
+  },
+  {
+    "en": "Dreams - Fleetwood Mac",
+    "zh": "Dreams - Fleetwood Mac",
+    "group": "Other"
+  },
+  {
+    "en": "Go Your Own Way - Fleetwood Mac",
+    "zh": "Go Your Own Way - Fleetwood Mac",
+    "group": "Other"
+  },
+  {
+    "en": "The Chain - Fleetwood Mac",
+    "zh": "The Chain - Fleetwood Mac",
+    "group": "Other"
+  },
+  {
+    "en": "Landslide - Fleetwood Mac",
+    "zh": "Landslide - Fleetwood Mac",
+    "group": "Other"
+  },
+  {
+    "en": "Don't Stop - Fleetwood Mac",
+    "zh": "Don't Stop - Fleetwood Mac",
+    "group": "Other"
+  },
+  {
+    "en": "More Than a Feeling - Boston",
+    "zh": "More Than a Feeling - Boston",
+    "group": "Rock/Metal"
+  },
+  {
+    "en": "Eye of the Tiger - Survivor",
+    "zh": "Eye of the Tiger - Survivor",
+    "group": "Other"
+  },
+  {
+    "en": "We Are the World - USA for Africa",
+    "zh": "We Are the World - USA for Africa",
+    "group": "Other"
+  },
+  {
+    "en": "What a Feeling - Irene Cara",
+    "zh": "What a Feeling - Irene Cara",
+    "group": "Other"
+  },
+  {
+    "en": "Take My Breath Away - Berlin",
+    "zh": "Take My Breath Away - Berlin",
+    "group": "Other"
+  },
+  {
+    "en": "My Heart Will Go On - Celine Dion",
+    "zh": "My Heart Will Go On - Celine Dion",
+    "group": "Pop"
+  },
+  {
+    "en": "The Power of Love - Celine Dion",
+    "zh": "The Power of Love - Celine Dion",
+    "group": "Pop"
+  },
+  {
+    "en": "Because You Loved Me - Celine Dion",
+    "zh": "Because You Loved Me - Celine Dion",
+    "group": "Pop"
+  },
+  {
+    "en": "Last Christmas - Wham!",
+    "zh": "Last Christmas - Wham!",
+    "group": "Other"
+  },
+  {
+    "en": "Mr. Brightside - The Killers",
+    "zh": "Mr. Brightside - The Killers",
+    "group": "Alternative"
+  },
+  {
+    "en": "Somebody Told Me - The Killers",
+    "zh": "Somebody Told Me - The Killers",
+    "group": "Alternative"
+  },
+  {
+    "en": "Seven Nation Army - The White Stripes",
+    "zh": "Seven Nation Army - The White Stripes",
+    "group": "Other"
+  },
+  {
+    "en": "Take Me Out - Franz Ferdinand",
+    "zh": "Take Me Out - Franz Ferdinand",
+    "group": "Other"
+  },
+  {
+    "en": "Do I Wanna Know? - Arctic Monkeys",
+    "zh": "Do I Wanna Know? - Arctic Monkeys",
+    "group": "Alternative"
+  },
+  {
+    "en": "505 - Arctic Monkeys",
+    "zh": "505 - Arctic Monkeys",
+    "group": "Alternative"
+  },
+  {
+    "en": "Feel Good Inc. - Gorillaz",
+    "zh": "Feel Good Inc. - Gorillaz",
+    "group": "Alternative"
+  },
+  {
+    "en": "Clint Eastwood - Gorillaz",
+    "zh": "Clint Eastwood - Gorillaz",
+    "group": "Alternative"
+  },
+  {
+    "en": "Kids - MGMT",
+    "zh": "Kids - MGMT",
+    "group": "Other"
+  },
+  {
+    "en": "Electric Feel - MGMT",
+    "zh": "Electric Feel - MGMT",
+    "group": "Other"
+  },
+  {
+    "en": "Somebody That I Used to Know - Gotye ft. Kimbra",
+    "zh": "Somebody That I Used to Know - Gotye ft. Kimbra",
+    "group": "Other"
+  },
+  {
+    "en": "Pumped Up Kicks - Foster the People",
+    "zh": "Pumped Up Kicks - Foster the People",
+    "group": "Other"
+  },
+  {
+    "en": "Take a Walk - Passion Pit",
+    "zh": "Take a Walk - Passion Pit",
+    "group": "Other"
+  },
+  {
+    "en": "Midnight City - M83",
+    "zh": "Midnight City - M83",
+    "group": "Other"
+  },
+  {
+    "en": "Summertime Sadness - Lana Del Rey",
+    "zh": "Summertime Sadness - Lana Del Rey",
+    "group": "Other"
+  },
+  {
+    "en": "Young and Beautiful - Lana Del Rey",
+    "zh": "Young and Beautiful - Lana Del Rey",
+    "group": "Other"
+  },
+  {
+    "en": "Video Games - Lana Del Rey",
+    "zh": "Video Games - Lana Del Rey",
+    "group": "Other"
+  },
+  {
+    "en": "Blinding Lights - The Weeknd",
+    "zh": "Blinding Lights - The Weeknd",
+    "group": "Pop"
+  },
+  {
+    "en": "Save Your Tears - The Weeknd",
+    "zh": "Save Your Tears - The Weeknd",
+    "group": "Pop"
+  },
+  {
+    "en": "Can't Feel My Face - The Weeknd",
+    "zh": "Can't Feel My Face - The Weeknd",
+    "group": "Pop"
+  },
+  {
+    "en": "Starboy - The Weeknd ft. Daft Punk",
+    "zh": "Starboy - The Weeknd ft. Daft Punk",
+    "group": "Pop"
+  },
+  {
+    "en": "As It Was - Harry Styles",
+    "zh": "As It Was - Harry Styles",
+    "group": "Pop"
+  },
+  {
+    "en": "Watermelon Sugar - Harry Styles",
+    "zh": "Watermelon Sugar - Harry Styles",
+    "group": "Pop"
+  },
+  {
+    "en": "Flowers - Miley Cyrus",
+    "zh": "Flowers - Miley Cyrus",
+    "group": "Pop"
+  },
+  {
+    "en": "Wrecking Ball - Miley Cyrus",
+    "zh": "Wrecking Ball - Miley Cyrus",
+    "group": "Pop"
+  },
+  {
+    "en": "Party in the U.S.A. - Miley Cyrus",
+    "zh": "Party in the U.S.A. - Miley Cyrus",
+    "group": "Pop"
+  },
+  {
+    "en": "Shake It Off - Taylor Swift",
+    "zh": "Shake It Off - Taylor Swift",
+    "group": "Pop"
+  },
+  {
+    "en": "Blank Space - Taylor Swift",
+    "zh": "Blank Space - Taylor Swift",
+    "group": "Pop"
+  },
+  {
+    "en": "Love Story - Taylor Swift",
+    "zh": "Love Story - Taylor Swift",
+    "group": "Pop"
+  },
+  {
+    "en": "Anti-Hero - Taylor Swift",
+    "zh": "Anti-Hero - Taylor Swift",
+    "group": "Pop"
+  },
+  {
+    "en": "Cruel Summer - Taylor Swift",
+    "zh": "Cruel Summer - Taylor Swift",
+    "group": "Pop"
+  },
+  {
+    "en": "Bad Blood - Taylor Swift",
+    "zh": "Bad Blood - Taylor Swift",
+    "group": "Pop"
+  },
+  {
+    "en": "You Belong with Me - Taylor Swift",
+    "zh": "You Belong with Me - Taylor Swift",
+    "group": "Pop"
+  },
+  {
+    "en": "All Too Well - Taylor Swift",
+    "zh": "All Too Well - Taylor Swift",
+    "group": "Pop"
+  },
+  {
+    "en": "Firework - Katy Perry",
+    "zh": "Firework - Katy Perry",
+    "group": "Pop"
+  },
+  {
+    "en": "Roar - Katy Perry",
+    "zh": "Roar - Katy Perry",
+    "group": "Pop"
+  },
+  {
+    "en": "Teenage Dream - Katy Perry",
+    "zh": "Teenage Dream - Katy Perry",
+    "group": "Pop"
+  },
+  {
+    "en": "Call Me Maybe - Carly Rae Jepsen",
+    "zh": "Call Me Maybe - Carly Rae Jepsen",
+    "group": "Other"
+  },
+  {
+    "en": "Happy - Pharrell Williams",
+    "zh": "Happy - Pharrell Williams",
+    "group": "Other"
+  },
+  {
+    "en": "Can't Stop the Feeling! - Justin Timberlake",
+    "zh": "Can't Stop the Feeling! - Justin Timberlake",
+    "group": "Pop"
+  },
+  {
+    "en": "What Makes You Beautiful - One Direction",
+    "zh": "What Makes You Beautiful - One Direction",
+    "group": "Pop"
+  },
+  {
+    "en": "A Sky Full of Stars - Coldplay",
+    "zh": "A Sky Full of Stars - Coldplay",
+    "group": "Alternative"
+  },
+  {
+    "en": "Earth Song - Michael Jackson",
+    "zh": "Earth Song - Michael Jackson",
+    "group": "Pop"
+  },
+  {
+    "en": "Isn't She Lovely - Stevie Wonder",
+    "zh": "Isn't She Lovely - Stevie Wonder",
+    "group": "Pop"
+  },
+  {
+    "en": "Superstition - Stevie Wonder",
+    "zh": "Superstition - Stevie Wonder",
+    "group": "Pop"
+  },
+  {
+    "en": "Sir Duke - Stevie Wonder",
+    "zh": "Sir Duke - Stevie Wonder",
+    "group": "Pop"
+  },
+  {
+    "en": "What's Going On - Marvin Gaye",
+    "zh": "What's Going On - Marvin Gaye",
+    "group": "Pop"
+  },
+  {
+    "en": "Sexual Healing - Marvin Gaye",
+    "zh": "Sexual Healing - Marvin Gaye",
+    "group": "Pop"
+  },
+  {
+    "en": "Ain't No Mountain High Enough - Marvin Gaye & Tammi Terrell",
+    "zh": "Ain't No Mountain High Enough - Marvin Gaye & Tammi Terrell",
+    "group": "Pop"
+  },
+  {
+    "en": "My Girl - The Temptations",
+    "zh": "My Girl - The Temptations",
+    "group": "Pop"
+  }
+]

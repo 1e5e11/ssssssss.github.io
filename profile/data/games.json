@@ -1,0 +1,330 @@
+[
+  {
+    "en": "Minecraft",
+    "zh": "我的世界",
+    "group": "Sandbox"
+  },
+  {
+    "en": "Terraria",
+    "zh": "泰拉瑞亚",
+    "group": "Sandbox"
+  },
+  {
+    "en": "Stardew Valley",
+    "zh": "星露谷物语",
+    "group": "Sandbox"
+  },
+  {
+    "en": "Animal Crossing",
+    "zh": "动物森友会",
+    "group": "Sandbox"
+  },
+  {
+    "en": "Valheim",
+    "zh": "英灵神殿",
+    "group": "Sandbox"
+  },
+  {
+    "en": "Elden Ring",
+    "zh": "艾尔登法环",
+    "group": "RPG"
+  },
+  {
+    "en": "The Witcher 3",
+    "zh": "巫师3",
+    "group": "RPG"
+  },
+  {
+    "en": "Skyrim",
+    "zh": "上古卷轴5",
+    "group": "RPG"
+  },
+  {
+    "en": "Dark Souls",
+    "zh": "黑暗之魂",
+    "group": "RPG"
+  },
+  {
+    "en": "Bloodborne",
+    "zh": "血源诅咒",
+    "group": "RPG"
+  },
+  {
+    "en": "Final Fantasy",
+    "zh": "最终幻想",
+    "group": "RPG"
+  },
+  {
+    "en": "Persona 5",
+    "zh": "女神异闻录5",
+    "group": "RPG"
+  },
+  {
+    "en": "Baldur's Gate 3",
+    "zh": "博德之门3",
+    "group": "RPG"
+  },
+  {
+    "en": "Cyberpunk 2077",
+    "zh": "赛博朋克2077",
+    "group": "RPG"
+  },
+  {
+    "en": "Zelda BotW/TotK",
+    "zh": "塞尔达传说",
+    "group": "RPG"
+  },
+  {
+    "en": "Pokemon",
+    "zh": "宝可梦",
+    "group": "RPG"
+  },
+  {
+    "en": "Monster Hunter",
+    "zh": "怪物猎人",
+    "group": "Action/Adventure"
+  },
+  {
+    "en": "CS2/CS:GO",
+    "zh": "CS2",
+    "group": "FPS/Shooter"
+  },
+  {
+    "en": "Valorant",
+    "zh": "无畏契约",
+    "group": "FPS/Shooter"
+  },
+  {
+    "en": "Apex Legends",
+    "zh": "Apex英雄",
+    "group": "FPS/Shooter"
+  },
+  {
+    "en": "Call of Duty",
+    "zh": "使命召唤",
+    "group": "FPS/Shooter"
+  },
+  {
+    "en": "Overwatch",
+    "zh": "守望先锋",
+    "group": "FPS/Shooter"
+  },
+  {
+    "en": "Rainbow Six Siege",
+    "zh": "彩虹六号",
+    "group": "FPS/Shooter"
+  },
+  {
+    "en": "Battlefield",
+    "zh": "战地",
+    "group": "FPS/Shooter"
+  },
+  {
+    "en": "Halo",
+    "zh": "光环",
+    "group": "FPS/Shooter"
+  },
+  {
+    "en": "League of Legends",
+    "zh": "英雄联盟",
+    "group": "MOBA"
+  },
+  {
+    "en": "Dota 2",
+    "zh": "Dota 2",
+    "group": "MOBA"
+  },
+  {
+    "en": "Genshin Impact",
+    "zh": "原神",
+    "group": "Action/Adventure"
+  },
+  {
+    "en": "GTA V",
+    "zh": "GTA5",
+    "group": "Action/Adventure"
+  },
+  {
+    "en": "Red Dead Redemption 2",
+    "zh": "荒野大镖客2",
+    "group": "Action/Adventure"
+  },
+  {
+    "en": "Sekiro",
+    "zh": "只狼",
+    "group": "Action/Adventure"
+  },
+  {
+    "en": "Devil May Cry",
+    "zh": "鬼泣",
+    "group": "Action/Adventure"
+  },
+  {
+    "en": "Metal Gear Solid",
+    "zh": "合金装备",
+    "group": "Action/Adventure"
+  },
+  {
+    "en": "Resident Evil",
+    "zh": "生化危机",
+    "group": "Action/Adventure"
+  },
+  {
+    "en": "Civilization",
+    "zh": "文明",
+    "group": "Strategy/Sim"
+  },
+  {
+    "en": "Factorio",
+    "zh": "异星工厂",
+    "group": "Strategy/Sim"
+  },
+  {
+    "en": "RimWorld",
+    "zh": "边缘世界",
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "gr
+    "group": "Racing/Sports"
+  },
+  {
+    "en": "NBA 2K",
+    "zh": "NBA 2K",
+    "group": "Racing/Sports"
+  },
+  {
+    "en": "Tetris",
+    "zh": "俄罗斯方块",
+    "group": "Indie"
+  },
+  {
+    "en": "Portal",
+    "zh": "传送门",
+    "group": "Action/Adventure"
+  },
+  {
+    "en": "Half-Life",
+    "zh": "半条命",
+    "group": "FPS/Shooter"
+  },
+  {
+    "en": "Nier: Automata",
+    "zh": "尼尔：机械纪元",
+    "group": "RPG"
+  }
+]

@@ -1,0 +1,1252 @@
+[
+  {
+    "en": "Pride and Prejudice",
+    "zh": "傲慢与偏见",
+    "group": "British"
+  },
+  {
+    "en": "Jane Eyre",
+    "zh": "简·爱",
+    "group": "British"
+  },
+  {
+    "en": "Wuthering Heights",
+    "zh": "呼啸山庄",
+    "group": "British"
+  },
+  {
+    "en": "Sense and Sensibility",
+    "zh": "理智与情感",
+    "group": "British"
+  },
+  {
+    "en": "Emma",
+    "zh": "爱玛",
+    "group": "British"
+  },
+  {
+    "en": "Mansfield Park",
+    "zh": "曼斯菲尔德庄园",
+    "group": "British"
+  },
+  {
+    "en": "Persuasion",
+    "zh": "劝导",
+    "group": "British"
+  },
+  {
+    "en": "David Copperfield",
+    "zh": "大卫·科波菲尔",
+    "group": "British"
+  },
+  {
+    "en": "Great Expectations",
+    "zh": "远大前程",
+    "group": "British"
+  },
+  {
+    "en": "A Tale of Two Cities",
+    "zh": "双城记",
+    "group": "British"
+  },
+  {
+    "en": "Oliver Twist",
+    "zh": "雾都孤儿",
+    "group": "British"
+  },
+  {
+    "en": "Bleak House",
+    "zh": "荒凉山庄",
+    "group": "British"
+  },
+  {
+    "en": "Hard Times",
+    "zh": "艰难时世",
+    "group": "British"
+  },
+  {
+    "en": "A Christmas Carol",
+    "zh": "圣诞颂歌",
+    "group": "British"
+  },
+  {
+    "en": "Middlemarch",
+    "zh": "米德尔马契",
+    "group": "British"
+  },
+  {
+    "en": "Vanity Fair",
+    "zh": "名利场",
+    "group": "British"
+  },
+  {
+    "en": "Tess of the d'Urbervilles",
+    "zh": "德伯家的苔丝",
+    "group": "British"
+  },
+  {
+    "en": "Jude the Obscure",
+    "zh": "无名的裘德",
+    "group": "British"
+  },
+  {
+    "en": "Far from the Madding Crowd",
+    "zh": "远离尘嚣",
+    "group": "British"
+  },
+  {
+    "en": "Sons and Lovers",
+    "zh": "儿子与情人",
+    "group": "British"
+  },
+  {
+    "en": "Lady Chatterley's Lover",
+    "zh": "查泰莱夫人的情人",
+    "group": "British"
+  },
+  {
+    "en": "Ulysses",
+    "zh": "尤利西斯",
+    "group": "Other"
+  },
+  {
+    "en": "Dubliners",
+    "zh": "都柏林人",
+    "group": "Other"
+  },
+  {
+    "en": "The Sound and the Fury",
+    "zh": "喧哗与骚动",
+    "group": "American"
+  },
+  {
+    "en": "Absalom, Absalom!",
+    "zh": "押沙龙，押沙龙！",
+    "group": "American"
+  },
+  {
+    "en": "In Our Time",
+    "zh": "在我们的时代",
+    "group": "American"
+  },
+  {
+    "en": "The Sun Also Rises",
+    "zh": "太阳照常升起",
+    "group": "American"
+  },
+  {
+    "en": "A Farewell to Arms",
+    "zh": "永别了，武器",
+    "group": "American"
+  },
+  {
+    "en": "For Whom the Bell Tolls",
+    "zh": "丧钟为谁而鸣",
+    "group": "American"
+  },
+  {
+    "en": "The Old Man and the Sea",
+    "zh": "老人与海",
+    "group": "American"
+  },
+  {
+    "en": "The Great Gatsby",
+    "zh": "了不起的盖茨比",
+    "group": "American"
+  },
+  {
+    "en": "Tender Is the Night",
+    "zh": "夜色温柔",
+    "group": "American"
+  },
+  {
+    "en": "The Grapes of Wrath",
+    "zh": "愤怒的葡萄",
+    "group": "American"
+  },
+  {
+    "en": "East of Eden",
+    "zh": "伊甸之东",
+    "group": "American"
+  },
+  {
+    "en": "Of Mice and Men",
+    "zh": "人鼠之间",
+    "group": "American"
+  },
+  {
+    "en": "The Pearl",
+    "zh": "珍珠",
+    "group": "American"
+  },
+  {
+    "en": "To Kill a Mockingbird",
+    "zh": "杀死一只知更鸟",
+    "group": "American"
+  },
+  {
+    "en": "The Catcher in the Rye",
+    "zh": "麦田里的守望者",
+    "group": "American"
+  },
+  {
+    "en": "Nineteen Eighty-Four",
+    "zh": "1984",
+    "group": "British"
+  },
+  {
+    "en": "Animal Farm",
+    "zh": "动物农场",
+    "group": "British"
+  },
+  {
+    "en": "Brave New World",
+    "zh": "美丽新世界",
+    "group": "British"
+  },
+  {
+    "en": "Fahrenheit 451",
+    "zh": "华氏451",
+    "group": "American"
+  },
+  {
+    "en": "We",
+    "zh": "我们",
+    "group": "Russian"
+  },
+  {
+    "en": "The Handmaid's Tale",
+    "zh": "使女的故事",
+    "group": "Other"
+  },
+  {
+    "en": "Catch-22",
+    "zh": "第二十二条军规",
+    "group": "American"
+  },
+  {
+    "en": "Lolita",
+    "zh": "洛丽塔",
+    "group": "Russian"
+  },
+  {
+    "en": "American Pastoral",
+    "zh": "美国牧歌",
+    "group": "American"
+  },
+  {
+    "en": "On the Road",
+    "zh": "在路上",
+    "group": "American"
+  },
+  {
+    "en": "The Naked and the Dead",
+    "zh": "裸者与死者",
+    "group": "Other"
+  },
+  {
+    "en": "Invisible Man",
+    "zh": "看不见的人",
+    "group": "American"
+  },
+  {
+    "en": "Beloved",
+    "zh": "宠儿",
+    "group": "American"
+  },
+  {
+    "en": "Song of Solomon",
+    "zh": "所罗门之歌",
+    "group": "American"
+  },
+  {
+    "en": "The Color Purple",
+    "zh": "紫色",
+    "group": "American"
+  },
+  {
+    "en": "Their Eyes Were Watching God",
+    "zh": "他们眼望上苍",
+    "group": "American"
+  },
+  {
+    "en": "The Bluest Eye",
+    "zh": "最蓝的眼睛",
+    "group": "American"
+  },
+  {
+    "en": "The Heart of the Matter",
+    "zh": "事情的本质",
+    "group": "British"
+  },
+  {
+    "en": "Lord of the Flies",
+    "zh": "蝇王",
+    "group": "British"
+  },
+  {
+    "en": "Rebecca",
+    "zh": "蝴蝶梦",
+    "group": "Other"
+  },
+  {
+    "en": "And Then There Were None",
+    "zh": "无人生还",
+    "group": "Other"
+  },
+  {
+    "en": "Murder on the Orient Express",
+    "zh": "东方快车谋杀案",
+    "group": "Other"
+  },
+  {
+    "en": "Death on the Nile",
+    "zh": "尼罗河上的惨案",
+    "group": "Other"
+  },
+  {
+    "en": "The A.B.C. Murders",
+    "zh": "ABC谋杀案",
+    "group": "Other"
+  },
+  {
+    "en": "The Adventures of Sherlock Holmes",
+    "zh": "福尔摩斯探案集",
+    "group": "Other"
+  },
+  {
+    "en": "The Hound of the Baskervilles",
+    "zh": "巴斯克维尔的猎犬",
+    "group": "Other"
+  },
+  {
+    "en": "Dracula",
+    "zh": "德古拉",
+    "group": "Other"
+  },
+  {
+    "en": "Frankenstein",
+    "zh": "科学怪人",
+    "group": "British"
+  },
+  {
+    "en": "Strange Case of Dr Jekyll and Mr Hyde",
+    "zh": "化身博士",
+    "group": "British"
+  },
+  {
+    "en": "Treasure Island",
+    "zh": "金银岛",
+    "group": "British"
+  },
+  {
+    "en": "Robinson Crusoe",
+    "zh": "鲁滨逊漂流记",
+    "group": "British"
+  },
+  {
+    "en": "Gulliver's Travels",
+    "zh": "格列佛游记",
+    "group": "British"
+  },
+  {
+    "en": "Don Quixote",
+    "zh": "堂吉诃德",
+    "group": "Latin/Spanish"
+  },
+  {
+    "en": "The Decameron",
+    "zh": "十日谈",
+    "group": "Other"
+  },
+  {
+    "en": "The Canterbury Tales",
+    "zh": "坎特伯雷故事集",
+    "group": "Other"
+  },
+  {
+    "en": "Les Misérables",
+    "zh": "悲惨世界",
+    "group": "French"
+  },
+  {
+    "en": "The Hunchback of Notre-Dame",
+    "zh": "巴黎圣母院",
+    "group": "French"
+  },
+  {
+    "en": "The Three Musketeers",
+    "zh": "三个火枪手",
+    "group": "French"
+  },
+  {
+    "en": "The Count of Monte Cristo",
+    "zh": "基督山伯爵",
+    "group": "French"
+  },
+  {
+    "en": "The Lady of the Camellias",
+    "zh": "茶花女",
+    "group": "French"
+  },
+  {
+    "en": "The Red and the Black",
+    "zh": "红与黑",
+    "group": "French"
+  },
+  {
+    "en": "La Comédie humaine",
+    "zh": "巴尔扎克小说集",
+    "group": "French"
+  },
+  {
+    "en": "Madame Bovary",
+    "zh": "包法利夫人",
+    "group": "French"
+  },
+  {
+    "en": "In Search of Lost Time",
+    "zh": "追忆似水年华",
+    "group": "French"
+  },
+  {
+    "en": "The Stranger",
+    "zh": "局外人",
+    "group": "French"
+  },
+  {
+    "en": "The Plague",
+    "zh": "鼠疫",
+    "group": "French"
+  },
+  {
+    "en": "Nausea",
+    "zh": "恶心",
+    "group": "French"
+  },
+  {
+    "en": "The Second Sex",
+    "zh": "第二性",
+    "group": "French"
+  },
+  {
+    "en": "War and Peace",
+    "zh": "战争与和平",
+    "group": "Russian"
+  },
+  {
+    "en": "Anna Karenina",
+    "zh": "安娜·卡列尼娜",
+    "group": "Russian"
+  },
+  {
+    "en": "Resurrection",
+    "zh": "复活",
+    "group": "Russian"
+  },
+  {
+    "en": "Crime and Punishment",
+    "zh": "罪与罚",
+    "group": "Russian"
+  },
+  {
+    "en": "The Brothers Karamazov",
+    "zh": "卡拉马佐夫兄弟",
+    "group": "Russian"
+  },
+  {
+    "en": "The Idiot",
+    "zh": "白痴",
+    "group": "Russian"
+  },
+  {
+    "en": "Notes from Underground",
+    "zh": "地下室手记",
+    "group": "Russian"
+  },
+  {
+    "en": "Fathers and Sons",
+    "zh": "父与子",
+    "group": "Russian"
+  },
+  {
+    "en": "Doctor Zhivago",
+    "zh": "日瓦戈医生",
+    "group": "Russian"
+  },
+  {
+    "en": "The Master and Margarita",
+    "zh": "大师与玛格丽特",
+    "group": "Russian"
+  },
+  {
+    "en": "Eugene Onegin",
+    "zh": "叶甫盖尼·奥涅金",
+    "group": "Russian"
+  },
+  {
+    "en": "Dead Souls",
+    "zh": "死魂灵",
+    "group": "Russian"
+  },
+  {
+    "en": "The Metamorphosis",
+    "zh": "变形记",
+    "group": "German"
+  },
+  {
+    "en": "The Trial",
+    "zh": "审判",
+    "group": "German"
+  },
+  {
+    "en": "The Castle",
+    "zh": "城堡",
+    "group": "German"
+  },
+  {
+    "en": "Buddenbrooks",
+    "zh": "布登勃洛克一家",
+    "group": "German"
+  },
+  {
+    "en": "The Magic Mountain",
+    "zh": "魔山",
+    "group": "German"
+  },
+  {
+    "en": "All Quiet on the Western Front",
+    "zh": "西线无战事",
+    "group": "German"
+  },
+  {
+    "en": "The Tin Drum",
+    "zh": "铁皮鼓",
+    "group": "German"
+  },
+  {
+    "en": "Love in the Time of Cholera",
+    "zh": "霍乱时期的爱情",
+    "group": "Latin/Spanish"
+  },
+  {
+    "en": "One Hundred Years of Solitude",
+    "zh": "百年孤独",
+    "group": "Latin/Spanish"
+  },
+  {
+    "en": "No One Writes to the Colonel",
+    "zh": "没有人给他写信的上校",
+    "group": "Latin/Spanish"
+  },
+  {
+    "en": "Hopscotch",
+    "zh": "跳房子",
+    "group": "Latin/Spanish"
+  },
+  {
+    "en": "Pedro Páramo",
+    "zh": "佩德罗·巴拉莫",
+    "group": "Latin/Spanish"
+  },
+  {
+    "en": "2666",
+    "zh": "2666",
+    "group": "Latin/Spanish"
+  },
+  {
+    "en": "The Savage Detectives",
+    "zh": "荒野侦探",
+    "group": "Latin/Spanish"
+  },
+  {
+    "en": "The General in His Labyrinth",
+    "zh": "迷宫中的将军",
+    "group": "Latin/Spanish"
+  },
+  {
+    "en": "One Thousand and One Nights",
+    "zh": "一千零一夜",
+    "group": "Other"
+  },
+  {
+    "en": "The Tale of Genji",
+    "zh": "源氏物语",
+    "group": "Other"
+  },
+  {
+    "en": "Snow Country",
+    "zh": "雪国",
+    "group": "Other"
+  },
+  {
+    "en": "The Old Capital",
+    "zh": "古都",
+    "group": "Other"
+  },
+  {
+    "en": "The Temple of the Golden Pavilion",
+    "zh": "金阁寺",
+    "group": "Other"
+  },
+  {
+    "en": "The Sound of Waves",
+    "zh": "潮骚",
+    "group": "Other"
+  },
+  {
+    "en": "Norwegian Wood",
+    "zh": "挪威的森林",
+    "group": "Other"
+  },
+  {
+    "en": "Kafka on the Shore",
+    "zh": "海边的卡夫卡",
+    "group": "Other"
+  },
+  {
+    "en": "1Q84",
+    "zh": "1Q84",
+    "group": "Other"
+  },
+  {
+    "en": "The Wind-Up Bird Chronicle",
+    "zh": "奇鸟行状录",
+    "group": "Other"
+  },
+  {
+    "en": "Lost Paradise",
+    "zh": "失乐园",
+    "group": "Other"
+  },
+  {
+    "en": "I Am a Cat",
+    "zh": "我是猫",
+    "group": "Other"
+  },
+  {
+    "en": "Kokoro",
+    "zh": "心",
+    "group": "Other"
+  },
+  {
+    "en": "Romance of the Three Kingdoms",
+    "zh": "三国演义",
+    "group": "Other"
+  },
+  {
+    "en": "Water Margin",
+    "zh": "水浒传",
+    "group": "Other"
+  },
+  {
+    "en": "Journey to the West",
+    "zh": "西游记",
+    "group": "Other"
+  },
+  {
+    "en": "Dream of the Red Chamber",
+    "zh": "红楼梦",
+    "group": "Chinese"
+  },
+  {
+    "en": "The Scholars",
+    "zh": "儒林外史",
+    "group": "Other"
+  },
+  {
+    "en": "Strange Tales from a Chinese Studio",
+    "zh": "聊斋志异",
+    "group": "Other"
+  },
+  {
+    "en": "Fortress Besieged",
+    "zh": "围城",
+    "group": "Chinese"
+  },
+  {
+    "en": "Family",
+    "zh": "家",
+    "group": "Chinese"
+  },
+  {
+    "en": "Midnight",
+    "zh": "子夜",
+    "group": "Other"
+  },
+  {
+    "en": "Rickshaw Boy",
+    "zh": "骆驼祥子",
+    "group": "Chinese"
+  },
+  {
+    "en": "Four Generations Under One Roof",
+    "zh": "四世同堂",
+    "group": "Chinese"
+  },
+  {
+    "en": "Border Town",
+    "zh": "边城",
+    "group": "Chinese"
+  },
+  {
+    "en": "To Live",
+    "zh": "活着",
+    "group": "Chinese"
+  },
+  {
+    "en": "Chronicle of a Blood Merchant",
+    "zh": "许三观卖血记",
+    "group": "Chinese"
+  },
+  {
+    "en": "Brothers",
+    "zh": "兄弟",
+    "group": "Chinese"
+  },
+  {
+    "en": "Ordinary World",
+    "zh": "平凡的世界",
+    "group": "Chinese"
+  },
+  {
+    "en": "White Deer Plain",
+    "zh": "白鹿原",
+    "group": "Chinese"
+  },
+  {
+    "en": "Red Poppies",
+    "zh": "尘埃落定",
+    "group": "Other"
+  },
+  {
+    "en": "Frog",
+    "zh": "蛙",
+    "group": "Chinese"
+  },
+  {
+    "en": "Big Breasts and Wide Hips",
+    "zh": "丰乳肥臀",
+    "group": "Chinese"
+  },
+  {
+    "en": "Sandalwood Death",
+    "zh": "檀香刑",
+    "group": "Chinese"
+  },
+  {
+    "en": "The Song of Everlasting Sorrow",
+    "zh": "长恨歌",
+    "group": "Chinese"
+  },
+  {
+    "en": "The Golden Age",
+    "zh": "黄金时代",
+    "group": "Chinese"
+  },
+  {
+    "en": "Love in a Fallen City",
+    "zh": "倾城之恋",
+    "group": "Chinese"
+  },
+  {
+    "en": "Eighteen Springs",
+    "zh": "半生缘",
+    "group": "Chinese"
+  },
+  {
+    "en": "Taipei People",
+    "zh": "台北人",
+    "group": "Other"
+  },
+  {
+    "en": "Crystal Boys",
+    "zh": "孽子",
+    "group": "Other"
+  },
+  {
+    "en": "Demi-Gods and Semi-Devils",
+    "zh": "天龙八部",
+    "group": "Chinese"
+  },
+  {
+    "en": "The Legend of the Condor Heroes",
+    "zh": "射雕英雄传",
+    "group": "Chinese"
+  },
+  {
+    "en": "The Return of the Condor Heroes",
+    "zh": "神雕侠侣",
+    "group": "Chinese"
+  },
+  {
+    "en": "The Heaven Sword and Dragon Saber",
+    "zh": "倚天屠龙记",
+    "group": "Chinese"
+  },
+  {
+    "en": "The Smiling, Proud Wanderer",
+    "zh": "笑傲江湖",
+    "group": "Chinese"
+  },
+  {
+    "en": "The Deer and the Cauldron",
+    "zh": "鹿鼎记",
+    "group": "Chinese"
+  },
+  {
+    "en": "Fox Volant of the Snowy Mountain",
+    "zh": "雪山飞狐",
+    "group": "Chinese"
+  },
+  {
+    "en": "The Book and the Sword",
+    "zh": "书剑恩仇录",
+    "group": "Chinese"
+  },
+  {
+    "en": "Zhu Xian",
+    "zh": "诛仙",
+    "group": "Other"
+  },
+  {
+    "en": "Ghost Blows Out the Light",
+    "zh": "鬼吹灯",
+    "group": "Other"
+  },
+  {
+    "en": "Daomu",
+    "zh": "盗墓笔记",
+    "group": "Other"
+  },
+  {
+    "en": "The Three-Body Problem",
+    "zh": "三体",
+    "group": "Chinese"
+  },
+  {
+    "en": "Ball Lightning",
+    "zh": "球状闪电",
+    "group": "Chinese"
+  },
+  {
+    "en": "The Wandering Earth",
+    "zh": "流浪地球",
+    "group": "Chinese"
+  },
+  {
+    "en": "Foundation",
+    "zh": "银河帝国：基地",
+    "group": "Other"
+  },
+  {
+    "en": "Foundation and Empire",
+    "zh": "基地与帝国",
+    "group": "Other"
+  },
+  {
+    "en": "Second Foundation",
+    "zh": "第二基地",
+    "group": "Other"
+  },
+  {
+    "en": "I, Robot",
+    "zh": "我，机器人",
+    "group": "Other"
+  },
+  {
+    "en": "Dune",
+    "zh": "沙丘",
+    "group": "Other"
+  },
+  {
+    "en": "Dune Messiah",
+    "zh": "沙丘救世主",
+    "group": "Other"
+  },
+  {
+    "en": "Neuromancer",
+    "zh": "神经漫游者",
+    "group": "Other"
+  },
+  {
+    "en": "Snow Crash",
+    "zh": "雪崩",
+    "group": "Other"
+  },
+  {
+    "en": "2001: A Space Odyssey",
+    "zh": "2001太空漫游",
+    "group": "Other"
+  },
+  {
+    "en": "Childhood's End",
+    "zh": "童年的终结",
+    "group": "Other"
+  },
+  {
+    "en": "The Time Machine",
+    "zh": "时间机器",
+    "group": "Other"
+  },
+  {
+    "en": "The War of the Worlds",
+    "zh": "世界大战",
+    "group": "Other"
+  },
+  {
+    "en": "The Invisible Man",
+    "zh": "隐身人",
+    "group": "Other"
+  },
+  {
+    "en": "Twenty Thousand Leagues Under the Sea",
+    "zh": "海底两万里",
+    "group": "French"
+  },
+  {
+    "en": "Journey to the Center of the Earth",
+    "zh": "地心游记",
+    "group": "French"
+  },
+  {
+    "en": "Around the World in Eighty Days",
+    "zh": "八十天环游地球",
+    "group": "French"
+  },
+  {
+    "en": "The Lion, the Witch and the Wardrobe",
+    "zh": "纳尼亚传奇：狮子、女巫和魔衣橱",
+    "group": "Other"
+  },
+  {
+    "en": "The Fellowship of the Ring",
+    "zh": "魔戒：护戒使者",
+    "group": "British"
+  },
+  {
+    "en": "The Two Towers",
+    "zh": "魔戒：双塔奇兵",
+    "group": "British"
+  },
+  {
+    "en": "The Return of the King",
+    "zh": "魔戒：王者归来",
+    "group": "British"
+  },
+  {
+    "en": "The Hobbit",
+    "zh": "霍比特人",
+    "group": "British"
+  },
+  {
+    "en": "Harry Potter and the Philosopher's Stone",
+    "zh": "哈利·波特与魔法石",
+    "group": "Other"
+  },
+  {
+    "en": "Harry Potter and the Chamber of Secrets",
+    "zh": "哈利·波特与密室",
+    "group": "Other"
+  },
+  {
+    "en": "Harry Potter and the Prisoner of Azkaban",
+    "zh": "哈利·波特与阿兹卡班的囚徒",
+    "group": "Other"
+  },
+  {
+    "en": "Harry Potter and the Goblet of Fire",
+    "zh": "哈利·波特与火焰杯",
+    "group": "Other"
+  },
+  {
+    "en": "Harry Potter and the Order of the Phoenix",
+    "zh": "哈利·波特与凤凰社",
+    "group": "Other"
+  },
+  {
+    "en": "Harry Potter and the Half-Blood Prince",
+    "zh": "哈利·波特与混血王子",
+    "group": "Other"
+  },
+  {
+    "en": "Harry Potter and the Deathly Hallows",
+    "zh": "哈利·波特与死亡圣器",
+    "group": "Other"
+  },
+  {
+    "en": "The Hunger Games",
+    "zh": "饥饿游戏",
+    "group": "Other"
+  },
+  {
+    "en": "A Clockwork Orange",
+    "zh": "发条橙",
+    "group": "British"
+  },
+  {
+    "en": "Watchmen",
+    "zh": "守望者",
+    "group": "Other"
+  },
+  {
+    "en": "World War Z",
+    "zh": "末日之战",
+    "group": "Other"
+  },
+  {
+    "en": "I Am Legend",
+    "zh": "我是传奇",
+    "group": "Other"
+  },
+  {
+    "en": "The Time Traveler's Wife",
+    "zh": "时间旅行者的妻子",
+    "group": "Other"
+  },
+  {
+    "en": "The Kite Runner",
+    "zh": "追风筝的人",
+    "group": "Other"
+  },
+  {
+    "en": "A Thousand Splendid Suns",
+    "zh": "灿烂千阳",
+    "group": "Other"
+  },
+  {
+    "en": "The Book Thief",
+    "zh": "偷书贼",
+    "group": "Other"
+  },
+  {
+    "en": "The Da Vinci Code",
+    "zh": "达·芬奇密码",
+    "group": "Other"
+  },
+  {
+    "en": "Angels & Demons",
+    "zh": "天使与魔鬼",
+    "group": "Other"
+  },
+  {
+    "en": "Gone Girl",
+    "zh": "消失的爱人",
+    "group": "Other"
+  },
+  {
+    "en": "The Girl with the Dragon Tattoo",
+    "zh": "龙纹身的女孩",
+    "group": "Other"
+  },
+  {
+    "en": "The Remains of the Day",
+    "zh": "长日将尽",
+    "group": "British"
+  },
+  {
+    "en": "Never Let Me Go",
+    "zh": "别让我走",
+    "group": "British"
+  },
+  {
+    "en": "Cloud Atlas",
+    "zh": "云图",
+    "group": "American"
+  },
+  {
+    "en": "Normal People",
+    "zh": "正常人",
+    "group": "Other"
+  },
+  {
+    "en": "Little Women",
+    "zh": "小妇人",
+    "group": "Other"
+  },
+  {
+    "en": "Anne of Green Gables",
+    "zh": "绿山墙的安妮",
+    "group": "Other"
+  },
+  {
+    "en": "The Secret Garden",
+    "zh": "秘密花园",
+    "group": "Other"
+  },
+  {
+    "en": "Alice's Adventures in Wonderland",
+    "zh": "爱丽丝梦游仙境",
+    "group": "Other"
+  },
+  {
+    "en": "Peter Pan",
+    "zh": "彼得·潘",
+    "group": "Other"
+  },
+  {
+    "en": "Howl's Moving Castle",
+    "zh": "霍尔斯的移动城堡",
+    "group": "Other"
+  },
+  {
+    "en": "Charlie and the Chocolate Factory",
+    "zh": "查理和巧克力工厂",
+    "group": "Other"
+  },
+  {
+    "en": "Fantastic Mr Fox",
+    "zh": "了不起的狐狸爸爸",
+    "group": "Other"
+  },
+  {
+    "en": "The Last Battle",
+    "zh": "纳尼亚传奇：最后的战役",
+    "group": "Other"
+  },
+  {
+    "en": "The Little Prince",
+    "zh": "小王子",
+    "group": "Other"
+  },
+  {
+    "en": "The Alchemist",
+    "zh": "牧羊少年奇幻之旅",
+    "group": "Other"
+  },
+  {
+    "en": "Letter from an Unknown Woman",
+    "zh": "一个陌生女人的来信",
+    "group": "German"
+  },
+  {
+    "en": "Chess Story",
+    "zh": "象棋的故事",
+    "group": "German"
+  },
+  {
+    "en": "Siddhartha",
+    "zh": "悉达多",
+    "group": "German"
+  },
+  {
+    "en": "Steppenwolf",
+    "zh": "荒原狼",
+    "group": "German"
+  },
+  {
+    "en": "The Glass Bead Game",
+    "zh": "玻璃球游戏",
+    "group": "German"
+  },
+  {
+    "en": "The Unlikely Pilgrimage of Harold Fry",
+    "zh": "一个人的朝圣",
+    "group": "Other"
+  },
+  {
+    "en": "Room",
+    "zh": "房间",
+    "group": "Other"
+  },
+  {
+    "en": "The Submarine at Night",
+    "zh": "夜晚的潜水艇",
+    "group": "Other"
+  },
+  {
+    "en": "The Last Quarter of the River",
+    "zh": "额尔古纳河右岸",
+    "group": "Chinese"
+  },
+  {
+    "en": "Someone to Talk To",
+    "zh": "一句顶一万句",
+    "group": "Chinese"
+  },
+  {
+    "en": "Blossoms",
+    "zh": "繁花",
+    "group": "Other"
+  },
+  {
+    "en": "The Heavenly Bath",
+    "zh": "天浴",
+    "group": "Other"
+  },
+  {
+    "en": "Selected Short Stories",
+    "zh": "中短篇小说精选",
+    "group": "Russian"
+  },
+  {
+    "en": "The Lord of the Rings",
+    "zh": "魔戒",
+    "group": "British"
+  },
+  {
+    "en": "Moby-Dick",
+    "zh": "白鲸",
+    "group": "American"
+  },
+  {
+    "en": "Gone with the Wind",
+    "zh": "飘",
+    "group": "American"
+  },
+  {
+    "en": "The Divine Comedy",
+    "zh": "神曲",
+    "group": "Classical/World"
+  },
+  {
+    "en": "Faust",
+    "zh": "浮士德",
+    "group": "German"
+  },
+  {
+    "en": "White Nights",
+    "zh": "白夜",
+    "group": "Russian"
+  },
+  {
+    "en": "The Dark Forest",
+    "zh": "三体II：黑暗森林",
+    "group": "Chinese"
+  },
+  {
+    "en": "Death's End",
+    "zh": "三体III：死神永生",
+    "group": "Chinese"
+  },
+  {
+    "en": "Ghost Blows Out the Light: Jingjue Ancient City",
+    "zh": "鬼吹灯之精绝古城",
+    "group": "Other"
+  },
+  {
+    "en": "Island Economics",
+    "zh": "小岛经济学",
+    "group": "Other"
+  },
+  {
+    "en": "Moby-Dick",
+    "zh": "白鲸",
+    "group": "American"
+  },
+  {
+    "en": "Gone with the Wind",
+    "zh": "飘",
+    "group": "American"
+  },
+  {
+    "en": "Ulysses",
+    "zh": "尤利西斯",
+    "group": "Other"
+  },
+  {
+    "en": "Faust",
+    "zh": "浮士德",
+    "group": "German"
+  }
+]

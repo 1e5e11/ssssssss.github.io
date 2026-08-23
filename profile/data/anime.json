@@ -1,0 +1,202 @@
+[
+  {
+    "en": "Naruto",
+    "zh": "火影忍者",
+    "group": "Shonen"
+  },
+  {
+    "en": "One Piece",
+    "zh": "海贼王",
+    "group": "Shonen"
+  },
+  {
+    "en": "Dragon Ball",
+    "zh": "龙珠",
+    "group": "Shonen"
+  },
+  {
+    "en": "Bleach",
+    "zh": "死神",
+    "group": "Shonen"
+  },
+  {
+    "en": "My Hero Academia",
+    "zh": "我的英雄学院",
+    "group": "Shonen"
+  },
+  {
+    "en": "Demon Slayer",
+    "zh": "鬼灭之刃",
+    "group": "Shonen"
+  },
+  {
+    "en": "Jujutsu Kaisen",
+    "zh": "咒术回战",
+    "group": "Shonen"
+  },
+  {
+    "en": "Hunter x Hunter",
+    "zh": "全职猎人",
+    "group": "Shonen"
+  },
+  {
+    "en": "Fullmetal Alchemist",
+    "zh": "钢之炼金术师",
+    "group": "Shonen"
+  },
+  {
+    "en": "Gintama",
+    "zh": "银魂",
+    "group": "Shonen"
+  },
+  {
+    "en": "Attack on Titan",
+    "zh": "进击的巨人",
+    "group": "Seinen"
+  },
+  {
+    "en": "Vinland Saga",
+    "zh": "冰海战记",
+    "group": "Seinen"
+  },
+  {
+    "en": "Cowboy Bebop",
+    "zh": "星际牛仔",
+    "group": "Seinen"
+  },
+  {
+    "en": "Monster",
+    "zh": "MONSTER",
+    "group": "Seinen"
+  },
+  {
+    "en": "Psycho-Pass",
+    "zh": "心理测量者",
+    "group": "Seinen"
+  },
+  {
+    "en": "One Punch Man",
+    "zh": "一拳超人",
+    "group": "Seinen"
+  },
+  {
+    "en": "Tokyo Ghoul",
+    "zh": "东京食尸鬼",
+    "group": "Seinen"
+  },
+  {
+    "en": "Parasyte",
+    "zh": "寄生兽",
+    "group": "Seinen"
+  },
+  {
+    "en": "Death Note",
+    "zh": "死亡笔记",
+    "group": "Shonen"
+  },
+  {
+    "en": "Code Geass",
+    "zh": "反叛的鲁路修",
+    "group": "Shonen"
+  },
+  {
+    "en": "Steins;Gate",
+    "zh": "命运石之门",
+    "group": "Seinen"
+  },
+  {
+    "en": "Neon Genesis Evangelion",
+    "zh": "新世纪福音战士",
+    "group": "Mecha/Sci-Fi"
+  },
+  {
+    "en": "Sword Art Online",
+    "zh": "刀剑神域",
+    "group": "Isekai/Fantasy"
+  },
+  {
+    "en": "Re:Zero",
+    "zh": "从零开始的异世界生活",
+    "group": "Isekai/Fantasy"
+  },
+  {
+    "en": "Mushoku Tensei",
+    "zh": "无职转生",
+    "group": "Isekai/Fantasy"
+  },
+  {
+    "en": "Overlord",
+    "zh": "OVERLORD",
+    "group": "Isekai/Fantasy"
+  },
+  {
+    "en": "Konosuba",
+    "zh": "为美好的世界献上祝福",
+    "group": "Isekai/Fantasy"
+  },
+  {
+    "en": "Slime Isekai",
+    "zh": "关于我转生变成史莱姆这档事",
+    "group": "Isekai/Fantasy"
+  },
+  {
+    "en": "Frieren",
+    "zh": "葬送的芙莉莲",
+    "group": "Isekai/Fantasy"
+  },
+  {
+    "en": "Made in Abyss",
+    "zh": "来自深渊",
+    "group": "Isekai/Fantasy"
+  },
+  {
+    "en": "Fate/Zero",
+    "zh": "Fate/Zero",
+    "group": "Isekai/Fantasy"
+  },
+  {
+    "en": "Mob Psycho 100",
+    "zh": "灵能百分百",
+    "group": "Seinen"
+  },
+  {
+    "en": "Chainsaw Man",
+    "zh": "电锯人",
+    "group": "Shonen"
+  },
+  {
+    "en": "Spy x Family",
+    "zh": "间谍过家家",
+    "group": "Slice of Life"
+  },
+  {
+    "en": "Haikyuu!!",
+    "zh": "排球少年",
+    "group": "Sports"
+  },
+  {
+    "en": "Your Lie in April",
+    "zh": "四月是你的谎言",
+    "group": "Slice of Life"
+  },
+  {
+    "en": "Violet Evergarden",
+    "zh": "紫罗兰永恒花园",
+    "group": "Slice of Life"
+  },
+  {
+    "en": "JoJo",
+    "zh": "JOJO的奇妙冒险",
+    "group": "Shonen"
+  },
+  {
+    "en": "Samurai Champloo",
+    "zh": "混沌武士",
+    "group": "Seinen"
+  },
+  {
+    "en": "Erased",
+    "zh": "只有我不存在的城市",
+    "group": "Horror/Thriller"
+  }
+]

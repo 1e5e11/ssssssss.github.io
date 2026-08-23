@@ -1,0 +1,167 @@
+[
+  {
+    "en": "Basketball",
+    "zh": "篮球",
+    "group": "Ball Sports"
+  },
+  {
+    "en": "Football",
+    "zh": "橄榄球",
+    "group": "Ball Sports"
+  },
+  {
+    "en": "Soccer",
+    "zh": "足球",
+    "group": "Ball Sports"
+  },
+  {
+    "en": "Baseball",
+    "zh": "棒球",
+    "group": "Ball Sports"
+  },
+  {
+    "en": "Tennis",
+    "zh": "网球",
+    "group": "Ball Sports"
+  },
+  {
+    "en": "Table Tennis",
+    "zh": "乒乓球",
+    "group": "Ball Sports"
+  },
+  {
+    "en": "Badminton",
+    "zh": "羽毛球",
+    "group": "Ball Sports"
+  },
+  {
+    "en": "Volleyball",
+    "zh": "排球",
+    "group": "Ball Sports"
+  },
+  {
+    "en": "Golf",
+    "zh": "高尔夫",
+    "group": "Ball Sports"
+  },
+  {
+    "en": "Cricket",
+    "zh": "板球",
+    "group": "Ball Sports"
+  },
+  {
+    "en": "Rugby",
+    "zh": "英式橄榄球",
+    "group": "Ball Sports"
+  },
+  {
+    "en": "Swimming",
+    "zh": "游泳",
+    "group": "Water Sports"
+  },
+  {
+    "en": "Surfing",
+    "zh": "冲浪",
+    "group": "Water Sports"
+  },
+  {
+    "en": "Diving",
+    "zh": "跳水",
+    "group": "Water Sports"
+  },
+  {
+    "en": "Rowing",
+    "zh": "划船",
+    "group": "Water Sports"
+  },
+  {
+    "en": "Skiing",
+    "zh": "滑雪",
+    "group": "Winter Sports"
+  },
+  {
+    "en": "Snowboarding",
+    "zh": "单板滑雪",
+    "group": "Winter Sports"
+  },
+  {
+    "en": "Ice Skating",
+    "zh": "滑冰",
+    "group": "Winter Sports"
+  },
+  {
+    "en": "Ice Hockey",
+    "zh": "冰球",
+    "group": "Winter Sports"
+  },
+  {
+    "en": "Running",
+    "zh": "跑步",
+    "group": "Outdoor"
+  },
+  {
+    "en": "Cycling",
+    "zh": "骑行",
+    "group": "Outdoor"
+  },
+  {
+    "en": "Hiking",
+    "zh": "徒步",
+    "group": "Outdoor"
+  },
+  {
+    "en": "Rock Climbing",
+    "zh": "攀岩",
+    "group": "Outdoor"
+  },
+  {
+    "en": "Fishing",
+    "zh": "钓鱼",
+    "group": "Outdoor"
+  },
+  {
+    "en": "Parkour",
+    "zh": "跑酷",
+    "group": "Outdoor"
+  },
+  {
+    "en": "Boxing",
+    "zh": "拳击",
+    "group": "Combat & Fitness"
+  },
+  {
+    "en": "MMA",
+    "zh": "综合格斗",
+    "group": "Combat & Fitness"
+  },
+  {
+    "en": "Fencing",
+    "zh": "击剑",
+    "group": "Combat & Fitness"
+  },
+  {
+    "en": "Archery",
+    "zh": "射箭",
+    "group": "Combat & Fitness"
+  },
+  {
+    "en": "Yoga",
+    "zh": "瑜伽",
+    "group": "Indoor"
+  },
+  {
+    "en": "Gymnastics",
+    "zh": "体操",
+    "group": "Indoor"
+  },
+  {
+    "en": "Bowling",
+    "zh": "保龄球",
+    "group": "Indoor"
+  },
+  {
+    "en": "Skateboarding",
+    "zh": "滑板",
+    "group": "Indoor"
+  }
+]

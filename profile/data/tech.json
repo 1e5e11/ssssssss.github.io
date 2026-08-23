@@ -1,0 +1,447 @@
+[
+  {
+    "en": "Python",
+    "zh": "Python",
+    "group": "Programming"
+  },
+  {
+    "en": "C++",
+    "zh": "C++",
+    "group": "Programming"
+  },
+  {
+    "en": "Java",
+    "zh": "Java",
+    "group": "Programming"
+  },
+  {
+    "en": "JavaScript",
+    "zh": "JavaScript",
+    "group": "Programming"
+  },
+  {
+    "en": "TypeScript",
+    "zh": "TypeScript",
+    "group": "Programming"
+  },
+  {
+    "en": "HTML",
+    "zh": "HTML",
+    "group": "Programming"
+  },
+  {
+    "en": "CSS",
+    "zh": "CSS",
+    "group": "Programming"
+  },
+  {
+    "en": "Rust",
+    "zh": "Rust",
+    "group": "Programming"
+  },
+  {
+    "en": "Go",
+    "zh": "Go",
+    "group": "Programming"
+  },
+  {
+    "en": "C#",
+    "zh": "C#",
+    "group": "Programming"
+  },
+  {
+    "en": "Node.js",
+    "zh": "Node.js",
+    "group": "Programming"
+  },
+  {
+    "en": "React",
+    "zh": "React",
+    "group": "Programming"
+  },
+  {
+    "en": "Vue",
+    "zh": "Vue",
+    "group": "Programming"
+  },
+  {
+    "en": "CPU Architecture",
+    "zh": "CPU架构",
+    "group": "Hardware"
+  },
+  {
+    "en": "GPU Architecture",
+    "zh": "GPU架构",
+    "group": "Hardware"
+  },
+  {
+    "en": "Overclocking",
+    "zh": "超频",
+    "group": "Hardware"
+  },
+  {
+    "en": "Custom PC Build",
+    "zh": "DIY装机",
+    "group": "Hardware"
+  },
+  {
+    "en": "SSD",
+    "zh": "固态硬盘",
+    "group": "Hardware"
+  },
+  {
+    "en": "NVMe",
+    "zh": "NVMe",
+    "group": "Hardware"
+  },
+  {
+    "en": "DDR5",
+    "zh": "DDR5内存",
+    "group": "Hardware"
+  },
+  {
+    "en": "USB",
+    "zh": "USB",
+    "group": "Hardware"
+  },
+  {
+    "en": "HDMI",
+    "zh": "HDMI",
+    "group": "Hardware"
+  },
+  {
+    "en": "PCIe",
+    "zh": "PCIe",
+    "group": "Hardware"
+  },
+  {
+    "en": "Mechanical Keyboard",
+    "zh": "机械键盘",
+    "group": "Hardware"
+  },
+  {
+    "en": "Raspberry Pi",
+    "zh": "树莓派",
+    "group": "Hardware"
+  },
+  {
+    "en": "Arduino",
+    "zh": "Arduino",
+    "group": "Hardware"
+  },
+  {
+    "en": "Blender",
+    "zh": "Blender",
+    "group": "Design/Media"
+  },
+  {
+    "en": "Photoshop",
+    "zh": "PS",
+    "group": "Design/Media"
+  },
+  {
+    "en": "Premiere Pro",
+    "zh": "PR",
+    "group": "Design/Media"
+  },
+  {
+    "en": "After Effects",
+    "zh": "AE",
+    "group": "Design/Media"
+  },
+  {
+    "en": "DaVinci Resolve",
+    "zh": "达芬奇",
+    "group": "Design/Media"
+  },
+  {
+    "en": "Figma",
+    "zh": "Figma",
+    "group": "Design/Media"
+  },
+  {
+    "en": "FFmpeg",
+    "zh": "FFmpeg",
+    "group": "Design/Media"
+  },
+  {
+    "en": "OBS",
+    "zh": "OBS",
+    "group": "Design/Media"
+  },
+  {
+    "en": "Photography",
+    "zh": "摄影",
+    "group": "Design/Media"
+  },
+  {
+    "en": "TCP/IP",
+    "zh": "TCP/IP",
+    "group": "Networking"
+  },
+  {
+    "en": "DNS",
+    "zh": "DNS",
+    "group": "Networking"
+  },
+  {
+    "en": "VPN",
+    "zh": "VPN",
+    "group": "Networking"
+  },
+  {
+    "en": "HTTP",
+    "zh": "HTTP",
+    "group": "Networking"
+  },
+  {
+    "en": "WebSocket",
+    "zh": "WebSocket",
+    "group": "Networking"
+  },
+  {
+    "en": "WiFi",
+    "zh": "WiFi",
+    "group": "Networking"
+  },
+  {
+    "en": "Bluetooth",
+    "zh": "蓝牙",
+    "group": "Networking"
+  },
+  {
+    "en": "NFC",
+    "zh": "NFC",
+    "group": "Networking"
+  },
+  {
+    "en": "Cryptography",
+    "zh": "密码学",
+    "group": "Security"
+  },
+  {
+    "en": "RSA",
+    "zh": "RSA",
+    "group": "Security"
+  },
+  {
+    "en": "AES",
+    "zh": "AES",
+    "group": "Security"
+  },
+  {
+    "en": "SHA-256",
+    "zh": "SHA-256",
+    "group": "Security"
+  },
+  {
+    "en": "SSL/TLS",
+    "zh": "SSL/TLS",
+    "group": "Security"
+  },
+  {
+    "en": "OAuth",
+    "zh": "OAuth",
+    "group": "Security"
+  },
+  {
+    "en": "JWT",
+    "zh": "JWT",
+    "group": "Security"
+  },
+  {
+    "en": "Flipper Zero",
+    "zh": "Flipper Zero",
+    "group": "Security"
+  },
+  {
+    "en": "Linux",
+    "zh": "Linux",
+    "group": "Systems/DevOps"
+  },
+  {
+    "en": "Windows",
+    "zh": "Windows",
+    "group": "Systems/DevOps"
+  },
+  {
+    "en": "macOS",
+    "zh": "macOS",
+    "group": "Systems/DevOps"
+  },
+  {
+    "en": "Docker",
+    "zh": "Docker",
+    "group": "Systems/DevOps"
+  },
+  {
+    "en": "Kubernetes",
+    "zh": "K8s",
+    "group": "Systems/DevOps"
+  },
+  {
+    "en": "CI/CD",
+    "zh": "CI/CD",
+    "group": "Systems/DevOps"
+  },
+  {
+    "en": "Nginx",
+    "zh": "Nginx",
+    "group": "Systems/DevOps"
+  },
+  {
+    "en": "Git",
+    "zh": "Git",
+    "group": "Systems/DevOps"
+  },
+  {
+    "en": "PowerShell",
+    "zh": "PowerShell",
+    "group": "Systems/DevOps"
+  },
+  {
+    "en": "Bash",
+    "zh": "Bash",
+    "group": "Systems/DevOps"
+  },
+  {
+    "en": "WSL",
+    "zh": "WSL",
+    "group": "Systems/DevOps"
+  },
+  {
+    "en": "Virtualization",
+    "zh": "虚拟化",
+    "group": "Systems/DevOps"
+  },
+  {
+    "en": "AI/ML",
+    "zh": "AI/机器学习",
+    "group": "AI/ML"
+  },
+  {
+    "en": "PyTorch",
+    "zh": "PyTorch",
+    "group": "AI/ML"
+  },
+  {
+    "en": "TensorFlow",
+    "zh": "TensorFlow",
+    "group": "AI/ML"
+  },
+  {
+    "en": "llama.cpp",
+    "zh": "llama.cpp",
+    "group": "AI/ML"
+  },
+  {
+    "en": "Stable Diffusion",
+    "zh": "Stable Diffusion",
+    "group": "AI/ML"
+  },
+  {
+    "en": "Android",
+    "zh": "Android",
+    "group": "Mobile/Embedded"
+  },
+  {
+    "en": "iOS",
+    "zh": "iOS",
+    "group": "Mobile/Embedded"
+  },
+  {
+    "en": "ESP32",
+    "zh": "ESP32",
+    "group": "Mobile/Embedded"
+  },
+  {
+    "en": "Embedded Systems",
+    "zh": "嵌入式",
+    "group": "Mobile/Embedded"
+  },
+  {
+    "en": "magisk",
+    "zh": "Magisk",
+    "group": "Mobile/Embedded"
+  },
+  {
+    "en": "LineageOS",
+    "zh": "LineageOS",
+    "group": "Mobile/Embedded"
+  },
+  {
+    "en": "MySQL",
+    "zh": "MySQL",
+    "group": "Tools"
+  },
+  {
+    "en": "PostgreSQL",
+    "zh": "PostgreSQL",
+    "group": "Tools"
+  },
+  {
+    "en": "MongoDB",
+    "zh": "MongoDB",
+    "group": "Tools"
+  },
+  {
+    "en": "Redis",
+    "zh": "Redis",
+    "group": "Tools"
+  },
+  {
+    "en": "GraphQL",
+    "zh": "GraphQL",
+    "group": "Tools"
+  },
+  {
+    "en": "VS Code",
+    "zh": "VS Code",
+    "group": "Tools"
+  },
+  {
+    "en": "Markdown",
+    "zh": "Markdown",
+    "group": "Tools"
+  },
+  {
+    "en": "LaTeX",
+    "zh": "LaTeX",
+    "group": "Tools"
+  },
+  {
+    "en": "MS Office",
+    "zh": "MS Office",
+    "group": "Tools"
+  },
+  {
+    "en": "Algorithms",
+    "zh": "算法",
+    "group": "Other"
+  },
+  {
+    "en": "Data Structures",
+    "zh": "数据结构",
+    "group": "Other"
+  },
+  {
+    "en": "3D Printing",
+    "zh": "3D打印",
+    "group": "Other"
+  },
+  {
+    "en": "HomeLab",
+    "zh": "HomeLab",
+    "group": "Other"
+  },
+  {
+    "en": "Minecraft Modding",
+    "zh": "MC模组",
+    "group": "Other"
+  },
+  {
+    "en": "Reverse Engineering",
+    "zh": "逆向工程",
+    "group": "Other"
+  }
+]

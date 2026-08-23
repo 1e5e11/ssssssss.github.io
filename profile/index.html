@@ -1,1 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>QR Personal Profile</title>
+<style id="szys">
 
+:root{--bjsdfz:#7c0a21;--bjsdfz-a:#7c0a2164;--wzys:black;--wzys-a:rgba(80,80,80,.9);--hanbj:rgba(255,255,255,.88);--bg:white;--bg2:#f5f5f5}
+body.dark{--wzys:#ddd;--wzys-a:rgba(210,210,210,.92);--hanbj:rgba(30,30,30,.85);--bg:#121212;--bg2:#1a1a1a}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;transition:background .2s,box-shadow .2s,color .2s}
+body{font-family:'Times New Roman',宋体,serif;color:var(--wzys);background:var(--bg);overflow-y:auto;overflow-x:hidden;min-height:100vh;-webkit-user-select:none;user-select:none}
+.bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;background:var(--bg)}
+.red-kuang{transform:translateZ(0);border:0;border-radius:.15em;background-color:var(--hanbj);box-shadow:0 2px 9px var(--bjsdfz-a);overflow:auto;display:flex;flex-direction:column;position:relative}
+.red-kuang::before{content:"";background:inherit;background-size:cover;filter:blur(8px);z-index:-1;position:absolute;top:0;left:0;width:100%;height:100%}
+input,select,textarea{background-color:var(--hanbj);border:0;border-bottom:2px solid transparent;outline:none;border-radius:.15em;color:var(--wzys);text-indent:6px;font-family:'Times New Roman',serif;font-size:16px;font-style:italic;box-shadow:0 1px 5px var(--bjsdfz-a);backdrop-filter:blur(15px);-webkit-appearance:none;height:30px}
+input:hover,select:hover,textarea:hover{box-shadow:0 0 10px var(--bjsdfz-a)}
+input:focus,select:focus,textarea:focus{border-bottom:2px solid var(--bjsdfz-a)}
+input::placeholder,textarea::placeholder{color:var(--wzys-a)}
+option{color:var(--bjsdfz)}
+input[type=button],button.btn{font-style:normal;text-indent:0;cursor:default;font-family:'Times New Roman',serif;display:inline-flex;align-items:center;justify-content:center;text-align:center;line-height:1}
+input[type=button]:hover,button.btn:hover{box-shadow:0 1px 5px var(--bjsdfz)}
+textarea{font-style:italic;text-indent:6px;padding:6px;resize:none;line-height:1.5;height:auto}
+/* Standard scrollbar per persentation.md: 14px wide, 5px transparent border */
+*::-webkit-scrollbar{width:14px;height:14px;border-radius:.15em}
+*::-webkit-scrollbar-track{transition:.2s;background-color:rgba(255,255,255,0);border-radius:5px}
+*::-webkit-scrollbar-thumb{transition:.2s;display:block;background:rgba(0,0,0,.5);background-color:var(--bjsdfz-a);background-clip:padding-box;border:5px solid transparent;border-radius:.15em}
+*::-webkit-scrollbar-thumb:hover{display:block;border:4px solid transparent;background-color:var(--bjsdfz)}
+*::-webkit-scrollbar-button{display:none}
+*::-webkit-scrollbar-corner{background-color:rgba(0,0,0,0)}
+/* Nav */
+.nav-bar{position:fixed;top:10px;right:16px;z-index:20;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.nb{padding:6px 14px;font-size:14px;border-radius:.15em;cursor:default;background:var(--hanbj);box-shadow:0 1px 5px var(--bjsdfz-a);color:var(--bjsdfz);font-family:'Times New Roman',serif;border:0;white-space:nowrap}
+.nb:hover{box-shadow:0 0 10px var(--bjsdfz);background:var(--bjsdfz);color:#fff}
+.lang-sw{position:fixed;top:10px;left:16px;z-index:20;display:flex;gap:4px}
+.lang-sw .nb{padding:6px 10px;font-size:13px}
+/* Toast */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:100;background:var(--bjsdfz);color:#fff;padding:10px 24px;border-radius:.15em;font-size:15px;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+/* Layout */
+.app-wrap{display:flex;justify-content:center;align-items:center;padding:60px 20px 30px;min-height:100vh;width:100%}
+.panel{width:100%;max-width:1000px;flex-shrink:0;display:flex;flex-direction:column;align-items:center}
+/* Sub-panels */
+.cp-sm{max-width:640px;min-height:500px;padding:40px 30px 30px;text-align:center}
+.cp-sm h1{font-size:36px;color:var(--bjsdfz);font-weight:normal;margin-bottom:10px}
+.cp-sm .sub{font-size:15px;color:var(--wzys-a);font-style:italic;margin-bottom:20px}
+/* Wizard */
+.cp-wiz{min-height:620px;padding:0;display:flex;flex-direction:column}
+.cp-wiz h1{font-size:22px;color:var(--bjsdfz);font-weight:normal;padding:20px 24px 4px;flex-shrink:0}
+.cp-wiz .wiz-sub{font-size:13px;color:var(--wzys-a);padding:0 24px 10px;flex-shrink:0;font-style:italic}
+.cp-wiz .wiz-top{padding:0 14px 6px;flex-shrink:0}
+.cp-wiz .wiz-body{flex:1;overflow-y:auto;padding:0 14px;min-height:300px}
+.cp-wiz .wiz-foot{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:10px 24px;border-top:1px solid var(--bjsdfz-a);min-height:50px;gap:8px;flex-wrap:wrap}
+/* Items */
+.item-grid{display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start;padding-bottom:6px}
+.item-card{display:inline-flex;align-items:center;gap:3px;padding:4px 10px;border-radius:.15em;font-size:14px;cursor:default;height:30px;line-height:1;white-space:nowrap;background:var(--hanbj);box-shadow:0 1px 3px var(--bjsdfz-a);color:var(--wzys-a);border:1px solid transparent;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
+.item-card.s1{color:var(--wzys);border-color:var(--bjsdfz-a);box-shadow:0 1px 5px var(--bjsdfz-a);background:rgba(124,10,33,.06)}
+.item-card.s2{color:#c0392b;border-color:rgba(192,57,43,.5);box-shadow:0 1px 5px rgba(192,57,43,.2);background:rgba(192,57,43,.06)}
+.item-card.s3{color:var(--bjsdfz);border-color:var(--bjsdfz);box-shadow:0 1px 7px var(--bjsdfz);font-weight:bold;background:rgba(124,10,33,.1)}
+.item-card .st-icon{display:inline-block;width:14px;height:14px;line-height:14px;text-align:center;border-radius:3px;font-size:11px;font-weight:bold;margin-right:1px}
+.item-card.s0 .st-icon{opacity:0}.item-card.s1 .st-icon{background:var(--bjsdfz-a);color:var(--bjsdfz)}.item-card.s2 .st-icon{background:rgba(192,57,43,.3);color:#c0392b}.item-card.s3 .st-icon{background:var(--bjsdfz);color:#fff}
+.item-card:hover,.item-card:active{border-color:var(--bjsdfz);box-shadow:0 0 8px var(--bjsdfz-a)}
+.item-card.view-only{cursor:default}.item-card.view-only:hover{border-color:transparent;box-shadow:0 1px 3px var(--bjsdfz-a)}
+.grp-hdr{font-size:14px;color:var(--bjsdfz);padding:8px 2px 4px;margin-top:6px;font-weight:bold;border-bottom:1px solid var(--bjsdfz-a)}
+.grp-div{height:0;border-top:1px dashed var(--bjsdfz-a);margin:8px 0 4px;width:100%;flex-basis:100%}
+.search-row{display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap}
+.search-row input{flex:1;min-width:120px;height:30px;font-size:14px}
+.search-row select{height:30px;font-size:13px;font-style:normal;text-indent:3px;min-width:100px}
+.legend{display:flex;gap:6px;margin:4px 0 3px;flex-wrap:wrap}
+.ldot{width:14px;height:14px;border-radius:3px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold}
+.ld0{background:transparent;border:1px dashed var(--wzys-a);color:var(--wzys-a)}.ld1{background:var(--bjsdfz-a);color:var(--bjsdfz)}.ld2{background:rgba(192,57,43,.3);color:#c0392b}.ld3{background:var(--bjsdfz);color:#fff}
+/* About/Message */
+.cp-about,.cp-msg{max-width:580px;padding:30px 30px;text-align:center}
+.cp-about h1,.cp-msg h1{font-size:24px;color:var(--bjsdfz);font-weight:normal;margin-bottom:6px}
+.cp-about .sub,.cp-msg .sub{font-size:13px;color:var(--wzys-a);font-style:italic;margin-bottom:14px}
+.cp-about .fl{text-align:left;font-size:13px;color:var(--wzys);padding:6px 2px 2px 0}
+.cp-about input,.cp-about textarea,.cp-msg textarea{width:100%;margin-bottom:4px;display:block}
+.cp-about textarea{height:80px}.cp-msg textarea{height:100px}
+/* Finish */
+.cp-finish{max-width:1000px;min-height:620px;padding:0;overflow:hidden}
+.fin-split{display:flex;flex-direction:row;height:100%;min-height:620px}
+.fin-left{flex:1;padding:20px 24px;overflow-y:auto;min-width:0}
+.fin-right{width:320px;min-width:280px;padding:16px;display:flex;flex-direction:column;align-items:center;border-left:1px solid var(--bjsdfz-a);flex-shrink:0}
+.fin-left h1{font-size:26px;color:var(--bjsdfz);font-weight:normal;margin-bottom:4px}
+.fin-left .bio{font-size:13px;color:var(--wzys-a);font-style:italic;margin-bottom:4px}
+.fin-left .msg{font-size:12px;color:var(--bjsdfz);font-style:italic;margin-bottom:10px}
+.fin-sec{margin:5px 0}.fin-sec h3{font-size:13px;color:var(--bjsdfz);margin-bottom:2px}
+.fin-sec .tags,.fin-sec .tg{display:flex;flex-wrap:wrap;gap:3px}
+.fin-sec .tag{padding:2px 7px;font-size:12px;border-radius:.15em;background:var(--bjsdfz-a);color:var(--wzys)}
+.fin-sec .tag.lv{background:var(--bjsdfz);color:#fff}
+.qr-box{width:260px;height:260px;background:#fff;padding:6px;border-radius:.15em;box-shadow:0 2px 9px var(--bjsdfz-a);display:flex;align-items:center;justify-content:center}
+.qr-box canvas{width:248px;height:248px}
+.cap-info{font-size:12px;color:var(--wzys-a);text-align:center;margin:8px 0 3px}
+.cap-bar{width:100%;height:4px;background:var(--bjsdfz-a);border-radius:2px;margin-bottom:8px;overflow:hidden}
+.cap-fill{height:100%;background:var(--bjsdfz);border-radius:2px}
+.dl-btn{width:100%;height:34px;font-size:13px;margin:3px 0}
+/* View */
+.cp-view{max-width:1000px;min-height:560px;padding:0}
+.vw-head{text-align:center;padding:22px 24px 8px;flex-shrink:0}
+.vw-head h1{font-size:26px;color:var(--bjsdfz);font-weight:normal}
+.vw-head .bio{font-size:13px;color:var(--wzys-a);font-style:italic;margin:3px 0}
+.vw-head .msg{font-size:13px;color:var(--bjsdfz);font-style:italic}
+.vw-body{flex:1;overflow-y:auto;padding:8px 24px 16px;display:flex;flex-wrap:wrap;gap:14px;align-content:flex-start}
+.vw-sec{flex:1;min-width:160px}.vw-sec h3{font-size:13px;color:var(--bjsdfz);margin-bottom:3px}
+.vt{padding:2px 7px;font-size:12px;border-radius:.15em;display:inline-block;margin:2px}
+.vt-l{background:var(--bjsdfz);color:#fff}.vt-t{background:var(--bjsdfz-a);color:var(--wzys)}.vt-d{background:rgba(192,57,43,.2);color:#c0392b}
+.cat-tab{padding:5px 12px;font-size:13px;border-radius:.15em;cursor:pointer;background:var(--hanbj);box-shadow:0 1px 3px var(--bjsdfz-a);color:var(--wzys-a);border:1px solid transparent;display:inline-block;user-select:none}
+.cat-tab.active{color:var(--bjsdfz);box-shadow:0 0 6px var(--bjsdfz);border-color:var(--bjsdfz)}
+.cat-tab:hover{color:var(--bjsdfz);box-shadow:0 0 8px var(--bjsdfz-a);border-color:var(--bjsdfz-a)}
+/* Scan */
+.cp-scan{max-width:520px;padding:28px;text-align:center}
+.scan-drop{width:200px;height:160px;margin:0 auto;border:2px dashed var(--bjsdfz-a);border-radius:.15em;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:default}
+.scan-drop:hover{border-color:var(--bjsdfz)}
+/* Buttons */
+.btn-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.btn{background:var(--hanbj);border:1px solid var(--bjsdfz-a);border-radius:.15em;padding:7px 16px;font-size:14px;color:var(--bjsdfz);cursor:default;font-family:'Times New Roman',serif;white-space:nowrap}
+.btn:hover{background:var(--bjsdfz);color:#fff;box-shadow:0 1px 5px var(--bjsdfz)}
+.btn.primary{background:var(--bjsdfz);color:#fff;border-color:var(--bjsdfz)}
+.btn.primary:hover{background:#9a0d2a;box-shadow:0 2px 8px var(--bjsdfz)}
+.btn.sm{padding:5px 12px;font-size:12px}
+/* Mobile */
+@media(max-width:700px){
+  .panel{max-width:100%}.app-wrap{padding:50px 4px 20px}
+  .cp-wiz,.cp-finish,.cp-view{border-radius:0;max-width:100%}
+  .cp-wiz h1{padding:14px 12px 4px;font-size:20px}
+  .cp-wiz .wiz-sub{padding:0 12px 6px}.cp-wiz .wiz-body{padding:0 8px}
+  .cp-wiz .wiz-foot{padding:8px 12px;min-height:44px}.cp-wiz .wiz-top{padding:0 8px 4px}
+  .fin-split{flex-direction:column}.fin-right{width:100%;border-left:none;border-top:1px solid var(--bjsdfz-a);max-width:100%}
+  .fin-left{max-height:40vh}.item-card{padding:5px 10px;height:34px;font-size:14px}
+  .cp-sm,.cp-about,.cp-msg{max-width:100%;min-height:auto;border-radius:0}
+  .nav-bar{top:4px;right:4px;gap:3px}.nb{padding:5px 9px;font-size:12px}.lang-sw{top:4px;left:4px}
+  .search-row{flex-direction:column}.search-row select{width:100%}
+}
+
+.movie-popup{position:fixed;z-index:200;background:var(--hanbj);border:1px solid var(--bjsdfz);border-radius:.15em;box-shadow:0 2px 12px var(--bjsdfz-a);padding:12px 16px;min-width:200px;max-width:300px;font-size:13px;line-height:1.6;display:none;backdrop-filter:blur(15px)}
+.movie-popup.show{display:block}
+.movie-popup .mp-title{font-size:16px;color:var(--bjsdfz);font-weight:bold;margin-bottom:6px}
+.movie-popup .mp-row{color:var(--wzys);margin:2px 0}
+.movie-popup .mp-row span{color:var(--wzys-a)}
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="lang-sw">
+  <button class="nb" onclick="App.setLang('zh')" id="btnZh" style="font-weight:bold">中</button>
+  <button class="nb" onclick="App.setLang('en')" id="btnEn">EN</button>
+  <button class="nb" onclick="App.toggleTheme()" id="btnTheme" title="Dark/Light">&#9788;</button>
+</div>
+<div class="nav-bar">
+  <button class="nb" id="navCreate" onclick="App.startNew()">Create</button>
+  <button class="nb" id="navScan" onclick="App.showScan()">Scan QR</button>
+  <button class="nb" id="navSave" onclick="App.saveProgress()">Save</button>
+  <button class="nb" id="navLoad" onclick="App.loadProgress()">Load</button>
+  <button class="nb" id="navExport" onclick="App.exportJSON()">Export</button>
+  <button class="nb" id="navImport" onclick="document.getElementById('impFile').click()">Import</button>
+  <input type="file" id="impFile" accept=".json,image/*" style="display:none" onchange="App.handleImportFile(event)">
+</div>
+<div class="toast" id="toast"></div>
+<div id="app"></div>
+
+
+<div class="movie-popup" id="moviePopup" oncontextmenu="return false"></div>
+<script src="data/movies.js"></script>
+<script src="data/foods.js"></script>
+<script src="data/sports.js"></script>
+<script src="data/games.js"></script>
+<script src="data/music.js"></script>
+<script src="data/books.js"></script>
+<script src="data/tv_shows.js"></script>
+<script src="data/anime.js"></script>
+<script src="data/tech.js"></script>
+<script src="data/movie_meta.js"></script>
+<script src="data/anime_meta.js"></script>
+<script src="data/game_meta.js"></script>
+<script src="data/tv_meta.js"></script>
+<script src="data/music_meta.js"></script>
+<script src="data/books_meta.js"></script>
+<script src="data/tech_meta.js"></script>
+<script src="data/foods_groups.js"></script>
+<script src="qrcode_gen.js"></script>
+<script>
+
+const I={zh:{"title":"QR Personal Profile","create":"创建","scan":"扫码","save":"保存","load":"载入","export":"导出","import":"导入","welcome":"兴趣档案二维码","welcomeSub":"把你的兴趣爱好变成一张可分享的二维码","desc1":"9 个类别、数百个项目","desc2":"4 种状态","desc3":"无需服务器、无需账号，一切尽在二维码中","est":"预计 5-15 分钟完成","start":"开始创建","aboutTitle":"关于你","aboutSub":"你的名字和简短介绍","nameField":"姓名","namePH":"你的名字","bioField":"简介","bioPH":"AI / 硬件 / Minecraft","msgTitle":"分享留言","msgSub":"给扫码查看你资料的人留句话","msgPH":"很高兴认识你！","genQR":"生成二维码","step":"第","rated":"已评","all":"全部","search":"搜索...","stateLbl":{"dflt":["未接触","接触过","不喜欢","喜欢"],"movies":["没看过","看过","不喜欢","喜欢"],"foods":["没吃过","吃过","不喜欢","喜欢"],"sports":["没试过","试过","不喜欢","喜欢"],"games":["没玩过","玩过","不喜欢","喜欢"],"music":["没听过","常听","不喜欢","喜欢"],"books":["没读过","读过","不喜欢","喜欢"],"tv":["没看过","看过","不喜欢","喜欢"],"anime":["没看过","看过","不喜欢","喜欢"],"tech":["没听过","听说过","不感兴趣","喜欢/熟练"]},"catName":{"movies":"电影","foods":"美食","sports":"运动","games":"游戏","music":"音乐","books":"书籍","tv":"电视剧","anime":"动漫","tech":"技术"},"next":"下一步","back":"上一步","dlQR":"下载二维码","dlPoster":"下载海报","edit":"编辑","capPrefix":"数据: ","capCmpr":"(已压缩)","scanTitle":"扫描二维码","scanSub":"上传二维码图片或从剪贴板粘贴","scanClick":"点击上传","scanPaste":"从剪贴板粘贴","scanNoImg":"剪贴板中无图片","scanDenied":"无权访问剪贴板","scanNoQR":"未找到二维码","scanBadQR":"无效的档案二维码","scanOK":"加载成功！","noSel":"尚未选择任何项目。","emptyProfile":"该档案为空。","tooBig":"档案过大","tooBigMsg":"请缩短留言后重试。","goBack":"返回","saved":"进度已保存，随时回来继续~","loaded":"进度已恢复！","noSaved":"没有已保存的进度","exported":"已导出档案","imported":"已导入档案","importView":"导入此配置并编辑","importViewMsg":"将覆盖当前配置并从导入的配置继续编辑，确定吗？","disclaimer":"数据由 AI 收集整理，可能存在错误，仅供参考","resumeTitle":"发现已保存的进度","resumeDesc":"是否继续上次的编辑？","resumeYes":"继续编辑","resumeNo":"重新开始","groups":{"Sci-Fi":"科幻","Action":"动作","Drama":"剧情","Animation":"动画","Horror/Thriller":"恐怖/惊悚","Crime":"犯罪","Comedy":"喜剧","Adventure":"冒险","Classic":"经典","Romance":"浪漫爱情","War":"战争","Fantasy":"奇幻","History":"历史","Documentary":"纪录","Meat & Seafood":"肉类海鲜","Vegetables & Fungi":"蔬菜菌菇","Fruits":"水果","Grains & Dairy":"谷物乳品","Main Dishes":"主食菜肴","Snacks & Desserts":"小吃甜点","Drinks":"饮品","Condiments & Others":"调料其他","Ball Sports":"球类","Water Sports":"水上","Winter Sports":"冬季","Combat & Fitness":"格斗健身","Outdoor":"户外","Indoor":"室内","Sandbox":"沙盒","RPG":"RPG","FPS/Shooter":"射击","MOBA":"MOBA","Action/Adventure":"动作冒险","Strategy/Sim":"策略模拟","Fighting":"格斗","Indie":"独立游戏","MMO":"网游","Racing/Sports":"竞速体育","Simulation":"模拟经营","Popular":"流行","Rock/Metal":"摇滚/金属","Electronic":"电子","Classical/Jazz":"古典/爵士","World/Regional":"世界/地区","Hip-Hop/R&B":"嘻哈/R&B","Folk/Indie":"民谣/独立","Pop":"流行","Folk/Blues":"民谣/蓝调","Classical":"古典名作","Alternative":"另类","Hip-Hop":"嘻哈","Chinese":"华语","K-Pop":"K-Pop","Other":"其他","Fiction":"小说","Non-Fiction":"非虚构","Special Interest":"特殊兴趣","British":"英国文学","American":"美国文学","French":"法国文学","German":"德国文学","Russian":"俄国文学","Latin/Spanish":"拉美文学","Japanese":"日本文学","Indian":"印度文学","Classical/World":"古典/世界","Shonen":"少年向","Seinen":"青年向","Shojo":"少女向","Isekai/Fantasy":"异世界/奇幻","Mecha/Sci-Fi":"机甲/科幻","Slice of Life":"日常","Sports":"体育","Anime Movie":"剧场版/动画电影","Western":"欧美动画","Mystery":"推理/悬疑","Programming":"编程","Hardware":"硬件","Design/Media":"设计/媒体","Networking":"网络","Security":"安全","Systems/DevOps":"系统/运维","AI/ML":"AI/ML","Mobile/Embedded":"移动/嵌入式","Tools":"工具","Realism":"现实主义","Magical Realism":"魔幻现实主义","Science Fiction":"科幻","Dystopian":"反乌托邦","Mystery/Thriller":"悬疑推理","Horror/Gothic":"恐怖/哥特","Historical/War":"历史/战争","Coming of Age":"成长教育","Satire":"讽刺","Wuxia":"武侠","Chinese Modern":"中国现代","Classics":"古典经典","Modernist":"现代主义","Philosophical":"哲学/存在主义","Children's":"童话童书","Short Stories":"短篇集","Sandbox/Survival":"沙盒/生存","MOBA/Battle Royale":"竞技对战","Strategy":"策略","Racing":"竞速","Horror":"恐怖","Roguelike/Deck":"肉鸽/卡牌","Casual/Co-op":"休闲/合作","Puzzle":"益智","Gacha/Anime":"二次元/抽卡","Global Series":"全球剧集","Chinese Series":"国产剧","K-Drama":"韩剧","J-Drama":"日剧","Taiwan Drama":"台剧","Nature/Science Doc":"自然/科学纪录片","Humanities/Society Doc":"人文/社会纪录片","Chinese Classic":"华语经典","Chinese Hot":"华语热门","Global Classic":"全球经典","Global Hot":"全球热门","Movie Score":"电影配乐","Virtual Singer":"虚拟歌手","Anime/VOCALOID":"动漫/VOCALOID","World Folk":"世界民歌","Western Extra":"欧美补充","Cantonese":"粤语经典","Video Game Music":"游戏音乐","Guichu":"鬼畜区","Minecraft":"我的世界","Rhythm/Music":"音游"}},en:{"title":"QR Personal Profile","create":"Create","scan":"Scan QR","save":"Save","load":"Load","export":"Export","import":"Import","welcome":"QR Personal Profile","welcomeSub":"Turn your interests into a shareable QR code","desc1":"9 categories with hundreds of items","desc2":"4 states per item","desc3":"No servers, no accounts","est":"~5-15 min to complete","start":"Get Started","aboutTitle":"About You","aboutSub":"Your name and a short introduction","nameField":"Name","namePH":"Your name","bioField":"Bio","bioPH":"AI / Hardware / Minecraft","msgTitle":"Share a Message","msgSub":"Leave a note","msgPH":"Nice to meet you!","genQR":"Generate QR","step":"Step","rated":"rated","all":"All","search":"Search...","stateLbl":{"dflt":["Untried","Tried","Dislike","Love"],"movies":["Not seen","Seen","Dislike","Love"],"foods":["Not tried","Tried","Dislike","Love"],"sports":["Not tried","Tried","Dislike","Love"],"games":["Not played","Played","Dislike","Love"],"music":["Not heard","Listened","Dislike","Love"],"books":["Not read","Read","Dislike","Love"],"tv":["Not seen","Seen","Dislike","Love"],"anime":["Not seen","Seen","Dislike","Love"],"tech":["Not heard","Heard of","Dislike","Like/Skilled"]},"catName":{"movies":"Movies","foods":"Food","sports":"Sports","games":"Games","music":"Music","books":"Books","tv":"TV Shows","anime":"Anime","tech":"Tech"},"next":"Next","back":"Back","dlQR":"Download QR","dlPoster":"Download Poster","edit":"Edit","capPrefix":"Data: ","capCmpr":" (compressed)","scanTitle":"Scan QR Profile","scanSub":"Upload a QR code image","scanClick":"Click to upload","scanPaste":"Paste from clipboard","scanNoImg":"No image in clipboard","scanDenied":"Clipboard access denied","scanNoQR":"No QR code found","scanBadQR":"Invalid profile QR code","scanOK":"Profile loaded!","noSel":"No items selected.","emptyProfile":"This profile is empty.","tooBig":"Profile Too Large","tooBigMsg":"Please shorten your message.","goBack":"Go Back","saved":"Progress saved! Come back anytime~","loaded":"Progress restored!","noSaved":"No saved progress","exported":"Profile exported","imported":"Profile imported","importView":"Import & Edit","importViewMsg":"This will overwrite your current progress and continue editing from the imported profile. Continue?","disclaimer":"Data is collected by AI and may contain errors; for reference only","resumeTitle":"Saved Progress Found","resumeDesc":"Continue?","resumeYes":"Continue","resumeNo":"Start Over","groups":{}}};
+let lang="zh";
+function T(key,fallback){return(I[lang]&&I[lang][key])||fallback||key}
+function TG(key){return(I[lang]&&I[lang].groups&&I[lang].groups[key])||key}
+function esc(s){if(!s)return"";let d=document.createElement("div");d.textContent=s;return d.innerHTML}
+function itemName(it){return lang==="zh"?it.zh:it.en}
+function ordItems(arr){return arr.slice().sort(function(a,b){let ao=a.order==null?a.id:a.order,bo=b.order==null?b.id:b.order;return ao-bo})}
+function toast(msg){let t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2000)}
+
+
+
+
+
+// ==================== CATALOG INIT ====================
+const C={_ver:1,cats:[],itemMap:{},groups:{}};
+let _catData={
+  movies:window.CATALOG_movies||[],foods:window.CATALOG_foods||[],
+  sports:window.CATALOG_sports||[],games:window.CATALOG_games||[],
+  music:window.CATALOG_music||[],books:window.CATALOG_books||[],
+  tv:window.CATALOG_tv_shows||[],anime:window.CATALOG_anime||[],
+  tech:window.CATALOG_tech||[]
+};
+let _catGroups={
+  foods:window.CATALOG_foods_groups||['成品'],
+  movies:(window.CATALOG_movies||[]).length?['1-50','51-100','101-150','151-200','201-250','251-300','301-414']:[],
+  sports:['Ball Sports','Water Sports','Winter Sports','Combat & Fitness','Outdoor','Indoor'],
+  games:['Sandbox/Survival','RPG','Action/Adventure','FPS/Shooter','MOBA/Battle Royale','Strategy','Simulation','Racing','Sports','Fighting','Horror','Roguelike/Deck','Casual/Co-op','Puzzle','Gacha/Anime','Rhythm/Music'],
+  music:['Chinese Classic','Chinese Hot','Global Classic','Global Hot','Classical','Movie Score','Virtual Singer','Anime/VOCALOID','World Folk','Western Extra','Cantonese','Video Game Music','Guichu'],
+  books:['Realism','Magical Realism','Science Fiction','Fantasy','Dystopian','Mystery/Thriller','Horror/Gothic','Historical/War','Romance','Adventure','Coming of Age','Satire','Wuxia','Chinese Modern','Classics','Modernist','Philosophical','Children\'s','Short Stories','Non-Fiction'],
+  tv:['Global Series','Chinese Series','K-Drama','J-Drama','Taiwan Drama','Nature/Science Doc','Humanities/Society Doc'],
+  anime:['Shonen','Seinen','Shojo','Isekai/Fantasy','Mecha/Sci-Fi','Slice of Life','Sports','Horror/Thriller','Anime Movie','Western','Mystery'],
+  tech:['Programming','Hardware','Design/Media','Networking','Security','Systems/DevOps','AI/ML','Mobile/Embedded','Tools','Minecraft','Other']
+};
+function defineCat(id,key,groups){C.cats.push({id,key,groups:groups||_catGroups[key]||[]})}
+function item(en,zh,group){return{en,zh,group,id:0}}
+function addItems(key,arr){arr.forEach(function(it,i){if(it.id==null)it.id=i});C.itemMap[key]=arr}
+for(let[k,items]of Object.entries(_catData)){defineCat(C.cats.length,k,_catGroups[k]);addItems(k,items)}
+C.catByKey={};C.cats.forEach(c=>C.catByKey[c.key]=c);
+C.nameIdx={};C.enIdx={};
+for(let cat of C.cats){for(let it of C.itemMap[cat.key]){if(it.deleted)continue;(C.nameIdx[it.zh]=C.nameIdx[it.zh]||[]).push({cat:cat.key,idx:it.id});if(it.en&&it.en!==it.zh)(C.enIdx[it.en]=C.enIdx[it.en]||[]).push({cat:cat.key,idx:it.id})}}
+const MOVIE_META=window.MOVIE_META||{};
+const ANIME_META=window.ANIME_META||{};
+const GAME_META=window.GAME_META||{};
+const TV_META=window.TV_META||{};
+const MUSIC_META=window.MUSIC_META||{};
+const BOOK_META=window.BOOK_META||{};
+const TECH_META=window.TECH_META||{};
+
+// ==================== BINARY PROTOCOL ====================
+// CAT_VER=2 (compact bitmap): items keep their original slot forever.
+// To "remove" an item, mark it deleted:true in the data file (tombstone) —
+// it still occupies its bitmap slot so all old QR codes stay valid;
+// new items are appended at the end. The UI hides deleted items.
+const PROTO_VER=1,CAT_VER=2,MAGIC=[0x51,0x52,0x50,0x46];
+function encodeProfile(p){
+  let te=new TextEncoder(),nB=te.encode((p.name||'').slice(0,64)),bB=te.encode((p.bio||'').slice(0,256)),mB=te.encode((p.message||'').slice(0,256));
+  let h=new Uint8Array(8);h.set(MAGIC,0);h[4]=PROTO_VER;h[5]=CAT_VER;h[6]=0;h[7]=0;
+  let parts=[h];
+  function ws(b){let l=Math.min(b.length,65535),a=new Uint8Array(2+l+1);a[0]=(l>>8)&0xFF;a[1]=l&0xFF;a.set(b.slice(0,l),2);a[2+l]=0;return a}
+  parts.push(ws(nB));parts.push(ws(bB));parts.push(ws(mB));
+  for(let cat of C.cats){
+    let items=C.itemMap[cat.key],st=p.states[cat.key]||{};
+    let bc=items.length*2,bytes=Math.ceil(bc/8),bf=new Uint8Array(bytes);
+    for(let i=0;i<items.length;i++){let s=st[i]||0,bp=i*2,bi=Math.floor(bp/8),bo=bp%8;bf[bi]|=((s&3)<<(6-bo))}
+    parts.push(bf);
+  }
+  let total=parts.reduce((s,a)=>s+a.length,0),raw=new Uint8Array(total),off=0;
+  for(let a of parts){raw.set(a,off);off+=a.length}
+  return raw;
+}
+function decodeProfile(raw,dbg){
+  let _dbg=dbg||(()=>{});
+  try{
+    if(raw.length<8){_dbg('DECODE: too short');return null}
+    if(raw[0]!==MAGIC[0]||raw[1]!==MAGIC[1]||raw[2]!==MAGIC[2]||raw[3]!==MAGIC[3]){_dbg('DECODE: bad magic');return null}
+    let flags=raw[6],cmp=(flags&1)!==0,payload=raw.slice(8);
+    _dbg('DECODE: proto='+raw[4]+' cat='+raw[5]+' flags='+flags+' compressed='+cmp+' payloadLen='+payload.length);
+    if(cmp){let dc=rleDecompress(payload);if(!dc){_dbg('DECODE: decompress failed');return null}payload=dc;_dbg('DECODE: decompressed '+dc.length+' bytes')}
+    let td=new TextDecoder(),pos=0;
+    function rs(){if(pos+2>payload.length)return'';let l=(payload[pos]<<8)|payload[pos+1];pos+=2;if(pos+l+1>payload.length)return'';let b=payload.slice(pos,pos+l);pos+=l+1;return td.decode(b)}
+    let name=rs(),bio=rs(),msg=rs(),p={name,bio,message:msg,states:{},protoVer:raw[4],catVer:raw[5]};
+    for(let cat of C.cats){
+      let items=C.itemMap[cat.key],bc=items.length*2,bytes=Math.ceil(bc/8);
+      if(pos+bytes>payload.length)break;
+      let st={};for(let i=0;i<items.length;i++){let bp=i*2,bi=Math.floor(bp/8),bo=bp%8,s=(payload[pos+bi]>>(6-bo))&3;if(s!==0)st[i]=s}
+      p.states[cat.key]=st;pos+=bytes;
+    }
+    return p;
+  }catch(e){_dbg('DECODE: err '+e.message);return null}
+}
+
+// ===== Simple RLE compression =====
+function rleCompress(data){
+  let out=[],i=0;
+  while(i<data.length){
+    let b=data[i],run=1;
+    while(i+run<data.length&&data[i+run]===b&&run<65535)run++;
+    if(run>=4||(b===0&&run>=3)){
+      out.push(0xFF);out.push(b);out.push(run&0xFF);out.push((run>>8)&0xFF);i+=run;
+    }else{
+      if(b===0xFF){out.push(0xFF);out.push(0xFF)}else out.push(b);
+      i++;
+    }
+  }
+  return new Uint8Array(out);
+}
+function rleDecompress(data){
+  let out=[],i=0;
+  while(i<data.length){
+    if(data[i]===0xFF&&i+1<data.length&&data[i+1]!==0xFF){
+      let b=data[i+1],count=(data[i+2]|(data[i+3]<<8));
+      for(let j=0;j<count;j++)out.push(b);i+=4;
+    }else if(data[i]===0xFF&&i+1<data.length&&data[i+1]===0xFF){out.push(0xFF);i+=2}
+    else{out.push(data[i]);i++}
+  }
+  return new Uint8Array(out);
+}
+function compressPayload(raw){
+  try{let c=rleCompress(raw.slice(8));if(c.length<raw.length-8){let f=new Uint8Array(8+c.length);f.set(raw.slice(0,8),0);f[6]|=1;f.set(c,8);return f}}catch(e){}
+  return raw;
+}
+
+// ===== Custom base85 =====
+const B85='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$()*+,-./:;@_~`<>[]{}';
+function toB85(bytes){let r='',pad=(4-bytes.length%4)%4,arr=new Uint8Array(bytes.length+pad);arr.set(bytes);for(let i=0;i<arr.length;i+=4){let n=BigInt((((arr[i]<<24)|(arr[i+1]<<16)|(arr[i+2]<<8)|arr[i+3])>>>0));if(n===0n){r+='00000';continue}let chars=[],w=n;for(let j=0;j<5;j++){let d=Number(w%85n);chars.unshift(B85[d]);w=w/85n}r+=chars.join('')}return r}
+function fromB85(s){let parts=[];for(let i=0;i<s.length;i+=5){let n=0n,chunk=s.slice(i,i+5);if(chunk.length<5)chunk=chunk.padEnd(5,'0');for(let j=0;j<5;j++){let idx=B85.indexOf(chunk[j]);if(idx<0)idx=0;n=n*85n+BigInt(idx)}parts.push(Number((n>>24n)&0xFFn),Number((n>>16n)&0xFFn),Number((n>>8n)&0xFFn),Number(n&0xFFn))}return new Uint8Array(parts)}
+
+// ===== QR Generation =====
+const QR_URL='https://ssssssss.eu.org/profile/';
+function generateQRCanvas(dataBytes){
+  let b85=toB85(dataBytes);
+  let url=QR_URL+'?v='+PROTO_VER+'&c='+CAT_VER+'&d='+encodeURIComponent(b85);
+  let qr=qrcode(40,'L');qr.addData(url);qr.make();
+  let modCount=qr.getModuleCount(),scale=8,margin=4,size=(modCount+margin*2)*scale;
+  let cv=document.createElement('canvas');cv.width=size;cv.height=size,ctx=cv.getContext('2d');
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,size,size);ctx.fillStyle='#000';
+  for(let r=0;r<modCount;r++)for(let c=0;c<modCount;c++)if(qr.isDark(r,c))ctx.fillRect((c+margin)*scale,(r+margin)*scale,scale,scale);
+  return cv;
+}
+
+// ==================== APP ====================
+let profile={name:'',bio:'',message:'',states:{}},qStep=0,qrCanvas=null,finPayload=null;
+
+const App={
+  init(){
+    let saved=localStorage.getItem('qrpf_lang');if(saved)lang=saved;
+    this.setLang(lang);
+    if(localStorage.getItem('qrpf_dark')==='1'){document.body.classList.add('dark');document.getElementById('btnTheme').innerHTML='&#9790;'}
+    let params=new URLSearchParams(window.location.search);
+    let d=params.get('d');
+    if(d){try{let bytes=fromB85(d);this.decodeAndView(bytes);return}catch(e){}}
+    let hasSaved=!!localStorage.getItem('qrpf_profile');
+    if(hasSaved)this.showResume();else this.startNew();
+    document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();App.saveProgress()}});
+    App._lastSave=Date.now();setInterval(function(){if(Date.now()-App._lastSave>=55000)App.saveProgress()},60000);
+    window.addEventListener('beforeunload',function(){App._autoSaveNow()});
+  },
+
+  async decodeAndView(bytes){let p=decodeProfile(bytes,console.log.bind(console,'[SCAN-DECODE]'));if(p){this.renderView(p);return}document.getElementById('app').innerHTML='<div class="app-wrap"><div class="panel"><div class="red-kuang cp-sm"><h1 style="color:#c0392b">'+T('scanBadQR')+'</h1></div></div></div>';},
+
+  setLang(l){lang=l;document.documentElement.lang=l;localStorage.setItem('qrpf_lang',l);document.getElementById('btnZh').style.fontWeight=l==='zh'?'bold':'normal';document.getElementById('btnEn').style.fontWeight=l==='en'?'bold':'normal';document.getElementById('navCreate').textContent=T('create');document.getElementById('navScan').textContent=T('scan');document.getElementById('navSave').textContent=T('save');document.getElementById('navLoad').textContent=T('load');document.getElementById('navExport').textContent=T('export');document.getElementById('navImport').textContent=T('import');if(qStep>=0)this.renderWiz();},
+
+  toggleTheme(){document.body.classList.toggle('dark');let isDark=document.body.classList.contains('dark');localStorage.setItem('qrpf_dark',isDark?'1':'0');document.getElementById('btnTheme').innerHTML=isDark?'&#9790;':'&#9788;';},
+
+  showResume(){document.getElementById('app').innerHTML='<div class="app-wrap"><div class="panel"><div class="red-kuang cp-sm"><h1>'+T('resumeTitle')+'</h1><div class="sub">'+T('resumeDesc')+'</div><div class="btn-row"><button class="btn primary" onclick="App.loadAndContinue()">'+T('resumeYes')+'</button><button class="btn" onclick="App.startNew()">'+T('resumeNo')+'</button></div></div></div></div>';},
+
+  startNew(){profile={name:'',bio:'',message:'',states:{}};qStep=0;this.renderWiz()},
+  loadProgress(){let s=localStorage.getItem('qrpf_profile');if(!s){toast(T('noSaved'));return}try{profile=JSON.parse(s);qStep=this._normStep(profile.qStep);this.renderWiz();toast(T('loaded'))}catch(e){toast(T('noSaved'))}},
+  loadAndContinue(){this.loadProgress()},
+  saveProgress(){this.saveInputs();profile.qStep=qStep;localStorage.setItem('qrpf_profile',JSON.stringify(profile));App._lastSave=Date.now();toast(T('saved'))},
+  _autoSaveNow(){try{this.saveInputs();profile.qStep=qStep;localStorage.setItem('qrpf_profile',JSON.stringify(profile))}catch(e){}},
+  _normStep(v){let t=C.cats.length;if(typeof v==='number'&&v>=0&&v<=2+t)return v;return 1},
+
+  exportJSON(){this.saveInputs();let out={version:1,step:qStep,name:profile.name,bio:profile.bio,message:profile.message,items:{}};for(let cat of C.cats){let st=profile.states[cat.key]||{},slbls=(I.en.stateLbl&&(I.en.stateLbl[cat.key]||I.en.stateLbl.dflt))||[],list=[];for(let it of C.itemMap[cat.key]){let s=st[it.id]||0;if(s>0)list.push({title:it.en&&it.en!==it.zh?it.en:it.zh,state:slbls[s]})}if(list.length)out.items[cat.key]=list}let a=document.createElement('a');a.download='profile.json';a.href=URL.createObjectURL(new Blob([JSON.stringify(out,null,2)],{type:'application/json'}));a.click();toast(T('exported'))},
+  importJSON(file){let r=new FileReader();r.onload=ev=>{try{let p=JSON.parse(ev.target.result);if(!p||typeof p!=='object')throw 0;profile={name:'',bio:'',message:'',states:{}};if(typeof p.name==='string')profile.name=p.name;if(typeof p.bio==='string')profile.bio=p.bio;if(typeof p.message==='string')profile.message=p.message;if(p.states&&typeof p.states==='object'){profile.states=p.states}else if(p.items&&typeof p.items==='object'){this._importItems(p.items)}qStep=this._normStep(p.step);this.renderWiz();toast(T('imported'))}catch(e){toast(T('scanBadQR'))}};r.readAsText(file)},
+  _importItems(items){for(let catKey in items){let list=items[catKey];if(!Array.isArray(list))continue;if(!C.catByKey[catKey])continue;let slblsZh=T('stateLbl')[catKey]||T('stateLbl').dflt,slblsEn=(I.en.stateLbl&&(I.en.stateLbl[catKey]||I.en.stateLbl.dflt))||slblsZh,st={};for(let e of list){if(!e||typeof e!=='object'||!e.title)continue;let tl=String(e.title).trim().toLowerCase(),it=null;for(let x of C.itemMap[catKey]){if(x.zh===e.title||(x.en&&x.en.toLowerCase()===tl)){it=x;break}}if(!it)continue;let s=0;if(typeof e.state==='number')s=e.state;else{let stx=String(e.state).trim();s=slblsEn.indexOf(stx);if(s<0)s=slblsZh.indexOf(stx);if(s<0)s=0}if(s>0&&s<=3)st[it.id]=s}if(Object.keys(st).length)profile.states[catKey]=st}},
+  importViewed(){if(!this._viewProfile)return;if(!confirm(T('importViewMsg')))return;let p=this._viewProfile;profile={name:p.name||'',bio:p.bio||'',message:p.message||'',states:{}};for(let k in (p.states||{})){profile.states[k]={};for(let i in p.states[k])profile.states[k][i]=p.states[k][i]}qStep=1;this.renderWiz()},
+  handleImportFile(e){let f=e.target.files[0];if(!f)return;e.target.value='';if(f.type&&f.type.indexOf('image')>=0)this.processFile(f);else this.importJSON(f)},
+
+  _encourage(step){let totalCats=C.cats.length;if(step===2){toast(lang==='zh'?'好的开始！来挑你喜欢的吧~':'Great start! Pick your favorites~');return}let ci=step-2,left=totalCats-ci;if(left===5)toast(lang==='zh'?'已经完成'+(totalCats-left)+'个，还有'+left+'类，继续加油！':'Keep going! '+(totalCats-left)+' down, '+left+' to go!');else if(left===3)toast(lang==='zh'?'就快完成了，还差'+left+'类~':'Almost there, just '+left+' more!');else if(left===1)toast(lang==='zh'?'最后一类了，你太棒了！':'Last category — you rock!')},
+
+  _readTotalStats(){let txt=T('welcome')+' '+T('welcomeSub')+' '+T('desc1')+' '+T('desc2')+' '+T('desc3')+' '+T('est')+' '+T('start')+' '+T('aboutTitle')+' '+T('aboutSub')+' '+T('nameField')+' '+T('namePH')+' '+T('bioField')+' '+T('bioPH')+' '+T('next');for(let cat of C.cats){txt+=' '+(T('catName')[cat.key]||cat.key)+' '+T('rated')+' '+T('search')+' '+T('step')+' '+T('back')+' '+T('next')+' '+(T('stateLbl')[cat.key]||T('stateLbl').dflt).join(' ');for(let it of ordItems(C.itemMap[cat.key])){if(it.deleted)continue;txt+=' '+itemName(it)}}txt+=' '+T('msgTitle')+' '+T('msgSub')+' '+T('msgPH')+' '+T('back')+' '+T('genQR');let hz=(txt.match(/[\u4e00-\u9fa5]/g)||[]).length;let wd=(txt.match(/[A-Za-z0-9]+/g)||[]).length;return{hz:hz,wd:wd}},
+
+  _fillReadStats(){let el=document.getElementById('readStats');if(!el)return;let s=this._readTotalStats();el.textContent=lang==='zh'?('整个问卷约 '+s.hz+' 字'+(s.wd?'，英文 '+s.wd+' 词':'')):('Entire survey ~'+s.wd+' words'+(s.hz?' · '+s.hz+' chars':''))},
+
+  renderWiz(){
+    profile.qStep=qStep;
+    window.scrollTo({top:0,behavior:'smooth'});
+    let el=document.getElementById('app'),totalCats=C.cats.length;
+    if(qStep===0){
+      el.innerHTML='<div class="app-wrap"><div class="panel"><div class="red-kuang cp-sm"><h1>'+T('welcome')+'</h1><div class="sub">'+T('welcomeSub')+'</div><div style="padding:4px 30px;font-size:14px;line-height:1.7;text-align:left;margin:0 auto;max-width:400px"><div class="legend"><span class="item-card s3" style="cursor:default"><span class="st-icon">♥</span>'+T('desc1')+'</span></div><div class="legend"><span class="item-card s1" style="cursor:default"><span class="st-icon">✓</span>'+T('desc2')+'</span></div><div class="legend"><span class="item-card s0" style="cursor:default">'+T('desc3')+'</span></div></div><div style="font-size:13px;color:var(--wzys-a);margin-top:14px;font-style:italic">'+T('est')+'</div><div id="readStats" style="font-size:12px;color:var(--bjsdfz);margin-top:6px;font-weight:bold"></div><div style="font-size:11px;color:var(--wzys-a);margin-top:12px;padding:8px 10px;border:1px dashed var(--bjsdfz-a);border-radius:.15em;line-height:1.5">⚠ '+T('disclaimer')+'</div><div class="btn-row"><button class="btn primary" onclick="qStep=1;App.renderWiz()">'+T('start')+'</button>'+(localStorage.getItem('qrpf_profile')?'<button class="btn" onclick="App.loadProgress()">'+T('load')+'</button>':'')+'</div></div></div></div>';
+    }else if(qStep===1){
+      el.innerHTML='<div class="app-wrap"><div class="panel"><div class="red-kuang cp-about"><h1>'+T('aboutTitle')+'</h1><div class="sub">'+T('aboutSub')+'</div><div class="fl">'+T('nameField')+'</div><input id="iName" placeholder="'+T('namePH')+'" value="'+esc(profile.name)+'" maxlength="64"><div class="fl">'+T('bioField')+'<span style="color:var(--wzys-a);font-size:11px"> (max 256)</span></div><textarea id="iBio" placeholder="'+T('bioPH')+'">'+esc(profile.bio)+'</textarea><div class="btn-row"><button class="btn primary" onclick="App.saveInputs();qStep=2;App.renderWiz()">'+T('next')+'</button></div></div></div></div>';
+    }else if(qStep>=2&&qStep<2+totalCats){
+      let ci=qStep-2,cat=C.cats[ci],items=C.itemMap[cat.key],sorted=ordItems(items),st=profile.states[cat.key]||{};App._curCat=cat.key;
+      let sel=0;for(let it of sorted){if(it.deleted)continue;if(st[it.id])sel++}let slbls=T('stateLbl')[cat.key]||T('stateLbl').dflt;
+      let groups={};for(let it of sorted){if(it.deleted)continue;let g=it.group;if(!groups[g])groups[g]=[];groups[g].push(it)}
+      let cards='';
+      if(cat.groups.length){for(let g of cat.groups){let gItems=groups[g];if(!gItems||!gItems.length)continue;cards+='<div class="grp-hdr">'+TG(g)+' <span style="font-weight:normal;font-size:12px;opacity:.85">'+gItems.length+'</span></div>';for(let it of gItems){if(it.deleted)continue;let s=st[it.id]||0,cl=' s'+s,si='';if(s===1)si='✓';else if(s===2)si='−';else if(s===3)si='♥';let nm=itemName(it);if(cat.key==='music'){let mm=MUSIC_META[it.zh];if(mm&&mm.singer)nm+=' <span style="opacity:.8;font-size:11px">· '+esc(mm.singer)+'</span>'}else if(cat.key==='books'){let bm=BOOK_META[it.zh]||BOOK_META[it.en];if(bm&&bm.author)nm+=' <span style="opacity:.8;font-size:11px">· '+esc(bm.author)+'</span>'}cards+='<span class="item-card'+cl+'" data-g="'+it.group+'" data-idx="'+it.id+'" onclick="App.toggleWiz('+ci+','+it.id+',event)"><span class="st-icon">'+si+'</span>'+nm+'</span>'}cards+='<div class="grp-div"></div>'}}
+      else{for(let it of sorted){if(it.deleted)continue;let s=st[it.id]||0,cl=' s'+s,si='';if(s===1)si='✓';else if(s===2)si='−';else if(s===3)si='♥';let nm=itemName(it);if(cat.key==='music'){let mm=MUSIC_META[it.zh];if(mm&&mm.singer)nm+=' <span style="opacity:.8;font-size:11px">· '+esc(mm.singer)+'</span>'}else if(cat.key==='books'){let bm=BOOK_META[it.zh]||BOOK_META[it.en];if(bm&&bm.author)nm+=' <span style="opacity:.8;font-size:11px">· '+esc(bm.author)+'</span>'}cards+='<span class="item-card'+cl+'" data-g="'+it.group+'" data-idx="'+it.id+'" onclick="App.toggleWiz('+ci+','+it.id+',event)"><span class="st-icon">'+si+'</span>'+nm+'</span>'}}
+      let leg='',legIcons=['','✓','−','♥'];for(let i=0;i<4;i++)leg+='<span class="item-card s'+i+'" style="cursor:default"><span class="st-icon">'+legIcons[i]+'</span>'+slbls[i]+'</span>';
+      el.innerHTML='<div class="app-wrap"><div class="panel"><div class="red-kuang cp-wiz"><h1>'+(T('catName')[cat.key]||cat.key)+'</h1><div class="wiz-sub">'+sel+' '+T('rated')+'</div><div style="display:flex;gap:4px;justify-content:flex-end;padding:0 24px 8px;flex-shrink:0"><button class="btn sm" onclick="qStep--;App.renderWiz()">'+T('back')+'</button><button class="btn sm primary" onclick="qStep++;App.renderWiz()">'+T('next')+'</button></div><div class="wiz-top"><div class="search-row"><input placeholder="'+T('search')+'" oninput="App.filterItems(this.value)" id="searchInp"></div><div class="legend">'+leg+'</div></div><div class="wiz-body"><div class="item-grid" id="itemGrid">'+cards+'</div></div><div class="wiz-foot"><span style="font-size:13px;color:var(--wzys-a)">'+T('step')+' '+(qStep-1)+'/'+(totalCats+1)+'</span><span style="font-size:13px;color:var(--wzys-a)">'+sel+'/'+items.length+' '+T('rated')+'</span><span style="display:flex;gap:4px"><button class="btn sm" onclick="qStep--;App.renderWiz()">'+T('back')+'</button><button class="btn sm primary" onclick="qStep++;App.renderWiz()">'+T('next')+'</button></span></div></div></div></div>';
+    }else if(qStep===2+totalCats){
+      el.innerHTML='<div class="app-wrap"><div class="panel"><div class="red-kuang cp-msg"><h1>'+T('msgTitle')+'</h1><div class="sub">'+T('msgSub')+'</div><textarea id="iMsg" placeholder="'+T('msgPH')+'" maxlength="256">'+esc(profile.message)+'</textarea><div class="btn-row"><button class="btn sm" onclick="App.saveInputs();qStep--;App.renderWiz()">'+T('back')+'</button><button class="btn primary" onclick="App.finish()">'+T('genQR')+'</button></div></div></div></div>';
+    }
+    this._encourage(qStep);
+    this._fillReadStats();
+  },
+
+  _itemHit(it,q){if(!it)return false;if(itemName(it).toLowerCase().includes(q))return true;if(TG(it.group).toLowerCase().includes(q))return true;let metaMap={movies:MOVIE_META,anime:ANIME_META,games:GAME_META,tv:TV_META}[this._curCat||this._viewCat];if(metaMap){let m=metaMap[it.zh]||metaMap[it.en];if(m){for(let k in m){if(m[k]&&String(m[k]).toLowerCase().includes(q))return true}}}return false},
+
+  filterItems(q){let g=document.getElementById('itemGrid');if(!g)return;q=(q||'').toLowerCase();let items=C.itemMap[App._curCat]||[];g.querySelectorAll('.item-card').forEach(c=>{if(q===''){c.style.display='';return}let it=items[+c.getAttribute('data-idx')];c.style.display=(c.textContent.toLowerCase().includes(q)||this._itemHit(it,q))?'':'none'})},
+
+  toggleWiz(ci,idx,evt){let cat=C.cats[ci],k=cat.key;if(!profile.states[k])profile.states[k]={};let shift=!!(evt&&evt.shiftKey),ctrl=!!(evt&&(evt.ctrlKey||evt.metaKey));let targets=[idx],bulk=false;if(shift&&App._lastCat===k&&App._lastIdx!=null&&App._lastIdx!==idx){let sorted=ordItems(C.itemMap[k]).filter(function(it){return !it.deleted});let pa=sorted.findIndex(function(it){return it.id===App._lastIdx}),pb=sorted.findIndex(function(it){return it.id===idx});if(pa>=0&&pb>=0){bulk=true;targets=[];let a=Math.min(pa,pb),b=Math.max(pa,pb);for(let i=a;i<=b;i++)targets.push(sorted[i].id)}}let cur=profile.states[k][idx]||0;let next;if(bulk){next=cur===0?1:0}else if(ctrl){next=cur===0?1:0}else{next=cur===0?1:cur===1?3:cur===3?2:0}for(let t of targets){profile.states[k][t]=next;let it=C.itemMap[k][t];if(it){let refs=(C.nameIdx[it.zh]||[]).concat(it.en&&it.en!==it.zh?(C.enIdx[it.en]||[]):[]);let seen=new Set();for(let r of refs){let k2=r.cat+':'+r.idx;if(seen.has(k2))continue;seen.add(k2);if(r.cat===k&&r.idx===t)continue;if(!profile.states[r.cat])profile.states[r.cat]={};profile.states[r.cat][r.idx]=next}}let card=document.querySelector('.item-card[data-idx="'+t+'"]');if(card){card.className='item-card'+(next?' s'+next:'');let si2='';if(next===1)si2='✓';else if(next===2)si2='−';else if(next===3)si2='♥';let icon=card.querySelector('.st-icon');if(icon)icon.textContent=si2}}if(!shift&&!ctrl)App._lastCat=k,App._lastIdx=idx;let items=C.itemMap[k],sel=0;for(let it of items){if(it.deleted)continue;if(profile.states[k][it.id])sel++}let subs=document.querySelectorAll('.wiz-sub');if(subs.length)subs[0].textContent=sel+' '+T('rated');let footSpans=document.querySelectorAll('.wiz-foot span');if(footSpans.length>=2)footSpans[1].textContent=sel+'/'+items.length+' '+T('rated');if(bulk){toast(lang==='zh'?(next===1?'已批量选中 '+targets.length+' 项':'已取消选择 '+targets.length+' 项'):(next===1?'Selected '+targets.length+' items':'Deselected '+targets.length+' items'));return}if(ctrl){toast(lang==='zh'?(next===1?'已选择「'+itemName(C.itemMap[k][idx])+'」':'已取消「'+itemName(C.itemMap[k][idx])+'」'):(next===1?'Selected': 'Deselected'));return}if(next>0&&cur===0){let nm=T('catName')[k]||k,lt=items.length-sel;if(sel===1)toast(lang==='zh'?nm+'：已选1项，共'+items.length+'项~':nm+': 1/'+items.length+' picked!');else if(sel===5)toast(lang==='zh'?nm+'：已选5项，还剩'+lt+'项~':nm+': 5/'+items.length+', '+lt+' left!');else if(sel===10)toast(lang==='zh'?nm+'：已选10项！还有'+lt+'项，继续~':nm+': 10/'+items.length+', keep going!');else if(sel===20)toast(lang==='zh'?nm+'：已评'+sel+'/'+items.length+'项，真棒！':nm+': '+sel+'/'+items.length+' — awesome!');else if(sel%25===0)toast(lang==='zh'?nm+'：已评'+sel+'/'+items.length+'项，加油！':nm+': '+sel+'/'+items.length+' rated!');if(sel===items.length)toast(lang==='zh'?nm+'：全部评完了！太厉害了~':nm+': All done! You\'re amazing~')}},
+
+  saveInputs(){let n=document.getElementById('iName');if(n)profile.name=n.value.slice(0,64);let b=document.getElementById('iBio');if(b)profile.bio=b.value.slice(0,256);let m=document.getElementById('iMsg');if(m)profile.message=m.value.slice(0,256);},
+
+  finish(){try{console.log('[FINISH] start');this.saveInputs();let raw=encodeProfile(profile);console.log('[FINISH] encoded',raw.length,'bytes');let compressed=compressPayload(raw);let useCmpr=(compressed[6]&1)!==0;console.log('[FINISH] payload',compressed.length,'bytes, compressed:',useCmpr);let fp=compressed,dataForQR=fp,total=fp.length;if(total>2953){document.getElementById('app').innerHTML='<div class="app-wrap"><div class="panel"><div class="red-kuang cp-sm" style="min-height:220px"><h1 style="color:#c0392b">'+T('tooBig')+'</h1><div class="sub">'+total+' / 2953 bytes ('+(total/2953*100).toFixed(1)+'%)</div><div class="btn-row"><button class="btn" onclick="qStep--;App.renderWiz()">'+T('goBack')+'</button></div></div></div></div>';return}qrCanvas=generateQRCanvas(dataForQR);finPayload=fp;let testBytes=fromB85(encodeURIComponent(toB85(dataForQR)));let testProfile=decodeProfile(testBytes,console.log.bind(console,'[SELF-TEST]'));console.log('[SELF-TEST] roundtrip:',testProfile?'OK':'FAIL');if(!testProfile){document.getElementById('app').innerHTML='<div class="app-wrap"><div class="panel"><div class="red-kuang cp-sm"><h1 style="color:#c0392b">SELF-TEST FAILED</h1><div class="sub">Check console (F12)</div></div></div></div>';return}let pct=(total/2953*100).toFixed(1);let left='';for(let cat of C.cats){let st=profile.states[cat.key]||{},items=ordItems(C.itemMap[cat.key]),liked=[],tried=[];for(let it of items){if(it.deleted)continue;let s=st[it.id]||0;if(s===3)liked.push(itemName(it));else if(s===1)tried.push(itemName(it))}if(!liked.length&&!tried.length)continue;left+='<div class="fin-sec"><h3>'+(T('catName')[cat.key]||cat.key)+'</h3><div class="tg">'+liked.map(t=>'<span class="tag lv">'+t+'</span>').join('')+tried.map(t=>'<span class="tag">'+t+'</span>').join('')+'</div></div>'}document.getElementById('app').innerHTML='<div class="app-wrap"><div class="panel"><div class="red-kuang cp-finish"><div class="fin-split"><div class="fin-left"><h1>'+esc(profile.name||'Anonymous')+'</h1><div class="bio">'+esc(profile.bio||'')+'</div>'+(profile.message?'<div class="msg">"'+esc(profile.message)+'"</div>':'')+'<div style="overflow-y:auto;max-height:460px">'+(left||'<div style="color:var(--wzys-a);padding-top:10px;font-size:13px">'+T('noSel')+'</div>')+'</div></div><div class="fin-right"><div class="qr-box" id="qrBox"></div><div class="cap-info">'+T('capPrefix')+total+' / 2953 ('+pct+'%)'+(useCmpr?T('capCmpr'):'')+'</div><div class="cap-bar"><div class="cap-fill" style="width:'+pct+'%"></div></div><input class="dl-btn" type="button" value="'+T('dlQR')+'" onclick="App.dlQR()"><input class="dl-btn" type="button" value="'+T('dlPoster')+'" onclick="App.dlPoster()"><input class="dl-btn" type="button" value="'+T('edit')+'" onclick="qStep=1;App.renderWiz()"></div></div></div></div></div>';document.getElementById('qrBox').appendChild(qrCanvas)}catch(e){console.error('[FINISH] error:',e);document.getElementById('app').innerHTML='<div class="app-wrap"><div class="panel"><div class="red-kuang cp-sm"><h1 style="color:#c0392b">Error</h1><div class="sub">'+e.message+'</div></div></div></div>'}},
+
+  dlQR(){let a=document.createElement('a');a.download='qrcode_profile.png';a.href=qrCanvas.toDataURL('image/png');a.click()},
+  dlPoster(){let W=2400,H=3600,cv=document.createElement('canvas');cv.width=W;cv.height=H,ctx=cv.getContext('2d');let g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'#f0f0f0');g.addColorStop(1,'#fff');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.fillStyle='#7c0a21';ctx.fillRect(0,0,W,15);ctx.fillStyle='#7c0a21';ctx.font='bold 170px "Times New Roman",宋体,serif';ctx.textAlign='center';ctx.fillText(profile.name||'Anonymous',W/2,280);let cy=400;if(profile.bio){ctx.fillStyle='rgba(128,128,128,.85)';ctx.font='italic 80px "Times New Roman",宋体,serif';ctx.fillText(profile.bio,W/2,cy);cy+=115}if(profile.message){ctx.fillStyle='#7c0a21';ctx.font='italic 64px "Times New Roman",宋体,serif';ctx.fillText('"'+profile.message+'"',W/2,cy);cy+=115}cy+=55;ctx.textAlign='left';let contentMax=H-1150;for(let cat of C.cats){let st=profile.states[cat.key]||{},items=ordItems(C.itemMap[cat.key]),liked=[];for(let it of items){if(it.deleted)continue;if((st[it.id]||0)===3)liked.push(itemName(it))}if(!liked.length)continue;if(cy>contentMax)break;ctx.fillStyle='#7c0a21';ctx.font='bold 64px "Times New Roman",宋体,serif';ctx.fillText((T('catName')[cat.key]||cat.key),120,cy);cy+=88;ctx.fillStyle='#000';ctx.font='54px "Times New Roman",宋体,serif';let line='',lw=120;for(let i=0;i<liked.length;i++){let t=liked[i]+(i<liked.length-1?'  ':''),m=ctx.measureText(t);if(lw+m.width>W-120){ctx.fillText(line.trim(),120,cy);cy+=64;line=liked[i]+'  ';lw=120+ctx.measureText(liked[i]+'  ').width}else{line+=t;lw+=m.width}}if(line)ctx.fillText(line.trim(),120,cy);cy+=95}let qs=820,qx=(W-qs)/2,qy=H-qs-150;ctx.fillStyle='#fff';ctx.fillRect(qx-50,qy-50,qs+100,qs+100);ctx.imageSmoothingEnabled=false;ctx.drawImage(qrCanvas,qx,qy,qs,qs);ctx.fillStyle='rgba(128,128,128,.75)';ctx.font='52px "Times New Roman",宋体,serif';ctx.textAlign='center';ctx.fillText('Scan to view full profile',W/2,qy-124);ctx.fillText('QR Personal Profile',W/2,H-24);ctx.fillStyle='#7c0a21';ctx.fillRect(0,H-15,W,15);let a=document.createElement('a');a.download='profile_poster.png';a.href=cv.toDataURL('image/png');a.click()},
+
+  showScan(){document.getElementById('app').innerHTML='<div class="app-wrap"><div class="panel"><div class="red-kuang cp-scan"><h1 style="font-size:22px;color:var(--bjsdfz);margin-bottom:6px">'+T('scanTitle')+'</h1><div class="sub" style="font-size:13px;color:var(--wzys-a);margin-bottom:14px">'+T('scanSub')+'</div><div class="scan-drop" id="scanZone" onclick="document.getElementById(\'fi\').click()"><span style="font-size:36px;opacity:.3">+</span><span style="font-size:13px;color:var(--wzys-a)">'+T('scanClick')+'</span></div><input type="file" id="fi" accept="image/*" onchange="App.handleFile(event)" style="display:none"><div id="scanRes" style="text-align:center;margin-top:10px;font-size:13px;min-height:18px"></div><div class="btn-row"><button class="btn sm" onclick="App.handlePaste()">'+T('scanPaste')+'</button></div></div></div></div>';let z=document.getElementById('scanZone');z.addEventListener('dragover',e=>e.preventDefault());z.addEventListener('drop',e=>{e.preventDefault();let f=e.dataTransfer.files[0];if(f)App.processFile(f)});},
+
+  handleFile(e){let f=e.target.files[0];if(f)this.processFile(f)},
+  handlePaste(){navigator.clipboard.read().then(items=>{for(let it of items)if(it.types.some(t=>t.startsWith('image/'))){it.getType('image/png').then(b=>App.processFile(new File([b],'c.png')));return}document.getElementById('scanRes').textContent=T('scanNoImg')}).catch(()=>document.getElementById('scanRes').textContent=T('scanDenied'))},
+
+  processFile(file){let r=new FileReader();r.onload=async ev=>{let img=new Image();img.onload=async()=>{let cv=document.createElement('canvas');cv.width=img.width;cv.height=img.height,ctx=cv.getContext('2d');ctx.drawImage(img,0,0);let id=ctx.getImageData(0,0,cv.width,cv.height);if(typeof jsQR!=='undefined'){let code=jsQR(id.data,cv.width,cv.height);if(code){let data=code.data;if(typeof data==='string'&&data.startsWith(QR_URL)){let u=new URL(data);let d=u.searchParams.get('d');if(d){try{let bytes=fromB85(d);App.decodeAndView(bytes);return}catch(e){}}}let rawData=code.binaryData||new TextEncoder().encode(data);let p=decodeProfile(rawData);if(p){document.getElementById('scanRes').textContent=T('scanOK');App.renderView(p)}else document.getElementById('scanRes').textContent=T('scanBadQR')}else document.getElementById('scanRes').textContent=T('scanNoQR')}else document.getElementById('scanRes').textContent='QR scanner not loaded.'};img.src=ev.target.result};r.readAsDataURL(file)},
+
+  renderView(p){this._viewProfile=p;this._viewCat=null;let tabs='';for(let cat of C.cats){let st=p.states[cat.key]||{},count=Object.keys(st).length;tabs+='<span class="cat-tab" onclick="App.switchViewCat(\''+cat.key+'\')" id="vtab_'+cat.key+'">'+(T('catName')[cat.key]||cat.key)+'<span style="font-size:10px;opacity:.5">'+(count?' '+count:'')+'</span></span>'}document.getElementById('app').innerHTML='<div class="app-wrap"><div class="panel"><div class="red-kuang cp-view" style="overflow:hidden;display:flex;flex-direction:column;max-width:1000px"><div class="vw-head"><h1>'+esc(p.name||'Anonymous')+'</h1><div class="bio">'+esc(p.bio||'')+'</div>'+(p.message?'<div class="msg">"'+esc(p.message)+'"</div>':'')+'</div><div class="btn-row" style="margin-top:4px;padding:0 12px 4px;justify-content:flex-start"><button class="btn sm primary" onclick="App.importViewed()">'+T('importView')+'</button></div><div style="padding:4px 12px;flex-shrink:0;display:flex;gap:3px;flex-wrap:wrap;border-bottom:1px solid var(--bjsdfz-a)">'+tabs+'</div><div id="viewBody" style="flex:1;overflow-y:auto;padding:4px 12px 12px"></div></div></div></div>';for(let cat of C.cats){let st=p.states[cat.key]||{};if(Object.keys(st).length>0){this.switchViewCat(cat.key);return}}this.switchViewCat(C.cats[0].key)},
+
+  switchViewCat(key){this._viewCat=key;let p=this._viewProfile,cat=C.catByKey[key],items=C.itemMap[key],st=p.states[key]||{};let slbls=T('stateLbl')[key]||T('stateLbl').dflt;document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));let tab=document.getElementById('vtab_'+key);if(tab)tab.classList.add('active');let groups={};for(let it of items){let g=it.group;if(!groups[g])groups[g]=[];groups[g].push(it)}let cards='';if(cat.groups.length){for(let g of cat.groups){let gItems=groups[g];if(!gItems||!gItems.length)continue;cards+='<div class="grp-hdr">'+TG(g)+' <span style="font-weight:normal;font-size:12px;opacity:.85">'+gItems.length+'</span></div>';for(let it of gItems){if(it.deleted)continue;let s=st[it.id]||0,cl=' s'+s,si='';if(s===1)si='✓';else if(s===2)si='−';else if(s===3)si='♥';cards+='<span class="item-card view-only'+cl+'" data-g="'+it.group+'" data-idx="'+it.id+'" style="cursor:default"><span class="st-icon">'+si+'</span>'+itemName(it)+'</span>'}cards+='<div class="grp-div"></div>'}}else{for(let it of items){if(it.deleted)continue;let s=st[it.id]||0,cl=' s'+s,si='';if(s===1)si='✓';else if(s===2)si='−';else if(s===3)si='♥';cards+='<span class="item-card view-only'+cl+'" data-g="'+it.group+'" data-idx="'+it.id+'" style="cursor:default"><span class="st-icon">'+si+'</span>'+itemName(it)+'</span>'}}let leg='',legIcons=['','✓','−','♥'];for(let i=0;i<4;i++)leg+='<span class="item-card s'+i+'" style="cursor:default"><span class="st-icon">'+legIcons[i]+'</span>'+slbls[i]+'</span>';let sel=0;for(let it of items){if(it.deleted)continue;if(st[it.id])sel++}let body=document.getElementById('viewBody');body.innerHTML='<h1 style="font-size:18px;color:var(--bjsdfz);padding:8px 0 2px;font-weight:normal">'+(T('catName')[key]||key)+'</h1><div style="font-size:12px;color:var(--wzys-a);padding:0 0 8px;font-style:italic">'+sel+'/'+items.length+' '+T('rated')+'</div><div class="search-row"><input placeholder="'+T('search')+'" oninput="App.filterViewItems(this.value)" style="font-size:14px;height:30px"></div><div class="legend">'+leg+'</div><div class="item-grid" id="viewGrid" style="padding-top:4px">'+cards+'</div>'},
+
+  filterViewItems(q){let g=document.getElementById('viewGrid');if(!g)return;q=(q||'').toLowerCase();let items=C.itemMap[this._viewCat]||[];g.querySelectorAll('.item-card').forEach(c=>{if(q===''){c.style.display='';return}let it=items[+c.getAttribute('data-idx')];c.style.display=(c.textContent.toLowerCase().includes(q)||this._itemHit(it,q))?'':'none'})}
+};
+
+// Movie popup
+let _longPressTimer=null;
+document.addEventListener('contextmenu',function(e){let card=e.target.closest('.item-card');if(!card)return;let name=card.textContent.replace(/[♥−✓]/g,'').replace(/\s*·.*$/,'').trim();let idx=card.getAttribute('data-idx');if(idx!=null){let ck=App._curCat||App._viewCat;if(ck&&C.itemMap[ck]&&C.itemMap[ck][+idx])name=itemName(C.itemMap[ck][+idx])}let meta=MOVIE_META[name]||GAME_META[name]||ANIME_META[name]||TV_META[name]||MUSIC_META[name]||BOOK_META[name]||TECH_META[name];e.preventDefault();let popup=document.getElementById('moviePopup');let rows='';if(meta){rows+=(meta.title_en&&meta.title_en!==name?'<div class="mp-row"><span>English:</span> '+esc(meta.title_en)+'</div>':'');rows+=(meta.year?'<div class="mp-row"><span>Year:</span> '+meta.year+'</div>':'');rows+=(meta.runtime?'<div class="mp-row"><span>Runtime:</span> '+meta.runtime+'</div>':'');rows+=(meta.director?'<div class="mp-row"><span>Director:</span> '+esc(meta.director)+'</div>':'');rows+=(meta.actors?'<div class="mp-row"><span>Actors:</span> '+esc(meta.actors)+'</div>':'');rows+=(meta.country?'<div class="mp-row"><span>Country:</span> '+esc(meta.country)+'</div>':'');rows+=(meta.genre?'<div class="mp-row"><span>Genre:</span> '+esc(meta.genre)+'</div>':'');rows+=(meta.publisher?'<div class="mp-row"><span>Publisher:</span> '+esc(meta.publisher)+'</div>':'');rows+=(meta.platform?'<div class="mp-row"><span>Platform:</span> '+esc(meta.platform)+'</div>':'');rows+=(meta.release_date?'<div class="mp-row"><span>Release:</span> '+meta.release_date+'</div>':'');rows+=(meta.up?'<div class="mp-row"><span>UP主:</span> '+esc(meta.up)+'</div>':'');rows+=(meta.bv?'<div class="mp-row"><span>BV:</span> <a href="https://www.bilibili.com/video/'+esc(meta.bv.split('（')[0].trim())+'" target="_blank" style="color:var(--bjsdfz)">'+esc(meta.bv)+'</a></div>':'');rows+=(meta.composer?'<div class="mp-row"><span>Composer:</span> '+esc(meta.composer)+'</div>':'');rows+=(meta.lyricist?'<div class="mp-row"><span>Lyricist:</span> '+esc(meta.lyricist)+'</div>':'');rows+=(meta.singer?'<div class="mp-row"><span>Singer:</span> '+esc(meta.singer)+'</div>':'');rows+=(meta.author?'<div class="mp-row"><span>Author:</span> '+esc(meta.author)+'</div>':'');rows+=(meta.genre?'<div class="mp-row"><span>Genre:</span> '+esc(meta.genre)+'</div>':'');rows+=(meta.score?'<div class="mp-row"><span>IMDB:</span> '+meta.score+'/10</div>':'');rows+=(meta.desc?'<div class="mp-row" style="font-style:italic">'+esc(meta.desc)+'</div>':'');rows+=(meta.votes?'<div class="mp-row"><span>Votes:</span> '+meta.votes+'</div>':'');rows+=(meta.quote?'<div class="mp-row" style="font-style:italic;color:var(--bjsdfz)">"'+esc(meta.quote)+'"</div>':'')}if(!rows)rows='<div class="mp-row" style="color:var(--wzys-a)">No extra info</div>';popup.innerHTML='<div class="mp-title">'+esc(name)+'</div>'+rows;popup.style.left=Math.min(e.clientX,window.innerWidth-310)+'px';popup.style.top=Math.min(e.clientY,window.innerHeight-220)+'px';popup.classList.add('show')});
+document.addEventListener('touchstart',function(e){let card=e.target.closest('.item-card');if(!card)return;_longPressTimer=setTimeout(()=>{let ev=new MouseEvent('contextmenu',{clientX:e.touches[0].clientX,clientY:e.touches[0].clientY});card.dispatchEvent(ev)},600)},{passive:true});
+document.addEventListener('touchend',()=>clearTimeout(_longPressTimer));
+document.addEventListener('touchmove',()=>clearTimeout(_longPressTimer));
+document.addEventListener('click',function(e){if(!e.target.closest('.movie-popup'))document.getElementById('moviePopup').classList.remove('show')});
+document.addEventListener('scroll',()=>document.getElementById('moviePopup').classList.remove('show'));
+
+App.init();
+if(typeof jsQR==='undefined'){let s=document.createElement('script');s.src='jsQR.min.js';document.head.appendChild(s)}
+
+</script>
+</body>
+</html>
