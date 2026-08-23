@@ -1,0 +1,355 @@
+<html>
+
+<head>
+    <link rel="shortcut icon" href="https://ssssssss.eu.org/az-128.ico" type="image/x-icon" />
+    <meta charset="utf-8">
+    <title>啊这软件园</title>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: 0.2s;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Times New Roman', 宋体, serif, 'Liberation Mono';
+            overflow: hidden;
+            cursor: default;
+            user-select: none;
+            color: var(--wzys);
+        }
+
+        .vfr {
+            position: absolute;
+        }
+
+        .az {
+            color: var(--bjsdfz);
+        }
+
+        .red-kuang {
+            transform: translateZ(0);
+            position: absolute;
+            border: 0;
+            border-radius: .15em;
+            background-color: var(--hanbj);
+            box-shadow: 0 1px 9px var(--bjsdfz-a);
+            overflow: auto;
+        }
+
+        .red-kuang::before {
+            content: "";
+            background: inherit;
+            background-size: cover;
+            filter: blur(8px);
+            backdrop-filter: url(#glass) blur(1px);
+            z-index: -1;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .bj {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--ymbj);
+            overflow: hidden;
+        }
+
+        .title-bar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 90px;
+            z-index: 5;
+            background-color: rgba(255, 255, 255, .35);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            box-shadow: 0 1px 9px var(--bjsdfz-a);
+            border-radius: 0;
+            overflow: hidden;
+            border-bottom: 1px solid var(--bjsdfz-a);
+            transition: 0.2s, backdrop-filter 0s, -webkit-backdrop-filter 0s;
+        }
+
+        .title-bar .title-txt {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            margin: auto;
+            width: 100%;
+            height: 90px;
+            line-height: 90px;
+            text-align: center;
+            font-size: 28px;
+            color: var(--bjsdfz);
+            letter-spacing: 2px;
+            text-shadow: 0 0 12px var(--bjsdfz-a);
+        }
+
+        .cardarea {
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 4;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, var(--card-w));
+            gap: var(--card-gap);
+            justify-content: center;
+            align-content: start;
+            padding: 100px var(--card-pad) var(--card-pad);
+        }
+
+        .cardarea .card {
+            transform: translateZ(0);
+            position: relative;
+            width: var(--card-w);
+            height: var(--card-h);
+            border-radius: .15em;
+            border: 1px solid var(--bjsdfz-a);
+            background-color: var(--hanbj);
+            box-shadow: 0 1px 9px var(--bjsdfz-a);
+            backdrop-filter: blur(15px);
+            overflow: hidden;
+        }
+
+        .cardarea .card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: inherit;
+            background-size: cover;
+            filter: blur(8px);
+            backdrop-filter: url(#glass) blur(1px);
+            z-index: -1;
+        }
+
+        .cardarea .card:hover {
+            box-shadow: 0 2px 14px var(--bjsdfz-a);
+        }
+
+        .card .t {
+            position: absolute;
+            top: 18px;
+            left: 20px;
+            right: 130px;
+            font-size: 26px;
+            color: var(--bjsdfz);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card .s {
+            position: absolute;
+            top: 56px;
+            left: 20px;
+            right: 130px;
+            font-size: 16px;
+            color: var(--wzys-a);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card .d {
+            position: absolute;
+            top: 88px;
+            left: 20px;
+            right: 130px;
+            height: 88px;
+            font-size: 16px;
+            line-height: 24px;
+            color: var(--wzys);
+            overflow: auto;
+        }
+
+        .card .btn {
+            position: absolute;
+            width: 92px;
+            height: 36px;
+            border-radius: .15em;
+            border: 2px solid var(--bjsdfz);
+            background: transparent;
+            text-align: center;
+            line-height: 36px;
+            color: var(--bjsdfz);
+            cursor: default;
+            font-size: 16px;
+            font-family: inherit;
+            font-style: normal;
+            text-indent: 0;
+        }
+
+        .card .btn:hover {
+            background: var(--bjsdfz);
+            color: #fff;
+            box-shadow: 0 1px 5px var(--bjsdfz);
+            transition: .3s;
+        }
+
+        .card .btn:active {
+            transform: scale(.92);
+            transition: .1s;
+        }
+
+        .card .btn.o {
+            right: 20px;
+            top: 22px;
+        }
+
+        .card .btn.g {
+            right: 20px;
+            top: 72px;
+        }
+
+        .card .ai {
+            position: absolute;
+            left: 20px;
+            bottom: 38px;
+            display: none;
+            font-size: 14px;
+            color: var(--bjsdfz);
+            border: 1px solid var(--bjsdfz-a);
+            border-radius: .15em;
+            padding: 1px 8px;
+            line-height: 22px;
+        }
+
+        .card .ai.on {
+            display: block;
+        }
+
+        .card .time {
+            position: absolute;
+            left: 20px;
+            bottom: 14px;
+            font-size: 12px;
+            color: var(--wzys-a);
+        }
+
+        .ldd {
+            position: fixed;
+            top: 96px;
+            left: 0;
+            right: 0;
+            margin: auto;
+            width: 150px;
+            height: 2px;
+            z-index: 114;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, .5);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            transition: .4s;
+            opacity: 0;
+        }
+
+        .ldd::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, var(--bjsdfz), transparent);
+            backdrop-filter: blur(1px);
+            filter: blur(1px);
+        }
+
+        *::-webkit-scrollbar {
+            width: 14px;
+            height: 14px;
+            border-radius: .15em;
+        }
+
+        *::-webkit-scrollbar-track {
+            transition: cubic-bezier(0.5, 0, 0.5, 1) .25s;
+            background-color: rgba(255, 255, 255, 0);
+            border-radius: 5px;
+        }
+
+        *::-webkit-scrollbar-thumb {
+            transition: cubic-bezier(0.5, 0, 0.5, 1) .25s;
+            display: block;
+            background: rgba(0, 0, 0, .5);
+            background-clip: padding-box;
+            border: 5px solid transparent;
+            border-radius: .15em;
+            background-color: var(--bjsdfz-a);
+        }
+
+        *::-webkit-scrollbar-thumb:hover {
+            transition: cubic-bezier(0.5, 0, 0.5, 1) .25s;
+            display: block;
+            border: 4px solid transparent;
+            background-color: var(--bjsdfz-a);
+        }
+
+        *::-webkit-scrollbar-button {
+            background-color: #eee;
+            display: none;
+        }
+
+        *::-webkit-scrollbar-corner {
+            background-color: rgba(0, 0, 0, 0);
+        }
+    </style>
+    <style id="szys">
+        :root {
+            --bjsdfz: #7c0a21;
+            --bjsdfz-a: #7c0a2164;
+            --wzys: black;
+            --wzys-a: rgba(128, 128, 128, .7);
+            --hanbj: rgba(255, 255, 255, .6);
+            --ymbj: #ffffff;
+            --card-w: 400px;
+            --card-h: 200px;
+            --card-gap: 16px;
+            --card-pad: 8px;
+        }
+    </style>
+    <script type="text/javascript" src="app.js"></script>
+</head>
+
+<body onselectstart="return false" onbeforecopy="return false">
+    <div class="bj">
+    </div>
+
+    <div class="title-bar">
+        <div class="title-txt">啊这软件园</div>
+    </div>
+    <div class="ldd" id="ldd"></div>
+
+    <div class="cardarea" id="cardarea"></div>
+
+    <svg style="display:none">
+        <defs>
+            <filter id="glass" x="0%" y="0%" width="100%" height="100%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="2" seed="114514" result="noise" />
+                <feGaussianBlur in="noise" stdDeviation="2" result="blurred" />
+                <feDisplacementMap in="SourceGraphic" in2="blurred" scale="20" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+        </defs>
+    </svg>
+
+</body>
+
+</html>
