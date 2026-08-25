@@ -8,6 +8,7 @@ var content = [
     { type: "工具", t: "红楼梦人物关系查询", s: "", d: "", o: "https://bjsdfz.ssssssss.eu.org/hongloumeng/", g: "#", ai: 0, firstDev: "2024-09-01", lastUpdate: "" },
     { type: "工具", t: "啊这起始页", s: "", d: "", o: "https://qsy.ssssssss.eu.org/", g: "#", ai: 0, firstDev: "2022-02", lastUpdate: "" },
     { type: "", t: "AZOS", s: "", d: "", o: "https://bjsdfz.ssssssss.eu.org/azos", g: "#", ai: 0, firstDev: "2021-10", lastUpdate: "" },
+    { type: "工具", t: "像素移动", s: "由一张图片的像素生成另一张", d: "", o: "https://ssssssss.eu.org/pixelmove/", g: "#", ai: 0, firstDev: "2026-05-16", lastUpdate: "2026-08-04" },
 ];
 
 function openjc(x) {
