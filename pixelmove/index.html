@@ -1,0 +1,2110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>像素排序变换 · 颜色合并中介统一 | Pixel Sort Morph</title>
+<script src="gif.js"></script>
+<script type="text/plain" id="gifWorkerSrc">// gif.worker.js 0.2.0 - https://github.com/jnordberg/gif.js
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){var NeuQuant=require("./TypedNeuQuant.js");var LZWEncoder=require("./LZWEncoder.js");function ByteArray(){this.page=-1;this.pages=[];this.newPage()}ByteArray.pageSize=4096;ByteArray.charMap={};for(var i=0;i<256;i++)ByteArray.charMap[i]=String.fromCharCode(i);ByteArray.prototype.newPage=function(){this.pages[++this.page]=new Uint8Array(ByteArray.pageSize);this.cursor=0};ByteArray.prototype.getData=function(){var rv="";for(var p=0;p<this.pages.length;p++){for(var i=0;i<ByteArray.pageSize;i++){rv+=ByteArray.charMap[this.pages[p][i]]}}return rv};ByteArray.prototype.writeByte=function(val){if(this.cursor>=ByteArray.pageSize)this.newPage();this.pages[this.page][this.cursor++]=val};ByteArray.prototype.writeUTFBytes=function(string){for(var l=string.length,i=0;i<l;i++)this.writeByte(string.charCodeAt(i))};ByteArray.prototype.writeBytes=function(array,offset,length){for(var l=length||array.length,i=offset||0;i<l;i++)this.writeByte(array[i])};function GIFEncoder(width,height){this.width=~~width;this.height=~~height;this.transparent=null;this.transIndex=0;this.repeat=-1;this.delay=0;this.image=null;this.pixels=null;this.indexedPixels=null;this.colorDepth=null;this.colorTab=null;this.neuQuant=null;this.usedEntry=new Array;this.palSize=7;this.dispose=-1;this.firstFrame=true;this.sample=10;this.dither=false;this.globalPalette=false;this.out=new ByteArray}GIFEncoder.prototype.setDelay=function(milliseconds){this.delay=Math.round(milliseconds/10)};GIFEncoder.prototype.setFrameRate=function(fps){this.delay=Math.round(100/fps)};GIFEncoder.prototype.setDispose=function(disposalCode){if(disposalCode>=0)this.dispose=disposalCode};GIFEncoder.prototype.setRepeat=function(repeat){this.repeat=repeat};GIFEncoder.prototype.setTransparent=function(color){this.transparent=color};GIFEncoder.prototype.addFrame=function(imageData){this.image=imageData;this.colorTab=this.globalPalette&&this.globalPalette.slice?this.globalPalette:null;this.getImagePixels();this.analyzePixels();if(this.globalPalette===true)this.globalPalette=this.colorTab;if(this.firstFrame){this.writeLSD();this.writePalette();if(this.repeat>=0){this.writeNetscapeExt()}}this.writeGraphicCtrlExt();this.writeImageDesc();if(!this.firstFrame&&!this.globalPalette)this.writePalette();this.writePixels();this.firstFrame=false};GIFEncoder.prototype.finish=function(){this.out.writeByte(59)};GIFEncoder.prototype.setQuality=function(quality){if(quality<1)quality=1;this.sample=quality};GIFEncoder.prototype.setDither=function(dither){if(dither===true)dither="FloydSteinberg";this.dither=dither};GIFEncoder.prototype.setGlobalPalette=function(palette){this.globalPalette=palette};GIFEncoder.prototype.getGlobalPalette=function(){return this.globalPalette&&this.globalPalette.slice&&this.globalPalette.slice(0)||this.globalPalette};GIFEncoder.prototype.writeHeader=function(){this.out.writeUTFBytes("GIF89a")};GIFEncoder.prototype.analyzePixels=function(){if(!this.colorTab){this.neuQuant=new NeuQuant(this.pixels,this.sample);this.neuQuant.buildColormap();this.colorTab=this.neuQuant.getColormap()}if(this.dither){this.ditherPixels(this.dither.replace("-serpentine",""),this.dither.match(/-serpentine/)!==null)}else{this.indexPixels()}this.pixels=null;this.colorDepth=8;this.palSize=7;if(this.transparent!==null){this.transIndex=this.findClosest(this.transparent,true)}};GIFEncoder.prototype.indexPixels=function(imgq){var nPix=this.pixels.length/3;this.indexedPixels=new Uint8Array(nPix);var k=0;for(var j=0;j<nPix;j++){var index=this.findClosestRGB(this.pixels[k++]&255,this.pixels[k++]&255,this.pixels[k++]&255);this.usedEntry[index]=true;this.indexedPixels[j]=index}};GIFEncoder.prototype.ditherPixels=function(kernel,serpentine){var kernels={FalseFloydSteinberg:[[3/8,1,0],[3/8,0,1],[2/8,1,1]],FloydSteinberg:[[7/16,1,0],[3/16,-1,1],[5/16,0,1],[1/16,1,1]],Stucki:[[8/42,1,0],[4/42,2,0],[2/42,-2,1],[4/42,-1,1],[8/42,0,1],[4/42,1,1],[2/42,2,1],[1/42,-2,2],[2/42,-1,2],[4/42,0,2],[2/42,1,2],[1/42,2,2]],Atkinson:[[1/8,1,0],[1/8,2,0],[1/8,-1,1],[1/8,0,1],[1/8,1,1],[1/8,0,2]]};if(!kernel||!kernels[kernel]){throw"Unknown dithering kernel: "+kernel}var ds=kernels[kernel];var index=0,height=this.height,width=this.width,data=this.pixels;var direction=serpentine?-1:1;this.indexedPixels=new Uint8Array(this.pixels.length/3);for(var y=0;y<height;y++){if(serpentine)direction=direction*-1;for(var x=direction==1?0:width-1,xend=direction==1?width:0;x!==xend;x+=direction){index=y*width+x;var idx=index*3;var r1=data[idx];var g1=data[idx+1];var b1=data[idx+2];idx=this.findClosestRGB(r1,g1,b1);this.usedEntry[idx]=true;this.indexedPixels[index]=idx;idx*=3;var r2=this.colorTab[idx];var g2=this.colorTab[idx+1];var b2=this.colorTab[idx+2];var er=r1-r2;var eg=g1-g2;var eb=b1-b2;for(var i=direction==1?0:ds.length-1,end=direction==1?ds.length:0;i!==end;i+=direction){var x1=ds[i][1];var y1=ds[i][2];if(x1+x>=0&&x1+x<width&&y1+y>=0&&y1+y<height){var d=ds[i][0];idx=index+x1+y1*width;idx*=3;data[idx]=Math.max(0,Math.min(255,data[idx]+er*d));data[idx+1]=Math.max(0,Math.min(255,data[idx+1]+eg*d));data[idx+2]=Math.max(0,Math.min(255,data[idx+2]+eb*d))}}}}};GIFEncoder.prototype.findClosest=function(c,used){return this.findClosestRGB((c&16711680)>>16,(c&65280)>>8,c&255,used)};GIFEncoder.prototype.findClosestRGB=function(r,g,b,used){if(this.colorTab===null)return-1;if(this.neuQuant&&!used){return this.neuQuant.lookupRGB(r,g,b)}var c=b|g<<8|r<<16;var minpos=0;var dmin=256*256*256;var len=this.colorTab.length;for(var i=0,index=0;i<len;index++){var dr=r-(this.colorTab[i++]&255);var dg=g-(this.colorTab[i++]&255);var db=b-(this.colorTab[i++]&255);var d=dr*dr+dg*dg+db*db;if((!used||this.usedEntry[index])&&d<dmin){dmin=d;minpos=index}}return minpos};GIFEncoder.prototype.getImagePixels=function(){var w=this.width;var h=this.height;this.pixels=new Uint8Array(w*h*3);var data=this.image;var srcPos=0;var count=0;for(var i=0;i<h;i++){for(var j=0;j<w;j++){this.pixels[count++]=data[srcPos++];this.pixels[count++]=data[srcPos++];this.pixels[count++]=data[srcPos++];srcPos++}}};GIFEncoder.prototype.writeGraphicCtrlExt=function(){this.out.writeByte(33);this.out.writeByte(249);this.out.writeByte(4);var transp,disp;if(this.transparent===null){transp=0;disp=0}else{transp=1;disp=2}if(this.dispose>=0){disp=dispose&7}disp<<=2;this.out.writeByte(0|disp|0|transp);this.writeShort(this.delay);this.out.writeByte(this.transIndex);this.out.writeByte(0)};GIFEncoder.prototype.writeImageDesc=function(){this.out.writeByte(44);this.writeShort(0);this.writeShort(0);this.writeShort(this.width);this.writeShort(this.height);if(this.firstFrame||this.globalPalette){this.out.writeByte(0)}else{this.out.writeByte(128|0|0|0|this.palSize)}};GIFEncoder.prototype.writeLSD=function(){this.writeShort(this.width);this.writeShort(this.height);this.out.writeByte(128|112|0|this.palSize);this.out.writeByte(0);this.out.writeByte(0)};GIFEncoder.prototype.writeNetscapeExt=function(){this.out.writeByte(33);this.out.writeByte(255);this.out.writeByte(11);this.out.writeUTFBytes("NETSCAPE2.0");this.out.writeByte(3);this.out.writeByte(1);this.writeShort(this.repeat);this.out.writeByte(0)};GIFEncoder.prototype.writePalette=function(){this.out.writeBytes(this.colorTab);var n=3*256-this.colorTab.length;for(var i=0;i<n;i++)this.out.writeByte(0)};GIFEncoder.prototype.writeShort=function(pValue){this.out.writeByte(pValue&255);this.out.writeByte(pValue>>8&255)};GIFEncoder.prototype.writePixels=function(){var enc=new LZWEncoder(this.width,this.height,this.indexedPixels,this.colorDepth);enc.encode(this.out)};GIFEncoder.prototype.stream=function(){return this.out};module.exports=GIFEncoder},{"./LZWEncoder.js":2,"./TypedNeuQuant.js":3}],2:[function(require,module,exports){var EOF=-1;var BITS=12;var HSIZE=5003;var masks=[0,1,3,7,15,31,63,127,255,511,1023,2047,4095,8191,16383,32767,65535];function LZWEncoder(width,height,pixels,colorDepth){var initCodeSize=Math.max(2,colorDepth);var accum=new Uint8Array(256);var htab=new Int32Array(HSIZE);var codetab=new Int32Array(HSIZE);var cur_accum,cur_bits=0;var a_count;var free_ent=0;var maxcode;var clear_flg=false;var g_init_bits,ClearCode,EOFCode;function char_out(c,outs){accum[a_count++]=c;if(a_count>=254)flush_char(outs)}function cl_block(outs){cl_hash(HSIZE);free_ent=ClearCode+2;clear_flg=true;output(ClearCode,outs)}function cl_hash(hsize){for(var i=0;i<hsize;++i)htab[i]=-1}function compress(init_bits,outs){var fcode,c,i,ent,disp,hsize_reg,hshift;g_init_bits=init_bits;clear_flg=false;n_bits=g_init_bits;maxcode=MAXCODE(n_bits);ClearCode=1<<init_bits-1;EOFCode=ClearCode+1;free_ent=ClearCode+2;a_count=0;ent=nextPixel();hshift=0;for(fcode=HSIZE;fcode<65536;fcode*=2)++hshift;hshift=8-hshift;hsize_reg=HSIZE;cl_hash(hsize_reg);output(ClearCode,outs);outer_loop:while((c=nextPixel())!=EOF){fcode=(c<<BITS)+ent;i=c<<hshift^ent;if(htab[i]===fcode){ent=codetab[i];continue}else if(htab[i]>=0){disp=hsize_reg-i;if(i===0)disp=1;do{if((i-=disp)<0)i+=hsize_reg;if(htab[i]===fcode){ent=codetab[i];continue outer_loop}}while(htab[i]>=0)}output(ent,outs);ent=c;if(free_ent<1<<BITS){codetab[i]=free_ent++;htab[i]=fcode}else{cl_block(outs)}}output(ent,outs);output(EOFCode,outs)}function encode(outs){outs.writeByte(initCodeSize);remaining=width*height;curPixel=0;compress(initCodeSize+1,outs);outs.writeByte(0)}function flush_char(outs){if(a_count>0){outs.writeByte(a_count);outs.writeBytes(accum,0,a_count);a_count=0}}function MAXCODE(n_bits){return(1<<n_bits)-1}function nextPixel(){if(remaining===0)return EOF;--remaining;var pix=pixels[curPixel++];return pix&255}function output(code,outs){cur_accum&=masks[cur_bits];if(cur_bits>0)cur_accum|=code<<cur_bits;else cur_accum=code;cur_bits+=n_bits;while(cur_bits>=8){char_out(cur_accum&255,outs);cur_accum>>=8;cur_bits-=8}if(free_ent>maxcode||clear_flg){if(clear_flg){maxcode=MAXCODE(n_bits=g_init_bits);clear_flg=false}else{++n_bits;if(n_bits==BITS)maxcode=1<<BITS;else maxcode=MAXCODE(n_bits)}}if(code==EOFCode){while(cur_bits>0){char_out(cur_accum&255,outs);cur_accum>>=8;cur_bits-=8}flush_char(outs)}}this.encode=encode}module.exports=LZWEncoder},{}],3:[function(require,module,exports){var ncycles=100;var netsize=256;var maxnetpos=netsize-1;var netbiasshift=4;var intbiasshift=16;var intbias=1<<intbiasshift;var gammashift=10;var gamma=1<<gammashift;var betashift=10;var beta=intbias>>betashift;var betagamma=intbias<<gammashift-betashift;var initrad=netsize>>3;var radiusbiasshift=6;var radiusbias=1<<radiusbiasshift;var initradius=initrad*radiusbias;var radiusdec=30;var alphabiasshift=10;var initalpha=1<<alphabiasshift;var alphadec;var radbiasshift=8;var radbias=1<<radbiasshift;var alpharadbshift=alphabiasshift+radbiasshift;var alpharadbias=1<<alpharadbshift;var prime1=499;var prime2=491;var prime3=487;var prime4=503;var minpicturebytes=3*prime4;function NeuQuant(pixels,samplefac){var network;var netindex;var bias;var freq;var radpower;function init(){network=[];netindex=new Int32Array(256);bias=new Int32Array(netsize);freq=new Int32Array(netsize);radpower=new Int32Array(netsize>>3);var i,v;for(i=0;i<netsize;i++){v=(i<<netbiasshift+8)/netsize;network[i]=new Float64Array([v,v,v,0]);freq[i]=intbias/netsize;bias[i]=0}}function unbiasnet(){for(var i=0;i<netsize;i++){network[i][0]>>=netbiasshift;network[i][1]>>=netbiasshift;network[i][2]>>=netbiasshift;network[i][3]=i}}function altersingle(alpha,i,b,g,r){network[i][0]-=alpha*(network[i][0]-b)/initalpha;network[i][1]-=alpha*(network[i][1]-g)/initalpha;network[i][2]-=alpha*(network[i][2]-r)/initalpha}function alterneigh(radius,i,b,g,r){var lo=Math.abs(i-radius);var hi=Math.min(i+radius,netsize);var j=i+1;var k=i-1;var m=1;var p,a;while(j<hi||k>lo){a=radpower[m++];if(j<hi){p=network[j++];p[0]-=a*(p[0]-b)/alpharadbias;p[1]-=a*(p[1]-g)/alpharadbias;p[2]-=a*(p[2]-r)/alpharadbias}if(k>lo){p=network[k--];p[0]-=a*(p[0]-b)/alpharadbias;p[1]-=a*(p[1]-g)/alpharadbias;p[2]-=a*(p[2]-r)/alpharadbias}}}function contest(b,g,r){var bestd=~(1<<31);var bestbiasd=bestd;var bestpos=-1;var bestbiaspos=bestpos;var i,n,dist,biasdist,betafreq;for(i=0;i<netsize;i++){n=network[i];dist=Math.abs(n[0]-b)+Math.abs(n[1]-g)+Math.abs(n[2]-r);if(dist<bestd){bestd=dist;bestpos=i}biasdist=dist-(bias[i]>>intbiasshift-netbiasshift);if(biasdist<bestbiasd){bestbiasd=biasdist;bestbiaspos=i}betafreq=freq[i]>>betashift;freq[i]-=betafreq;bias[i]+=betafreq<<gammashift}freq[bestpos]+=beta;bias[bestpos]-=betagamma;return bestbiaspos}function inxbuild(){var i,j,p,q,smallpos,smallval,previouscol=0,startpos=0;for(i=0;i<netsize;i++){p=network[i];smallpos=i;smallval=p[1];for(j=i+1;j<netsize;j++){q=network[j];if(q[1]<smallval){smallpos=j;smallval=q[1]}}q=network[smallpos];if(i!=smallpos){j=q[0];q[0]=p[0];p[0]=j;j=q[1];q[1]=p[1];p[1]=j;j=q[2];q[2]=p[2];p[2]=j;j=q[3];q[3]=p[3];p[3]=j}if(smallval!=previouscol){netindex[previouscol]=startpos+i>>1;for(j=previouscol+1;j<smallval;j++)netindex[j]=i;previouscol=smallval;startpos=i}}netindex[previouscol]=startpos+maxnetpos>>1;for(j=previouscol+1;j<256;j++)netindex[j]=maxnetpos}function inxsearch(b,g,r){var a,p,dist;var bestd=1e3;var best=-1;var i=netindex[g];var j=i-1;while(i<netsize||j>=0){if(i<netsize){p=network[i];dist=p[1]-g;if(dist>=bestd)i=netsize;else{i++;if(dist<0)dist=-dist;a=p[0]-b;if(a<0)a=-a;dist+=a;if(dist<bestd){a=p[2]-r;if(a<0)a=-a;dist+=a;if(dist<bestd){bestd=dist;best=p[3]}}}}if(j>=0){p=network[j];dist=g-p[1];if(dist>=bestd)j=-1;else{j--;if(dist<0)dist=-dist;a=p[0]-b;if(a<0)a=-a;dist+=a;if(dist<bestd){a=p[2]-r;if(a<0)a=-a;dist+=a;if(dist<bestd){bestd=dist;best=p[3]}}}}}return best}function learn(){var i;var lengthcount=pixels.length;var alphadec=30+(samplefac-1)/3;var samplepixels=lengthcount/(3*samplefac);var delta=~~(samplepixels/ncycles);var alpha=initalpha;var radius=initradius;var rad=radius>>radiusbiasshift;if(rad<=1)rad=0;for(i=0;i<rad;i++)radpower[i]=alpha*((rad*rad-i*i)*radbias/(rad*rad));var step;if(lengthcount<minpicturebytes){samplefac=1;step=3}else if(lengthcount%prime1!==0){step=3*prime1}else if(lengthcount%prime2!==0){step=3*prime2}else if(lengthcount%prime3!==0){step=3*prime3}else{step=3*prime4}var b,g,r,j;var pix=0;i=0;while(i<samplepixels){b=(pixels[pix]&255)<<netbiasshift;g=(pixels[pix+1]&255)<<netbiasshift;r=(pixels[pix+2]&255)<<netbiasshift;j=contest(b,g,r);altersingle(alpha,j,b,g,r);if(rad!==0)alterneigh(rad,j,b,g,r);pix+=step;if(pix>=lengthcount)pix-=lengthcount;i++;if(delta===0)delta=1;if(i%delta===0){alpha-=alpha/alphadec;radius-=radius/radiusdec;rad=radius>>radiusbiasshift;if(rad<=1)rad=0;for(j=0;j<rad;j++)radpower[j]=alpha*((rad*rad-j*j)*radbias/(rad*rad))}}}function buildColormap(){init();learn();unbiasnet();inxbuild()}this.buildColormap=buildColormap;function getColormap(){var map=[];var index=[];for(var i=0;i<netsize;i++)index[network[i][3]]=i;var k=0;for(var l=0;l<netsize;l++){var j=index[l];map[k++]=network[j][0];map[k++]=network[j][1];map[k++]=network[j][2]}return map}this.getColormap=getColormap;this.lookupRGB=inxsearch}module.exports=NeuQuant},{}],4:[function(require,module,exports){var GIFEncoder,renderFrame;GIFEncoder=require("./GIFEncoder.js");renderFrame=function(frame){var encoder,page,stream,transfer;encoder=new GIFEncoder(frame.width,frame.height);if(frame.index===0){encoder.writeHeader()}else{encoder.firstFrame=false}encoder.setTransparent(frame.transparent);encoder.setRepeat(frame.repeat);encoder.setDelay(frame.delay);encoder.setQuality(frame.quality);encoder.setDither(frame.dither);encoder.setGlobalPalette(frame.globalPalette);encoder.addFrame(frame.data);if(frame.last){encoder.finish()}if(frame.globalPalette===true){frame.globalPalette=encoder.getGlobalPalette()}stream=encoder.stream();frame.data=stream.pages;frame.cursor=stream.cursor;frame.pageSize=stream.constructor.pageSize;if(frame.canTransfer){transfer=function(){var i,len,ref,results;ref=frame.data;results=[];for(i=0,len=ref.length;i<len;i++){page=ref[i];results.push(page.buffer)}return results}();return self.postMessage(frame,transfer)}else{return self.postMessage(frame)}};self.onmessage=function(event){return renderFrame(event.data)}},{"./GIFEncoder.js":1}]},{},[4]);
+//# sourceMappingURL=gif.worker.js.map
+</script>
+<script type="text/plain" id="webmMuxerSrc">var __defProp = Object.defineProperty;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __pow = Math.pow;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b ||= {})
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __accessCheck = (obj, member, msg) => {
+  if (!member.has(obj))
+    throw TypeError("Cannot " + msg);
+};
+var __privateGet = (obj, member, getter) => {
+  __accessCheck(obj, member, "read from private field");
+  return getter ? getter.call(obj) : member.get(obj);
+};
+var __privateAdd = (obj, member, value) => {
+  if (member.has(obj))
+    throw TypeError("Cannot add the same private member more than once");
+  member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
+};
+var __privateSet = (obj, member, value, setter) => {
+  __accessCheck(obj, member, "write to private field");
+  setter ? setter.call(obj, value) : member.set(obj, value);
+  return value;
+};
+var __privateMethod = (obj, member, method) => {
+  __accessCheck(obj, member, "access private method");
+  return method;
+};
+
+// src/ebml.ts
+var EBMLFloat32 = class {
+  constructor(value) {
+    this.value = value;
+  }
+};
+var EBMLFloat64 = class {
+  constructor(value) {
+    this.value = value;
+  }
+};
+var measureUnsignedInt = (value) => {
+  if (value < 1 << 8) {
+    return 1;
+  } else if (value < 1 << 16) {
+    return 2;
+  } else if (value < 1 << 24) {
+    return 3;
+  } else if (value < __pow(2, 32)) {
+    return 4;
+  } else if (value < __pow(2, 40)) {
+    return 5;
+  } else {
+    return 6;
+  }
+};
+var measureEBMLVarInt = (value) => {
+  if (value < (1 << 7) - 1) {
+    return 1;
+  } else if (value < (1 << 14) - 1) {
+    return 2;
+  } else if (value < (1 << 21) - 1) {
+    return 3;
+  } else if (value < (1 << 28) - 1) {
+    return 4;
+  } else if (value < __pow(2, 35) - 1) {
+    return 5;
+  } else if (value < __pow(2, 42) - 1) {
+    return 6;
+  } else {
+    throw new Error("EBML VINT size not supported " + value);
+  }
+};
+
+// src/misc.ts
+var readBits = (bytes, start, end) => {
+  let result = 0;
+  for (let i = start; i < end; i++) {
+    let byteIndex = Math.floor(i / 8);
+    let byte = bytes[byteIndex];
+    let bitIndex = 7 - (i & 7);
+    let bit = (byte & 1 << bitIndex) >> bitIndex;
+    result <<= 1;
+    result |= bit;
+  }
+  return result;
+};
+var writeBits = (bytes, start, end, value) => {
+  for (let i = start; i < end; i++) {
+    let byteIndex = Math.floor(i / 8);
+    let byte = bytes[byteIndex];
+    let bitIndex = 7 - (i & 7);
+    byte &= ~(1 << bitIndex);
+    byte |= (value & 1 << end - i - 1) >> end - i - 1 << bitIndex;
+    bytes[byteIndex] = byte;
+  }
+};
+
+// src/target.ts
+var ArrayBufferTarget = class {
+  constructor() {
+    this.buffer = null;
+  }
+};
+var StreamTarget = class {
+  constructor(onData, onDone, options) {
+    this.onData = onData;
+    this.onDone = onDone;
+    this.options = options;
+  }
+};
+var FileSystemWritableFileStreamTarget = class {
+  constructor(stream, options) {
+    this.stream = stream;
+    this.options = options;
+  }
+};
+
+// src/writer.ts
+var _helper, _helperView, _writeByte, writeByte_fn, _writeFloat32, writeFloat32_fn, _writeFloat64, writeFloat64_fn, _writeUnsignedInt, writeUnsignedInt_fn, _writeString, writeString_fn;
+var Writer = class {
+  constructor() {
+    __privateAdd(this, _writeByte);
+    __privateAdd(this, _writeFloat32);
+    __privateAdd(this, _writeFloat64);
+    __privateAdd(this, _writeUnsignedInt);
+    __privateAdd(this, _writeString);
+    this.pos = 0;
+    __privateAdd(this, _helper, new Uint8Array(8));
+    __privateAdd(this, _helperView, new DataView(__privateGet(this, _helper).buffer));
+    this.offsets = /* @__PURE__ */ new WeakMap();
+    this.dataOffsets = /* @__PURE__ */ new WeakMap();
+  }
+  seek(newPos) {
+    this.pos = newPos;
+  }
+  writeEBMLVarInt(value, width = measureEBMLVarInt(value)) {
+    let pos = 0;
+    switch (width) {
+      case 1:
+        __privateGet(this, _helperView).setUint8(pos++, 1 << 7 | value);
+        break;
+      case 2:
+        __privateGet(this, _helperView).setUint8(pos++, 1 << 6 | value >> 8);
+        __privateGet(this, _helperView).setUint8(pos++, value);
+        break;
+      case 3:
+        __privateGet(this, _helperView).setUint8(pos++, 1 << 5 | value >> 16);
+        __privateGet(this, _helperView).setUint8(pos++, value >> 8);
+        __privateGet(this, _helperView).setUint8(pos++, value);
+        break;
+      case 4:
+        __privateGet(this, _helperView).setUint8(pos++, 1 << 4 | value >> 24);
+        __privateGet(this, _helperView).setUint8(pos++, value >> 16);
+        __privateGet(this, _helperView).setUint8(pos++, value >> 8);
+        __privateGet(this, _helperView).setUint8(pos++, value);
+        break;
+      case 5:
+        __privateGet(this, _helperView).setUint8(pos++, 1 << 3 | value / __pow(2, 32) & 7);
+        __privateGet(this, _helperView).setUint8(pos++, value >> 24);
+        __privateGet(this, _helperView).setUint8(pos++, value >> 16);
+        __privateGet(this, _helperView).setUint8(pos++, value >> 8);
+        __privateGet(this, _helperView).setUint8(pos++, value);
+        break;
+      case 6:
+        __privateGet(this, _helperView).setUint8(pos++, 1 << 2 | value / __pow(2, 40) & 3);
+        __privateGet(this, _helperView).setUint8(pos++, value / __pow(2, 32) | 0);
+        __privateGet(this, _helperView).setUint8(pos++, value >> 24);
+        __privateGet(this, _helperView).setUint8(pos++, value >> 16);
+        __privateGet(this, _helperView).setUint8(pos++, value >> 8);
+        __privateGet(this, _helperView).setUint8(pos++, value);
+        break;
+      default:
+        throw new Error("Bad EBML VINT size " + width);
+    }
+    this.write(__privateGet(this, _helper).subarray(0, pos));
+  }
+  writeEBML(data) {
+    var _a, _b;
+    if (data === null)
+      return;
+    if (data instanceof Uint8Array) {
+      this.write(data);
+    } else if (Array.isArray(data)) {
+      for (let elem of data) {
+        this.writeEBML(elem);
+      }
+    } else {
+      this.offsets.set(data, this.pos);
+      __privateMethod(this, _writeUnsignedInt, writeUnsignedInt_fn).call(this, data.id);
+      if (Array.isArray(data.data)) {
+        let sizePos = this.pos;
+        let sizeSize = data.size === -1 ? 1 : (_a = data.size) != null ? _a : 4;
+        if (data.size === -1) {
+          __privateMethod(this, _writeByte, writeByte_fn).call(this, 255);
+        } else {
+          this.seek(this.pos + sizeSize);
+        }
+        let startPos = this.pos;
+        this.dataOffsets.set(data, startPos);
+        this.writeEBML(data.data);
+        if (data.size !== -1) {
+          let size = this.pos - startPos;
+          let endPos = this.pos;
+          this.seek(sizePos);
+          this.writeEBMLVarInt(size, sizeSize);
+          this.seek(endPos);
+        }
+      } else if (typeof data.data === "number") {
+        let size = (_b = data.size) != null ? _b : measureUnsignedInt(data.data);
+        this.writeEBMLVarInt(size);
+        __privateMethod(this, _writeUnsignedInt, writeUnsignedInt_fn).call(this, data.data, size);
+      } else if (typeof data.data === "string") {
+        this.writeEBMLVarInt(data.data.length);
+        __privateMethod(this, _writeString, writeString_fn).call(this, data.data);
+      } else if (data.data instanceof Uint8Array) {
+        this.writeEBMLVarInt(data.data.byteLength, data.size);
+        this.write(data.data);
+      } else if (data.data instanceof EBMLFloat32) {
+        this.writeEBMLVarInt(4);
+        __privateMethod(this, _writeFloat32, writeFloat32_fn).call(this, data.data.value);
+      } else if (data.data instanceof EBMLFloat64) {
+        this.writeEBMLVarInt(8);
+        __privateMethod(this, _writeFloat64, writeFloat64_fn).call(this, data.data.value);
+      }
+    }
+  }
+};
+_helper = new WeakMap();
+_helperView = new WeakMap();
+_writeByte = new WeakSet();
+writeByte_fn = function(value) {
+  __privateGet(this, _helperView).setUint8(0, value);
+  this.write(__privateGet(this, _helper).subarray(0, 1));
+};
+_writeFloat32 = new WeakSet();
+writeFloat32_fn = function(value) {
+  __privateGet(this, _helperView).setFloat32(0, value, false);
+  this.write(__privateGet(this, _helper).subarray(0, 4));
+};
+_writeFloat64 = new WeakSet();
+writeFloat64_fn = function(value) {
+  __privateGet(this, _helperView).setFloat64(0, value, false);
+  this.write(__privateGet(this, _helper));
+};
+_writeUnsignedInt = new WeakSet();
+writeUnsignedInt_fn = function(value, width = measureUnsignedInt(value)) {
+  let pos = 0;
+  switch (width) {
+    case 6:
+      __privateGet(this, _helperView).setUint8(pos++, value / __pow(2, 40) | 0);
+    case 5:
+      __privateGet(this, _helperView).setUint8(pos++, value / __pow(2, 32) | 0);
+    case 4:
+      __privateGet(this, _helperView).setUint8(pos++, value >> 24);
+    case 3:
+      __privateGet(this, _helperView).setUint8(pos++, value >> 16);
+    case 2:
+      __privateGet(this, _helperView).setUint8(pos++, value >> 8);
+    case 1:
+      __privateGet(this, _helperView).setUint8(pos++, value);
+      break;
+    default:
+      throw new Error("Bad UINT size " + width);
+  }
+  this.write(__privateGet(this, _helper).subarray(0, pos));
+};
+_writeString = new WeakSet();
+writeString_fn = function(str) {
+  this.write(new Uint8Array(str.split("").map((x) => x.charCodeAt(0))));
+};
+var _target, _buffer, _bytes, _ensureSize, ensureSize_fn;
+var ArrayBufferTargetWriter = class extends Writer {
+  constructor(target) {
+    super();
+    __privateAdd(this, _ensureSize);
+    __privateAdd(this, _target, void 0);
+    __privateAdd(this, _buffer, new ArrayBuffer(__pow(2, 16)));
+    __privateAdd(this, _bytes, new Uint8Array(__privateGet(this, _buffer)));
+    __privateSet(this, _target, target);
+  }
+  write(data) {
+    __privateMethod(this, _ensureSize, ensureSize_fn).call(this, this.pos + data.byteLength);
+    __privateGet(this, _bytes).set(data, this.pos);
+    this.pos += data.byteLength;
+  }
+  finalize() {
+    __privateMethod(this, _ensureSize, ensureSize_fn).call(this, this.pos);
+    __privateGet(this, _target).buffer = __privateGet(this, _buffer).slice(0, this.pos);
+  }
+};
+_target = new WeakMap();
+_buffer = new WeakMap();
+_bytes = new WeakMap();
+_ensureSize = new WeakSet();
+ensureSize_fn = function(size) {
+  let newLength = __privateGet(this, _buffer).byteLength;
+  while (newLength < size)
+    newLength *= 2;
+  if (newLength === __privateGet(this, _buffer).byteLength)
+    return;
+  let newBuffer = new ArrayBuffer(newLength);
+  let newBytes = new Uint8Array(newBuffer);
+  newBytes.set(__privateGet(this, _bytes), 0);
+  __privateSet(this, _buffer, newBuffer);
+  __privateSet(this, _bytes, newBytes);
+};
+var _target2, _sections, _lastFlushEnd, _ensureMonotonicity;
+var StreamTargetWriter = class extends Writer {
+  constructor(target, ensureMonotonicity) {
+    super();
+    __privateAdd(this, _target2, void 0);
+    __privateAdd(this, _sections, []);
+    __privateAdd(this, _lastFlushEnd, 0);
+    __privateAdd(this, _ensureMonotonicity, void 0);
+    __privateSet(this, _target2, target);
+    __privateSet(this, _ensureMonotonicity, ensureMonotonicity);
+  }
+  write(data) {
+    __privateGet(this, _sections).push({
+      data: data.slice(),
+      start: this.pos
+    });
+    this.pos += data.byteLength;
+  }
+  flush() {
+    if (__privateGet(this, _sections).length === 0)
+      return;
+    let chunks = [];
+    let sorted = [...__privateGet(this, _sections)].sort((a, b) => a.start - b.start);
+    chunks.push({
+      start: sorted[0].start,
+      size: sorted[0].data.byteLength
+    });
+    for (let i = 1; i < sorted.length; i++) {
+      let lastChunk = chunks[chunks.length - 1];
+      let section = sorted[i];
+      if (section.start <= lastChunk.start + lastChunk.size) {
+        lastChunk.size = Math.max(lastChunk.size, section.start + section.data.byteLength - lastChunk.start);
+      } else {
+        chunks.push({
+          start: section.start,
+          size: section.data.byteLength
+        });
+      }
+    }
+    for (let chunk of chunks) {
+      chunk.data = new Uint8Array(chunk.size);
+      for (let section of __privateGet(this, _sections)) {
+        if (chunk.start <= section.start && section.start < chunk.start + chunk.size) {
+          chunk.data.set(section.data, section.start - chunk.start);
+        }
+      }
+      if (__privateGet(this, _ensureMonotonicity) && chunk.start < __privateGet(this, _lastFlushEnd)) {
+        throw new Error("Internal error: Monotonicity violation.");
+      }
+      __privateGet(this, _target2).onData(chunk.data, chunk.start);
+      __privateSet(this, _lastFlushEnd, chunk.start + chunk.data.byteLength);
+    }
+    __privateGet(this, _sections).length = 0;
+  }
+  finalize() {
+    var _a, _b;
+    (_b = (_a = __privateGet(this, _target2)).onDone) == null ? void 0 : _b.call(_a);
+  }
+};
+_target2 = new WeakMap();
+_sections = new WeakMap();
+_lastFlushEnd = new WeakMap();
+_ensureMonotonicity = new WeakMap();
+var DEFAULT_CHUNK_SIZE = __pow(2, 24);
+var MAX_CHUNKS_AT_ONCE = 2;
+var _target3, _chunkSize, _chunks, _lastFlushEnd2, _ensureMonotonicity2, _writeDataIntoChunks, writeDataIntoChunks_fn, _insertSectionIntoChunk, insertSectionIntoChunk_fn, _createChunk, createChunk_fn, _flushChunks, flushChunks_fn;
+var ChunkedStreamTargetWriter = class extends Writer {
+  constructor(target, ensureMonotonicity) {
+    var _a, _b;
+    super();
+    __privateAdd(this, _writeDataIntoChunks);
+    __privateAdd(this, _insertSectionIntoChunk);
+    __privateAdd(this, _createChunk);
+    __privateAdd(this, _flushChunks);
+    __privateAdd(this, _target3, void 0);
+    __privateAdd(this, _chunkSize, void 0);
+    __privateAdd(this, _chunks, []);
+    __privateAdd(this, _lastFlushEnd2, 0);
+    __privateAdd(this, _ensureMonotonicity2, void 0);
+    __privateSet(this, _target3, target);
+    __privateSet(this, _chunkSize, (_b = (_a = target.options) == null ? void 0 : _a.chunkSize) != null ? _b : DEFAULT_CHUNK_SIZE);
+    __privateSet(this, _ensureMonotonicity2, ensureMonotonicity);
+    if (!Number.isInteger(__privateGet(this, _chunkSize)) || __privateGet(this, _chunkSize) < __pow(2, 10)) {
+      throw new Error("Invalid StreamTarget options: chunkSize must be an integer not smaller than 1024.");
+    }
+  }
+  write(data) {
+    __privateMethod(this, _writeDataIntoChunks, writeDataIntoChunks_fn).call(this, data, this.pos);
+    __privateMethod(this, _flushChunks, flushChunks_fn).call(this);
+    this.pos += data.byteLength;
+  }
+  finalize() {
+    var _a, _b;
+    __privateMethod(this, _flushChunks, flushChunks_fn).call(this, true);
+    (_b = (_a = __privateGet(this, _target3)).onDone) == null ? void 0 : _b.call(_a);
+  }
+};
+_target3 = new WeakMap();
+_chunkSize = new WeakMap();
+_chunks = new WeakMap();
+_lastFlushEnd2 = new WeakMap();
+_ensureMonotonicity2 = new WeakMap();
+_writeDataIntoChunks = new WeakSet();
+writeDataIntoChunks_fn = function(data, position) {
+  let chunkIndex = __privateGet(this, _chunks).findIndex((x) => x.start <= position && position < x.start + __privateGet(this, _chunkSize));
+  if (chunkIndex === -1)
+    chunkIndex = __privateMethod(this, _createChunk, createChunk_fn).call(this, position);
+  let chunk = __privateGet(this, _chunks)[chunkIndex];
+  let relativePosition = position - chunk.start;
+  let toWrite = data.subarray(0, Math.min(__privateGet(this, _chunkSize) - relativePosition, data.byteLength));
+  chunk.data.set(toWrite, relativePosition);
+  let section = {
+    start: relativePosition,
+    end: relativePosition + toWrite.byteLength
+  };
+  __privateMethod(this, _insertSectionIntoChunk, insertSectionIntoChunk_fn).call(this, chunk, section);
+  if (chunk.written[0].start === 0 && chunk.written[0].end === __privateGet(this, _chunkSize)) {
+    chunk.shouldFlush = true;
+  }
+  if (__privateGet(this, _chunks).length > MAX_CHUNKS_AT_ONCE) {
+    for (let i = 0; i < __privateGet(this, _chunks).length - 1; i++) {
+      __privateGet(this, _chunks)[i].shouldFlush = true;
+    }
+    __privateMethod(this, _flushChunks, flushChunks_fn).call(this);
+  }
+  if (toWrite.byteLength < data.byteLength) {
+    __privateMethod(this, _writeDataIntoChunks, writeDataIntoChunks_fn).call(this, data.subarray(toWrite.byteLength), position + toWrite.byteLength);
+  }
+};
+_insertSectionIntoChunk = new WeakSet();
+insertSectionIntoChunk_fn = function(chunk, section) {
+  let low = 0;
+  let high = chunk.written.length - 1;
+  let index = -1;
+  while (low <= high) {
+    let mid = Math.floor(low + (high - low + 1) / 2);
+    if (chunk.written[mid].start <= section.start) {
+      low = mid + 1;
+      index = mid;
+    } else {
+      high = mid - 1;
+    }
+  }
+  chunk.written.splice(index + 1, 0, section);
+  if (index === -1 || chunk.written[index].end < section.start)
+    index++;
+  while (index < chunk.written.length - 1 && chunk.written[index].end >= chunk.written[index + 1].start) {
+    chunk.written[index].end = Math.max(chunk.written[index].end, chunk.written[index + 1].end);
+    chunk.written.splice(index + 1, 1);
+  }
+};
+_createChunk = new WeakSet();
+createChunk_fn = function(includesPosition) {
+  let start = Math.floor(includesPosition / __privateGet(this, _chunkSize)) * __privateGet(this, _chunkSize);
+  let chunk = {
+    start,
+    data: new Uint8Array(__privateGet(this, _chunkSize)),
+    written: [],
+    shouldFlush: false
+  };
+  __privateGet(this, _chunks).push(chunk);
+  __privateGet(this, _chunks).sort((a, b) => a.start - b.start);
+  return __privateGet(this, _chunks).indexOf(chunk);
+};
+_flushChunks = new WeakSet();
+flushChunks_fn = function(force = false) {
+  for (let i = 0; i < __privateGet(this, _chunks).length; i++) {
+    let chunk = __privateGet(this, _chunks)[i];
+    if (!chunk.shouldFlush && !force)
+      continue;
+    for (let section of chunk.written) {
+      if (__privateGet(this, _ensureMonotonicity2) && chunk.start + section.start < __privateGet(this, _lastFlushEnd2)) {
+        throw new Error("Internal error: Monotonicity violation.");
+      }
+      __privateGet(this, _target3).onData(
+        chunk.data.subarray(section.start, section.end),
+        chunk.start + section.start
+      );
+      __privateSet(this, _lastFlushEnd2, chunk.start + section.end);
+    }
+    __privateGet(this, _chunks).splice(i--, 1);
+  }
+};
+var FileSystemWritableFileStreamTargetWriter = class extends ChunkedStreamTargetWriter {
+  constructor(target, ensureMonotonicity) {
+    var _a;
+    super(new StreamTarget(
+      (data, position) => target.stream.write({
+        type: "write",
+        data,
+        position
+      }),
+      void 0,
+      { chunkSize: (_a = target.options) == null ? void 0 : _a.chunkSize }
+    ), ensureMonotonicity);
+  }
+};
+
+// src/muxer.ts
+var VIDEO_TRACK_NUMBER = 1;
+var AUDIO_TRACK_NUMBER = 2;
+var SUBTITLE_TRACK_NUMBER = 3;
+var VIDEO_TRACK_TYPE = 1;
+var AUDIO_TRACK_TYPE = 2;
+var SUBTITLE_TRACK_TYPE = 17;
+var MAX_CHUNK_LENGTH_MS = __pow(2, 15);
+var CODEC_PRIVATE_MAX_SIZE = __pow(2, 12);
+var APP_NAME = "https://github.com/Vanilagy/webm-muxer";
+var SEGMENT_SIZE_BYTES = 6;
+var CLUSTER_SIZE_BYTES = 5;
+var FIRST_TIMESTAMP_BEHAVIORS = ["strict", "offset", "permissive"];
+var _options, _writer, _segment, _segmentInfo, _seekHead, _tracksElement, _segmentDuration, _colourElement, _videoCodecPrivate, _audioCodecPrivate, _subtitleCodecPrivate, _cues, _currentCluster, _currentClusterTimestamp, _duration, _videoChunkQueue, _audioChunkQueue, _subtitleChunkQueue, _firstVideoTimestamp, _firstAudioTimestamp, _lastVideoTimestamp, _lastAudioTimestamp, _lastSubtitleTimestamp, _colorSpace, _finalized, _validateOptions, validateOptions_fn, _createFileHeader, createFileHeader_fn, _writeEBMLHeader, writeEBMLHeader_fn, _createCodecPrivatePlaceholders, createCodecPrivatePlaceholders_fn, _createColourElement, createColourElement_fn, _createSeekHead, createSeekHead_fn, _createSegmentInfo, createSegmentInfo_fn, _createTracks, createTracks_fn, _createSegment, createSegment_fn, _createCues, createCues_fn, _maybeFlushStreamingTargetWriter, maybeFlushStreamingTargetWriter_fn, _segmentDataOffset, segmentDataOffset_get, _writeVideoDecoderConfig, writeVideoDecoderConfig_fn, _fixVP9ColorSpace, fixVP9ColorSpace_fn, _writeSubtitleChunks, writeSubtitleChunks_fn, _createInternalChunk, createInternalChunk_fn, _validateTimestamp, validateTimestamp_fn, _writeBlock, writeBlock_fn, _createCodecPrivateElement, createCodecPrivateElement_fn, _writeCodecPrivate, writeCodecPrivate_fn, _createNewCluster, createNewCluster_fn, _finalizeCurrentCluster, finalizeCurrentCluster_fn, _ensureNotFinalized, ensureNotFinalized_fn;
+var Muxer = class {
+  constructor(options) {
+    __privateAdd(this, _validateOptions);
+    __privateAdd(this, _createFileHeader);
+    __privateAdd(this, _writeEBMLHeader);
+    __privateAdd(this, _createCodecPrivatePlaceholders);
+    __privateAdd(this, _createColourElement);
+    __privateAdd(this, _createSeekHead);
+    __privateAdd(this, _createSegmentInfo);
+    __privateAdd(this, _createTracks);
+    __privateAdd(this, _createSegment);
+    __privateAdd(this, _createCues);
+    __privateAdd(this, _maybeFlushStreamingTargetWriter);
+    __privateAdd(this, _segmentDataOffset);
+    __privateAdd(this, _writeVideoDecoderConfig);
+    __privateAdd(this, _fixVP9ColorSpace);
+    __privateAdd(this, _writeSubtitleChunks);
+    __privateAdd(this, _createInternalChunk);
+    __privateAdd(this, _validateTimestamp);
+    __privateAdd(this, _writeBlock);
+    __privateAdd(this, _createCodecPrivateElement);
+    __privateAdd(this, _writeCodecPrivate);
+    __privateAdd(this, _createNewCluster);
+    __privateAdd(this, _finalizeCurrentCluster);
+    __privateAdd(this, _ensureNotFinalized);
+    __privateAdd(this, _options, void 0);
+    __privateAdd(this, _writer, void 0);
+    __privateAdd(this, _segment, void 0);
+    __privateAdd(this, _segmentInfo, void 0);
+    __privateAdd(this, _seekHead, void 0);
+    __privateAdd(this, _tracksElement, void 0);
+    __privateAdd(this, _segmentDuration, void 0);
+    __privateAdd(this, _colourElement, void 0);
+    __privateAdd(this, _videoCodecPrivate, void 0);
+    __privateAdd(this, _audioCodecPrivate, void 0);
+    __privateAdd(this, _subtitleCodecPrivate, void 0);
+    __privateAdd(this, _cues, void 0);
+    __privateAdd(this, _currentCluster, void 0);
+    __privateAdd(this, _currentClusterTimestamp, void 0);
+    __privateAdd(this, _duration, 0);
+    __privateAdd(this, _videoChunkQueue, []);
+    __privateAdd(this, _audioChunkQueue, []);
+    __privateAdd(this, _subtitleChunkQueue, []);
+    __privateAdd(this, _firstVideoTimestamp, void 0);
+    __privateAdd(this, _firstAudioTimestamp, void 0);
+    __privateAdd(this, _lastVideoTimestamp, -1);
+    __privateAdd(this, _lastAudioTimestamp, -1);
+    __privateAdd(this, _lastSubtitleTimestamp, -1);
+    __privateAdd(this, _colorSpace, void 0);
+    __privateAdd(this, _finalized, false);
+    var _a;
+    __privateMethod(this, _validateOptions, validateOptions_fn).call(this, options);
+    __privateSet(this, _options, __spreadValues({
+      type: "webm",
+      firstTimestampBehavior: "strict"
+    }, options));
+    this.target = options.target;
+    let ensureMonotonicity = !!__privateGet(this, _options).streaming;
+    if (options.target instanceof ArrayBufferTarget) {
+      __privateSet(this, _writer, new ArrayBufferTargetWriter(options.target));
+    } else if (options.target instanceof StreamTarget) {
+      __privateSet(this, _writer, ((_a = options.target.options) == null ? void 0 : _a.chunked) ? new ChunkedStreamTargetWriter(options.target, ensureMonotonicity) : new StreamTargetWriter(options.target, ensureMonotonicity));
+    } else if (options.target instanceof FileSystemWritableFileStreamTarget) {
+      __privateSet(this, _writer, new FileSystemWritableFileStreamTargetWriter(options.target, ensureMonotonicity));
+    } else {
+      throw new Error(`Invalid target: ${options.target}`);
+    }
+    __privateMethod(this, _createFileHeader, createFileHeader_fn).call(this);
+  }
+  addVideoChunk(chunk, meta, timestamp) {
+    let data = new Uint8Array(chunk.byteLength);
+    chunk.copyTo(data);
+    this.addVideoChunkRaw(data, chunk.type, timestamp != null ? timestamp : chunk.timestamp, meta);
+  }
+  addVideoChunkRaw(data, type, timestamp, meta) {
+    __privateMethod(this, _ensureNotFinalized, ensureNotFinalized_fn).call(this);
+    if (!__privateGet(this, _options).video)
+      throw new Error("No video track declared.");
+    if (__privateGet(this, _firstVideoTimestamp) === void 0)
+      __privateSet(this, _firstVideoTimestamp, timestamp);
+    if (meta)
+      __privateMethod(this, _writeVideoDecoderConfig, writeVideoDecoderConfig_fn).call(this, meta);
+    let videoChunk = __privateMethod(this, _createInternalChunk, createInternalChunk_fn).call(this, data, type, timestamp, VIDEO_TRACK_NUMBER);
+    if (__privateGet(this, _options).video.codec === "V_VP9")
+      __privateMethod(this, _fixVP9ColorSpace, fixVP9ColorSpace_fn).call(this, videoChunk);
+    __privateSet(this, _lastVideoTimestamp, videoChunk.timestamp);
+    while (__privateGet(this, _audioChunkQueue).length > 0 && __privateGet(this, _audioChunkQueue)[0].timestamp <= videoChunk.timestamp) {
+      let audioChunk = __privateGet(this, _audioChunkQueue).shift();
+      __privateMethod(this, _writeBlock, writeBlock_fn).call(this, audioChunk, false);
+    }
+    if (!__privateGet(this, _options).audio || videoChunk.timestamp <= __privateGet(this, _lastAudioTimestamp)) {
+      __privateMethod(this, _writeBlock, writeBlock_fn).call(this, videoChunk, true);
+    } else {
+      __privateGet(this, _videoChunkQueue).push(videoChunk);
+    }
+    __privateMethod(this, _writeSubtitleChunks, writeSubtitleChunks_fn).call(this);
+    __privateMethod(this, _maybeFlushStreamingTargetWriter, maybeFlushStreamingTargetWriter_fn).call(this);
+  }
+  addAudioChunk(chunk, meta, timestamp) {
+    let data = new Uint8Array(chunk.byteLength);
+    chunk.copyTo(data);
+    this.addAudioChunkRaw(data, chunk.type, timestamp != null ? timestamp : chunk.timestamp, meta);
+  }
+  addAudioChunkRaw(data, type, timestamp, meta) {
+    __privateMethod(this, _ensureNotFinalized, ensureNotFinalized_fn).call(this);
+    if (!__privateGet(this, _options).audio)
+      throw new Error("No audio track declared.");
+    if (__privateGet(this, _firstAudioTimestamp) === void 0)
+      __privateSet(this, _firstAudioTimestamp, timestamp);
+    if (meta == null ? void 0 : meta.decoderConfig) {
+      if (__privateGet(this, _options).streaming) {
+        __privateSet(this, _audioCodecPrivate, __privateMethod(this, _createCodecPrivateElement, createCodecPrivateElement_fn).call(this, meta.decoderConfig.description));
+      } else {
+        __privateMethod(this, _writeCodecPrivate, writeCodecPrivate_fn).call(this, __privateGet(this, _audioCodecPrivate), meta.decoderConfig.description);
+      }
+    }
+    let audioChunk = __privateMethod(this, _createInternalChunk, createInternalChunk_fn).call(this, data, type, timestamp, AUDIO_TRACK_NUMBER);
+    __privateSet(this, _lastAudioTimestamp, audioChunk.timestamp);
+    while (__privateGet(this, _videoChunkQueue).length > 0 && __privateGet(this, _videoChunkQueue)[0].timestamp <= audioChunk.timestamp) {
+      let videoChunk = __privateGet(this, _videoChunkQueue).shift();
+      __privateMethod(this, _writeBlock, writeBlock_fn).call(this, videoChunk, true);
+    }
+    if (!__privateGet(this, _options).video || audioChunk.timestamp <= __privateGet(this, _lastVideoTimestamp)) {
+      __privateMethod(this, _writeBlock, writeBlock_fn).call(this, audioChunk, !__privateGet(this, _options).video);
+    } else {
+      __privateGet(this, _audioChunkQueue).push(audioChunk);
+    }
+    __privateMethod(this, _writeSubtitleChunks, writeSubtitleChunks_fn).call(this);
+    __privateMethod(this, _maybeFlushStreamingTargetWriter, maybeFlushStreamingTargetWriter_fn).call(this);
+  }
+  addSubtitleChunk(chunk, meta, timestamp) {
+    __privateMethod(this, _ensureNotFinalized, ensureNotFinalized_fn).call(this);
+    if (!__privateGet(this, _options).subtitles)
+      throw new Error("No subtitle track declared.");
+    if (meta == null ? void 0 : meta.decoderConfig) {
+      if (__privateGet(this, _options).streaming) {
+        __privateSet(this, _subtitleCodecPrivate, __privateMethod(this, _createCodecPrivateElement, createCodecPrivateElement_fn).call(this, meta.decoderConfig.description));
+      } else {
+        __privateMethod(this, _writeCodecPrivate, writeCodecPrivate_fn).call(this, __privateGet(this, _subtitleCodecPrivate), meta.decoderConfig.description);
+      }
+    }
+    let subtitleChunk = __privateMethod(this, _createInternalChunk, createInternalChunk_fn).call(this, chunk.body, "key", timestamp != null ? timestamp : chunk.timestamp, SUBTITLE_TRACK_NUMBER, chunk.duration, chunk.additions);
+    __privateSet(this, _lastSubtitleTimestamp, subtitleChunk.timestamp);
+    __privateGet(this, _subtitleChunkQueue).push(subtitleChunk);
+    __privateMethod(this, _writeSubtitleChunks, writeSubtitleChunks_fn).call(this);
+    __privateMethod(this, _maybeFlushStreamingTargetWriter, maybeFlushStreamingTargetWriter_fn).call(this);
+  }
+  finalize() {
+    while (__privateGet(this, _videoChunkQueue).length > 0)
+      __privateMethod(this, _writeBlock, writeBlock_fn).call(this, __privateGet(this, _videoChunkQueue).shift(), true);
+    while (__privateGet(this, _audioChunkQueue).length > 0)
+      __privateMethod(this, _writeBlock, writeBlock_fn).call(this, __privateGet(this, _audioChunkQueue).shift(), true);
+    while (__privateGet(this, _subtitleChunkQueue).length > 0 && __privateGet(this, _subtitleChunkQueue)[0].timestamp <= __privateGet(this, _duration)) {
+      __privateMethod(this, _writeBlock, writeBlock_fn).call(this, __privateGet(this, _subtitleChunkQueue).shift(), false);
+    }
+    if (!__privateGet(this, _options).streaming) {
+      __privateMethod(this, _finalizeCurrentCluster, finalizeCurrentCluster_fn).call(this);
+    }
+    __privateGet(this, _writer).writeEBML(__privateGet(this, _cues));
+    if (!__privateGet(this, _options).streaming) {
+      let endPos = __privateGet(this, _writer).pos;
+      let segmentSize = __privateGet(this, _writer).pos - __privateGet(this, _segmentDataOffset, segmentDataOffset_get);
+      __privateGet(this, _writer).seek(__privateGet(this, _writer).offsets.get(__privateGet(this, _segment)) + 4);
+      __privateGet(this, _writer).writeEBMLVarInt(segmentSize, SEGMENT_SIZE_BYTES);
+      __privateGet(this, _segmentDuration).data = new EBMLFloat64(__privateGet(this, _duration));
+      __privateGet(this, _writer).seek(__privateGet(this, _writer).offsets.get(__privateGet(this, _segmentDuration)));
+      __privateGet(this, _writer).writeEBML(__privateGet(this, _segmentDuration));
+      __privateGet(this, _seekHead).data[0].data[1].data = __privateGet(this, _writer).offsets.get(__privateGet(this, _cues)) - __privateGet(this, _segmentDataOffset, segmentDataOffset_get);
+      __privateGet(this, _seekHead).data[1].data[1].data = __privateGet(this, _writer).offsets.get(__privateGet(this, _segmentInfo)) - __privateGet(this, _segmentDataOffset, segmentDataOffset_get);
+      __privateGet(this, _seekHead).data[2].data[1].data = __privateGet(this, _writer).offsets.get(__privateGet(this, _tracksElement)) - __privateGet(this, _segmentDataOffset, segmentDataOffset_get);
+      __privateGet(this, _writer).seek(__privateGet(this, _writer).offsets.get(__privateGet(this, _seekHead)));
+      __privateGet(this, _writer).writeEBML(__privateGet(this, _seekHead));
+      __privateGet(this, _writer).seek(endPos);
+    }
+    __privateMethod(this, _maybeFlushStreamingTargetWriter, maybeFlushStreamingTargetWriter_fn).call(this);
+    __privateGet(this, _writer).finalize();
+    __privateSet(this, _finalized, true);
+  }
+};
+_options = new WeakMap();
+_writer = new WeakMap();
+_segment = new WeakMap();
+_segmentInfo = new WeakMap();
+_seekHead = new WeakMap();
+_tracksElement = new WeakMap();
+_segmentDuration = new WeakMap();
+_colourElement = new WeakMap();
+_videoCodecPrivate = new WeakMap();
+_audioCodecPrivate = new WeakMap();
+_subtitleCodecPrivate = new WeakMap();
+_cues = new WeakMap();
+_currentCluster = new WeakMap();
+_currentClusterTimestamp = new WeakMap();
+_duration = new WeakMap();
+_videoChunkQueue = new WeakMap();
+_audioChunkQueue = new WeakMap();
+_subtitleChunkQueue = new WeakMap();
+_firstVideoTimestamp = new WeakMap();
+_firstAudioTimestamp = new WeakMap();
+_lastVideoTimestamp = new WeakMap();
+_lastAudioTimestamp = new WeakMap();
+_lastSubtitleTimestamp = new WeakMap();
+_colorSpace = new WeakMap();
+_finalized = new WeakMap();
+_validateOptions = new WeakSet();
+validateOptions_fn = function(options) {
+  if (options.type && options.type !== "webm" && options.type !== "matroska") {
+    throw new Error(`Invalid type: ${options.type}`);
+  }
+  if (options.firstTimestampBehavior && !FIRST_TIMESTAMP_BEHAVIORS.includes(options.firstTimestampBehavior)) {
+    throw new Error(`Invalid first timestamp behavior: ${options.firstTimestampBehavior}`);
+  }
+};
+_createFileHeader = new WeakSet();
+createFileHeader_fn = function() {
+  __privateMethod(this, _writeEBMLHeader, writeEBMLHeader_fn).call(this);
+  if (!__privateGet(this, _options).streaming) {
+    __privateMethod(this, _createSeekHead, createSeekHead_fn).call(this);
+  }
+  __privateMethod(this, _createSegmentInfo, createSegmentInfo_fn).call(this);
+  __privateMethod(this, _createCodecPrivatePlaceholders, createCodecPrivatePlaceholders_fn).call(this);
+  __privateMethod(this, _createColourElement, createColourElement_fn).call(this);
+  if (!__privateGet(this, _options).streaming) {
+    __privateMethod(this, _createTracks, createTracks_fn).call(this);
+    __privateMethod(this, _createSegment, createSegment_fn).call(this);
+  } else {
+  }
+  __privateMethod(this, _createCues, createCues_fn).call(this);
+  __privateMethod(this, _maybeFlushStreamingTargetWriter, maybeFlushStreamingTargetWriter_fn).call(this);
+};
+_writeEBMLHeader = new WeakSet();
+writeEBMLHeader_fn = function() {
+  var _a;
+  let ebmlHeader = { id: 440786851 /* EBML */, data: [
+    { id: 17030 /* EBMLVersion */, data: 1 },
+    { id: 17143 /* EBMLReadVersion */, data: 1 },
+    { id: 17138 /* EBMLMaxIDLength */, data: 4 },
+    { id: 17139 /* EBMLMaxSizeLength */, data: 8 },
+    { id: 17026 /* DocType */, data: (_a = __privateGet(this, _options).type) != null ? _a : "webm" },
+    { id: 17031 /* DocTypeVersion */, data: 2 },
+    { id: 17029 /* DocTypeReadVersion */, data: 2 }
+  ] };
+  __privateGet(this, _writer).writeEBML(ebmlHeader);
+};
+_createCodecPrivatePlaceholders = new WeakSet();
+createCodecPrivatePlaceholders_fn = function() {
+  __privateSet(this, _videoCodecPrivate, { id: 236 /* Void */, size: 4, data: new Uint8Array(CODEC_PRIVATE_MAX_SIZE) });
+  __privateSet(this, _audioCodecPrivate, { id: 236 /* Void */, size: 4, data: new Uint8Array(CODEC_PRIVATE_MAX_SIZE) });
+  __privateSet(this, _subtitleCodecPrivate, { id: 236 /* Void */, size: 4, data: new Uint8Array(CODEC_PRIVATE_MAX_SIZE) });
+};
+_createColourElement = new WeakSet();
+createColourElement_fn = function() {
+  __privateSet(this, _colourElement, { id: 21936 /* Colour */, data: [
+    { id: 21937 /* MatrixCoefficients */, data: 2 },
+    { id: 21946 /* TransferCharacteristics */, data: 2 },
+    { id: 21947 /* Primaries */, data: 2 },
+    { id: 21945 /* Range */, data: 0 }
+  ] });
+};
+_createSeekHead = new WeakSet();
+createSeekHead_fn = function() {
+  const kaxCues = new Uint8Array([28, 83, 187, 107]);
+  const kaxInfo = new Uint8Array([21, 73, 169, 102]);
+  const kaxTracks = new Uint8Array([22, 84, 174, 107]);
+  let seekHead = { id: 290298740 /* SeekHead */, data: [
+    { id: 19899 /* Seek */, data: [
+      { id: 21419 /* SeekID */, data: kaxCues },
+      { id: 21420 /* SeekPosition */, size: 5, data: 0 }
+    ] },
+    { id: 19899 /* Seek */, data: [
+      { id: 21419 /* SeekID */, data: kaxInfo },
+      { id: 21420 /* SeekPosition */, size: 5, data: 0 }
+    ] },
+    { id: 19899 /* Seek */, data: [
+      { id: 21419 /* SeekID */, data: kaxTracks },
+      { id: 21420 /* SeekPosition */, size: 5, data: 0 }
+    ] }
+  ] };
+  __privateSet(this, _seekHead, seekHead);
+};
+_createSegmentInfo = new WeakSet();
+createSegmentInfo_fn = function() {
+  let segmentDuration = { id: 17545 /* Duration */, data: new EBMLFloat64(0) };
+  __privateSet(this, _segmentDuration, segmentDuration);
+  let segmentInfo = { id: 357149030 /* Info */, data: [
+    { id: 2807729 /* TimestampScale */, data: 1e6 },
+    { id: 19840 /* MuxingApp */, data: APP_NAME },
+    { id: 22337 /* WritingApp */, data: APP_NAME },
+    !__privateGet(this, _options).streaming ? segmentDuration : null
+  ] };
+  __privateSet(this, _segmentInfo, segmentInfo);
+};
+_createTracks = new WeakSet();
+createTracks_fn = function() {
+  let tracksElement = { id: 374648427 /* Tracks */, data: [] };
+  __privateSet(this, _tracksElement, tracksElement);
+  if (__privateGet(this, _options).video) {
+    tracksElement.data.push({ id: 174 /* TrackEntry */, data: [
+      { id: 215 /* TrackNumber */, data: VIDEO_TRACK_NUMBER },
+      { id: 29637 /* TrackUID */, data: VIDEO_TRACK_NUMBER },
+      { id: 131 /* TrackType */, data: VIDEO_TRACK_TYPE },
+      { id: 134 /* CodecID */, data: __privateGet(this, _options).video.codec },
+      __privateGet(this, _videoCodecPrivate),
+      __privateGet(this, _options).video.frameRate ? { id: 2352003 /* DefaultDuration */, data: 1e9 / __privateGet(this, _options).video.frameRate } : null,
+      { id: 224 /* Video */, data: [
+        { id: 176 /* PixelWidth */, data: __privateGet(this, _options).video.width },
+        { id: 186 /* PixelHeight */, data: __privateGet(this, _options).video.height },
+        __privateGet(this, _options).video.alpha ? { id: 21440 /* AlphaMode */, data: 1 } : null,
+        __privateGet(this, _colourElement)
+      ] }
+    ] });
+  }
+  if (__privateGet(this, _options).audio) {
+    __privateSet(this, _audioCodecPrivate, __privateGet(this, _options).streaming ? __privateGet(this, _audioCodecPrivate) || null : { id: 236 /* Void */, size: 4, data: new Uint8Array(CODEC_PRIVATE_MAX_SIZE) });
+    tracksElement.data.push({ id: 174 /* TrackEntry */, data: [
+      { id: 215 /* TrackNumber */, data: AUDIO_TRACK_NUMBER },
+      { id: 29637 /* TrackUID */, data: AUDIO_TRACK_NUMBER },
+      { id: 131 /* TrackType */, data: AUDIO_TRACK_TYPE },
+      { id: 134 /* CodecID */, data: __privateGet(this, _options).audio.codec },
+      __privateGet(this, _audioCodecPrivate),
+      { id: 225 /* Audio */, data: [
+        { id: 181 /* SamplingFrequency */, data: new EBMLFloat32(__privateGet(this, _options).audio.sampleRate) },
+        { id: 159 /* Channels */, data: __privateGet(this, _options).audio.numberOfChannels },
+        __privateGet(this, _options).audio.bitDepth ? { id: 25188 /* BitDepth */, data: __privateGet(this, _options).audio.bitDepth } : null
+      ] }
+    ] });
+  }
+  if (__privateGet(this, _options).subtitles) {
+    tracksElement.data.push({ id: 174 /* TrackEntry */, data: [
+      { id: 215 /* TrackNumber */, data: SUBTITLE_TRACK_NUMBER },
+      { id: 29637 /* TrackUID */, data: SUBTITLE_TRACK_NUMBER },
+      { id: 131 /* TrackType */, data: SUBTITLE_TRACK_TYPE },
+      { id: 134 /* CodecID */, data: __privateGet(this, _options).subtitles.codec },
+      __privateGet(this, _subtitleCodecPrivate)
+    ] });
+  }
+};
+_createSegment = new WeakSet();
+createSegment_fn = function() {
+  let segment = {
+    id: 408125543 /* Segment */,
+    size: __privateGet(this, _options).streaming ? -1 : SEGMENT_SIZE_BYTES,
+    data: [
+      !__privateGet(this, _options).streaming ? __privateGet(this, _seekHead) : null,
+      __privateGet(this, _segmentInfo),
+      __privateGet(this, _tracksElement)
+    ]
+  };
+  __privateSet(this, _segment, segment);
+  __privateGet(this, _writer).writeEBML(segment);
+};
+_createCues = new WeakSet();
+createCues_fn = function() {
+  __privateSet(this, _cues, { id: 475249515 /* Cues */, data: [] });
+};
+_maybeFlushStreamingTargetWriter = new WeakSet();
+maybeFlushStreamingTargetWriter_fn = function() {
+  if (__privateGet(this, _writer) instanceof StreamTargetWriter) {
+    __privateGet(this, _writer).flush();
+  }
+};
+_segmentDataOffset = new WeakSet();
+segmentDataOffset_get = function() {
+  return __privateGet(this, _writer).dataOffsets.get(__privateGet(this, _segment));
+};
+_writeVideoDecoderConfig = new WeakSet();
+writeVideoDecoderConfig_fn = function(meta) {
+  if (!meta.decoderConfig)
+    return;
+  if (meta.decoderConfig.colorSpace) {
+    let colorSpace = meta.decoderConfig.colorSpace;
+    __privateSet(this, _colorSpace, colorSpace);
+    __privateGet(this, _colourElement).data = [
+      { id: 21937 /* MatrixCoefficients */, data: {
+        "rgb": 1,
+        "bt709": 1,
+        "bt470bg": 5,
+        "smpte170m": 6
+      }[colorSpace.matrix] },
+      { id: 21946 /* TransferCharacteristics */, data: {
+        "bt709": 1,
+        "smpte170m": 6,
+        "iec61966-2-1": 13
+      }[colorSpace.transfer] },
+      { id: 21947 /* Primaries */, data: {
+        "bt709": 1,
+        "bt470bg": 5,
+        "smpte170m": 6
+      }[colorSpace.primaries] },
+      { id: 21945 /* Range */, data: [1, 2][Number(colorSpace.fullRange)] }
+    ];
+    if (!__privateGet(this, _options).streaming) {
+      let endPos = __privateGet(this, _writer).pos;
+      __privateGet(this, _writer).seek(__privateGet(this, _writer).offsets.get(__privateGet(this, _colourElement)));
+      __privateGet(this, _writer).writeEBML(__privateGet(this, _colourElement));
+      __privateGet(this, _writer).seek(endPos);
+    }
+  }
+  if (meta.decoderConfig.description) {
+    if (__privateGet(this, _options).streaming) {
+      __privateSet(this, _videoCodecPrivate, __privateMethod(this, _createCodecPrivateElement, createCodecPrivateElement_fn).call(this, meta.decoderConfig.description));
+    } else {
+      __privateMethod(this, _writeCodecPrivate, writeCodecPrivate_fn).call(this, __privateGet(this, _videoCodecPrivate), meta.decoderConfig.description);
+    }
+  }
+};
+_fixVP9ColorSpace = new WeakSet();
+fixVP9ColorSpace_fn = function(chunk) {
+  if (chunk.type !== "key")
+    return;
+  if (!__privateGet(this, _colorSpace))
+    return;
+  let i = 0;
+  if (readBits(chunk.data, 0, 2) !== 2)
+    return;
+  i += 2;
+  let profile = (readBits(chunk.data, i + 1, i + 2) << 1) + readBits(chunk.data, i + 0, i + 1);
+  i += 2;
+  if (profile === 3)
+    i++;
+  let showExistingFrame = readBits(chunk.data, i + 0, i + 1);
+  i++;
+  if (showExistingFrame)
+    return;
+  let frameType = readBits(chunk.data, i + 0, i + 1);
+  i++;
+  if (frameType !== 0)
+    return;
+  i += 2;
+  let syncCode = readBits(chunk.data, i + 0, i + 24);
+  i += 24;
+  if (syncCode !== 4817730)
+    return;
+  if (profile >= 2)
+    i++;
+  let colorSpaceID = {
+    "rgb": 7,
+    "bt709": 2,
+    "bt470bg": 1,
+    "smpte170m": 3
+  }[__privateGet(this, _colorSpace).matrix];
+  writeBits(chunk.data, i + 0, i + 3, colorSpaceID);
+};
+_writeSubtitleChunks = new WeakSet();
+writeSubtitleChunks_fn = function() {
+  let lastWrittenMediaTimestamp = Math.min(
+    __privateGet(this, _options).video ? __privateGet(this, _lastVideoTimestamp) : Infinity,
+    __privateGet(this, _options).audio ? __privateGet(this, _lastAudioTimestamp) : Infinity
+  );
+  let queue = __privateGet(this, _subtitleChunkQueue);
+  while (queue.length > 0 && queue[0].timestamp <= lastWrittenMediaTimestamp) {
+    __privateMethod(this, _writeBlock, writeBlock_fn).call(this, queue.shift(), !__privateGet(this, _options).video && !__privateGet(this, _options).audio);
+  }
+};
+_createInternalChunk = new WeakSet();
+createInternalChunk_fn = function(data, type, timestamp, trackNumber, duration, additions) {
+  let adjustedTimestamp = __privateMethod(this, _validateTimestamp, validateTimestamp_fn).call(this, timestamp, trackNumber);
+  let internalChunk = {
+    data,
+    additions,
+    type,
+    timestamp: adjustedTimestamp,
+    duration,
+    trackNumber
+  };
+  return internalChunk;
+};
+_validateTimestamp = new WeakSet();
+validateTimestamp_fn = function(timestamp, trackNumber) {
+  let lastTimestamp = trackNumber === VIDEO_TRACK_NUMBER ? __privateGet(this, _lastVideoTimestamp) : trackNumber === AUDIO_TRACK_NUMBER ? __privateGet(this, _lastAudioTimestamp) : __privateGet(this, _lastSubtitleTimestamp);
+  if (trackNumber !== SUBTITLE_TRACK_NUMBER) {
+    let firstTimestamp = trackNumber === VIDEO_TRACK_NUMBER ? __privateGet(this, _firstVideoTimestamp) : __privateGet(this, _firstAudioTimestamp);
+    if (__privateGet(this, _options).firstTimestampBehavior === "strict" && lastTimestamp === -1 && timestamp !== 0) {
+      throw new Error(
+        `The first chunk for your media track must have a timestamp of 0 (received ${timestamp}). Non-zero first timestamps are often caused by directly piping frames or audio data from a MediaStreamTrack into the encoder. Their timestamps are typically relative to the age of the document, which is probably what you want.
+
+If you want to offset all timestamps of a track such that the first one is zero, set firstTimestampBehavior: 'offset' in the options.
+If you want to allow non-zero first timestamps, set firstTimestampBehavior: 'permissive'.
+`
+      );
+    } else if (__privateGet(this, _options).firstTimestampBehavior === "offset") {
+      timestamp -= firstTimestamp;
+    }
+  }
+  if (timestamp < lastTimestamp) {
+    throw new Error(
+      `Timestamps must be monotonically increasing (went from ${lastTimestamp} to ${timestamp}).`
+    );
+  }
+  if (timestamp < 0) {
+    throw new Error(`Timestamps must be non-negative (received ${timestamp}).`);
+  }
+  return timestamp;
+};
+_writeBlock = new WeakSet();
+writeBlock_fn = function(chunk, canCreateNewCluster) {
+  if (__privateGet(this, _options).streaming && !__privateGet(this, _tracksElement)) {
+    __privateMethod(this, _createTracks, createTracks_fn).call(this);
+    __privateMethod(this, _createSegment, createSegment_fn).call(this);
+  }
+  let msTimestamp = Math.floor(chunk.timestamp / 1e3);
+  let shouldCreateNewClusterFromKeyFrame = canCreateNewCluster && chunk.type === "key" && msTimestamp - __privateGet(this, _currentClusterTimestamp) >= 1e3;
+  if (!__privateGet(this, _currentCluster) || shouldCreateNewClusterFromKeyFrame) {
+    __privateMethod(this, _createNewCluster, createNewCluster_fn).call(this, msTimestamp);
+  }
+  let relativeTimestamp = msTimestamp - __privateGet(this, _currentClusterTimestamp);
+  if (relativeTimestamp < 0) {
+    return;
+  }
+  let clusterIsTooLong = relativeTimestamp >= MAX_CHUNK_LENGTH_MS;
+  if (clusterIsTooLong) {
+    throw new Error(
+      `Current Matroska cluster exceeded its maximum allowed length of ${MAX_CHUNK_LENGTH_MS} milliseconds. In order to produce a correct WebM file, you must pass in a key frame at least every ${MAX_CHUNK_LENGTH_MS} milliseconds.`
+    );
+  }
+  let prelude = new Uint8Array(4);
+  let view = new DataView(prelude.buffer);
+  view.setUint8(0, 128 | chunk.trackNumber);
+  view.setInt16(1, relativeTimestamp, false);
+  if (chunk.duration === void 0 && !chunk.additions) {
+    view.setUint8(3, Number(chunk.type === "key") << 7);
+    let simpleBlock = { id: 163 /* SimpleBlock */, data: [
+      prelude,
+      chunk.data
+    ] };
+    __privateGet(this, _writer).writeEBML(simpleBlock);
+  } else {
+    let msDuration = Math.floor(chunk.duration / 1e3);
+    let blockGroup = { id: 160 /* BlockGroup */, data: [
+      { id: 161 /* Block */, data: [
+        prelude,
+        chunk.data
+      ] },
+      chunk.duration !== void 0 ? { id: 155 /* BlockDuration */, data: msDuration } : null,
+      chunk.additions ? { id: 30113 /* BlockAdditions */, data: chunk.additions } : null
+    ] };
+    __privateGet(this, _writer).writeEBML(blockGroup);
+  }
+  __privateSet(this, _duration, Math.max(__privateGet(this, _duration), msTimestamp));
+};
+_createCodecPrivateElement = new WeakSet();
+createCodecPrivateElement_fn = function(data) {
+  return { id: 25506 /* CodecPrivate */, size: 4, data: new Uint8Array(data) };
+};
+_writeCodecPrivate = new WeakSet();
+writeCodecPrivate_fn = function(element, data) {
+  let endPos = __privateGet(this, _writer).pos;
+  __privateGet(this, _writer).seek(__privateGet(this, _writer).offsets.get(element));
+  let codecPrivateElementSize = 2 + 4 + data.byteLength;
+  let voidDataSize = CODEC_PRIVATE_MAX_SIZE - codecPrivateElementSize;
+  if (voidDataSize < 0) {
+    let newByteLength = data.byteLength + voidDataSize;
+    if (data instanceof ArrayBuffer) {
+      data = data.slice(0, newByteLength);
+    } else {
+      data = data.buffer.slice(0, newByteLength);
+    }
+    voidDataSize = 0;
+  }
+  element = [
+    __privateMethod(this, _createCodecPrivateElement, createCodecPrivateElement_fn).call(this, data),
+    { id: 236 /* Void */, size: 4, data: new Uint8Array(voidDataSize) }
+  ];
+  __privateGet(this, _writer).writeEBML(element);
+  __privateGet(this, _writer).seek(endPos);
+};
+_createNewCluster = new WeakSet();
+createNewCluster_fn = function(timestamp) {
+  if (__privateGet(this, _currentCluster) && !__privateGet(this, _options).streaming) {
+    __privateMethod(this, _finalizeCurrentCluster, finalizeCurrentCluster_fn).call(this);
+  }
+  __privateSet(this, _currentCluster, {
+    id: 524531317 /* Cluster */,
+    size: __privateGet(this, _options).streaming ? -1 : CLUSTER_SIZE_BYTES,
+    data: [
+      { id: 231 /* Timestamp */, data: timestamp }
+    ]
+  });
+  __privateGet(this, _writer).writeEBML(__privateGet(this, _currentCluster));
+  __privateSet(this, _currentClusterTimestamp, timestamp);
+  let clusterOffsetFromSegment = __privateGet(this, _writer).offsets.get(__privateGet(this, _currentCluster)) - __privateGet(this, _segmentDataOffset, segmentDataOffset_get);
+  __privateGet(this, _cues).data.push({ id: 187 /* CuePoint */, data: [
+    { id: 179 /* CueTime */, data: timestamp },
+    __privateGet(this, _options).video ? { id: 183 /* CueTrackPositions */, data: [
+      { id: 247 /* CueTrack */, data: VIDEO_TRACK_NUMBER },
+      { id: 241 /* CueClusterPosition */, data: clusterOffsetFromSegment }
+    ] } : null,
+    __privateGet(this, _options).audio ? { id: 183 /* CueTrackPositions */, data: [
+      { id: 247 /* CueTrack */, data: AUDIO_TRACK_NUMBER },
+      { id: 241 /* CueClusterPosition */, data: clusterOffsetFromSegment }
+    ] } : null
+  ] });
+};
+_finalizeCurrentCluster = new WeakSet();
+finalizeCurrentCluster_fn = function() {
+  let clusterSize = __privateGet(this, _writer).pos - __privateGet(this, _writer).dataOffsets.get(__privateGet(this, _currentCluster));
+  let endPos = __privateGet(this, _writer).pos;
+  __privateGet(this, _writer).seek(__privateGet(this, _writer).offsets.get(__privateGet(this, _currentCluster)) + 4);
+  __privateGet(this, _writer).writeEBMLVarInt(clusterSize, CLUSTER_SIZE_BYTES);
+  __privateGet(this, _writer).seek(endPos);
+};
+_ensureNotFinalized = new WeakSet();
+ensureNotFinalized_fn = function() {
+  if (__privateGet(this, _finalized)) {
+    throw new Error("Cannot add new video or audio chunks after the file has been finalized.");
+  }
+};
+
+// src/subtitles.ts
+var cueBlockHeaderRegex = /(?:(.+?)\n)?((?:\d{2}:)?\d{2}:\d{2}.\d{3})\s+-->\s+((?:\d{2}:)?\d{2}:\d{2}.\d{3})/g;
+var preambleStartRegex = /^WEBVTT.*?\n{2}/;
+var timestampRegex = /(?:(\d{2}):)?(\d{2}):(\d{2}).(\d{3})/;
+var inlineTimestampRegex = /<(?:(\d{2}):)?(\d{2}):(\d{2}).(\d{3})>/g;
+var textEncoder = new TextEncoder();
+var _options2, _config, _preambleSeen, _preambleBytes, _preambleEmitted, _parseTimestamp, parseTimestamp_fn, _formatTimestamp, formatTimestamp_fn;
+var SubtitleEncoder = class {
+  constructor(options) {
+    __privateAdd(this, _parseTimestamp);
+    __privateAdd(this, _formatTimestamp);
+    __privateAdd(this, _options2, void 0);
+    __privateAdd(this, _config, void 0);
+    __privateAdd(this, _preambleSeen, false);
+    __privateAdd(this, _preambleBytes, void 0);
+    __privateAdd(this, _preambleEmitted, false);
+    __privateSet(this, _options2, options);
+  }
+  configure(config) {
+    if (config.codec !== "webvtt") {
+      throw new Error("Codec must be 'webvtt'.");
+    }
+    __privateSet(this, _config, config);
+  }
+  encode(text) {
+    var _a;
+    if (!__privateGet(this, _config)) {
+      throw new Error("Encoder not configured.");
+    }
+    text = text.replace("\r\n", "\n").replace("\r", "\n");
+    cueBlockHeaderRegex.lastIndex = 0;
+    let match;
+    if (!__privateGet(this, _preambleSeen)) {
+      if (!preambleStartRegex.test(text)) {
+        let error = new Error("WebVTT preamble incorrect.");
+        __privateGet(this, _options2).error(error);
+        throw error;
+      }
+      match = cueBlockHeaderRegex.exec(text);
+      let preamble = text.slice(0, (_a = match == null ? void 0 : match.index) != null ? _a : text.length).trimEnd();
+      if (!preamble) {
+        let error = new Error("No WebVTT preamble provided.");
+        __privateGet(this, _options2).error(error);
+        throw error;
+      }
+      __privateSet(this, _preambleBytes, textEncoder.encode(preamble));
+      __privateSet(this, _preambleSeen, true);
+      if (match) {
+        text = text.slice(match.index);
+        cueBlockHeaderRegex.lastIndex = 0;
+      }
+    }
+    while (match = cueBlockHeaderRegex.exec(text)) {
+      let notes = text.slice(0, match.index);
+      let cueIdentifier = match[1] || "";
+      let matchEnd = match.index + match[0].length;
+      let bodyStart = text.indexOf("\n", matchEnd) + 1;
+      let cueSettings = text.slice(matchEnd, bodyStart).trim();
+      let bodyEnd = text.indexOf("\n\n", matchEnd);
+      if (bodyEnd === -1)
+        bodyEnd = text.length;
+      let startTime = __privateMethod(this, _parseTimestamp, parseTimestamp_fn).call(this, match[2]);
+      let endTime = __privateMethod(this, _parseTimestamp, parseTimestamp_fn).call(this, match[3]);
+      let duration = endTime - startTime;
+      let body = text.slice(bodyStart, bodyEnd);
+      let additions = `${cueSettings}
+${cueIdentifier}
+${notes}`;
+      inlineTimestampRegex.lastIndex = 0;
+      body = body.replace(inlineTimestampRegex, (match2) => {
+        let time = __privateMethod(this, _parseTimestamp, parseTimestamp_fn).call(this, match2.slice(1, -1));
+        let offsetTime = time - startTime;
+        return `<${__privateMethod(this, _formatTimestamp, formatTimestamp_fn).call(this, offsetTime)}>`;
+      });
+      text = text.slice(bodyEnd).trimStart();
+      cueBlockHeaderRegex.lastIndex = 0;
+      let chunk = {
+        body: textEncoder.encode(body),
+        additions: additions.trim() === "" ? void 0 : textEncoder.encode(additions),
+        timestamp: startTime * 1e3,
+        duration: duration * 1e3
+      };
+      let meta = {};
+      if (!__privateGet(this, _preambleEmitted)) {
+        meta.decoderConfig = {
+          description: __privateGet(this, _preambleBytes)
+        };
+        __privateSet(this, _preambleEmitted, true);
+      }
+      __privateGet(this, _options2).output(chunk, meta);
+    }
+  }
+};
+_options2 = new WeakMap();
+_config = new WeakMap();
+_preambleSeen = new WeakMap();
+_preambleBytes = new WeakMap();
+_preambleEmitted = new WeakMap();
+_parseTimestamp = new WeakSet();
+parseTimestamp_fn = function(string) {
+  let match = timestampRegex.exec(string);
+  if (!match)
+    throw new Error("Expected match.");
+  return 60 * 60 * 1e3 * Number(match[1] || "0") + 60 * 1e3 * Number(match[2]) + 1e3 * Number(match[3]) + Number(match[4]);
+};
+_formatTimestamp = new WeakSet();
+formatTimestamp_fn = function(timestamp) {
+  let hours = Math.floor(timestamp / (60 * 60 * 1e3));
+  let minutes = Math.floor(timestamp % (60 * 60 * 1e3) / (60 * 1e3));
+  let seconds = Math.floor(timestamp % (60 * 1e3) / 1e3);
+  let milliseconds = timestamp % 1e3;
+  return hours.toString().padStart(2, "0") + ":" + minutes.toString().padStart(2, "0") + ":" + seconds.toString().padStart(2, "0") + "." + milliseconds.toString().padStart(3, "0");
+};
+export {
+  ArrayBufferTarget,
+  FileSystemWritableFileStreamTarget,
+  Muxer,
+  StreamTarget,
+  SubtitleEncoder
+};
+
+</script>
+<style id="szys">
+:root {
+  --bjsdfz:   #7c0a21;              /* 强调色:酒红 */
+  --bjsdfz-a: #7c0a2164;            /* 强调色+透明度 */
+  --bjsdfz-8: #7c0a2180;            /* 强调色半透 */
+  --wzys:     #1b1b1b;              /* 文字色 */
+  --wzys-a:   rgba(128,128,128,.7); /* 次要文字 */
+  --hanbj:    rgba(255,255,255,.55);/* 面板/输入框底色（浅色） */
+}
+</style>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { height: 100%; }
+  body { font-family: 'Times New Roman', 宋体, serif; cursor: default; overflow: hidden; }
+
+  .vfr { position: absolute; }
+
+  .app {
+    position: fixed; left: 0; top: 0; width: 100%; height: 100%;
+    color: var(--wzys); user-select: none;
+    background:
+      radial-gradient(circle at 20% 10%, #fdeef1 0%, transparent 55%),
+      radial-gradient(circle at 85% 90%, #f6e4e8 0%, transparent 55%),
+      linear-gradient(160deg, #ffffff 0%, #faf5f6 55%, #f3eaed 100%);
+  }
+  .app * { transition: background-color .2s, color .2s, box-shadow .2s, border-color .2s; }
+
+  .red-kuang {
+    transform: translateZ(0);
+    position: absolute; border: 0;
+    border-radius: .15em;
+    background-color: var(--hanbj);
+    box-shadow: 0 1px 9px var(--bjsdfz-a);
+    backdrop-filter: blur(15px);
+    overflow: auto;
+  }
+  .red-kuang::before {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background: inherit; background-size: cover;
+    filter: blur(8px);
+    backdrop-filter: url(#glass) blur(1px);
+    border-radius: .15em;
+  }
+
+  .tl { position: absolute; left: 22px; top: 14px; }
+  .tl .az { font-size: 24px; color: var(--bjsdfz); letter-spacing: 1px; font-weight: bold; }
+  .tl .sb { font-size: 12px; color: var(--wzys-a); margin-top: 2px; }
+
+  .up { left: 20px; top: 96px; width: 196px; padding: 10px 12px; }
+  #upB { top: 336px; }
+  .up .ph {
+    font-size: 12px; color: var(--wzys-a); margin-bottom: 6px;
+    border-bottom: 1px solid var(--bjsdfz-8); padding-bottom: 3px;
+    display: flex; justify-content: space-between;
+  }
+  .up .ph .tag { color: var(--bjsdfz); font-style: italic; }
+  .zone {
+    width: 100%; height: 128px;
+    border: 1px dashed var(--bjsdfz-8); border-radius: .15em;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; cursor: default; background: rgba(255,255,255,.4);
+  }
+  .zone:hover { box-shadow: 0 0 10px var(--bjsdfz-a); }
+  .zone .ph-ic { text-align: center; color: var(--wzys-a); font-size: 11px; }
+  .zone .ph-ic .ic { font-size: 22px; display: block; color: var(--bjsdfz); }
+  .zone img { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
+  .up .info { margin-top: 6px; font-size: 10px; color: var(--wzys-a); min-height: 12px; text-align: center; }
+  .filelabel {
+    display: block; text-align: center; margin-top: 6px; padding: 4px 8px;
+    cursor: default; border: 1px solid var(--bjsdfz-8); border-radius: .15em;
+    color: var(--bjsdfz); font-size: 11px;
+  }
+  .filelabel:hover { background: var(--bjsdfz); color: #fff; box-shadow: 0 1px 5px var(--bjsdfz); }
+  .up input[type=file] { display: none; }
+
+  .stage {
+    display: flex; align-items: center; justify-content: center;
+    left: 234px; right: 218px; top: 64px; bottom: 58px;
+    overflow: hidden;
+  }
+  .stage canvas { display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
+
+  .ctl { right: 20px; top: 64px; bottom: 58px; width: 188px; padding: 12px 13px; }
+  .ctl .grp { margin-bottom: 11px; }
+  .ctl .lbl { font-size: 11px; color: var(--wzys-a); margin-bottom: 4px; border-bottom: 1px solid var(--bjsdfz-8); padding-bottom: 2px; }
+  .ctl .row { display: flex; align-items: center; gap: 5px; }
+  .ctl input[type=number] {
+    background: var(--hanbj); color: var(--wzys); border: 0; outline: none;
+    border-bottom: 2px solid transparent; border-radius: .15em;
+    text-indent: 3px; font-family: Times New Roman; font-size: 12px; font-style: italic;
+    box-shadow: 0 1px 5px var(--bjsdfz-a); width: 62px; padding: 2px 2px; text-align: center;
+  }
+  .ctl input[type=number]:focus { border-bottom: 2px solid var(--bjsdfz-8); box-shadow: 0 0 10px var(--bjsdfz-a); }
+  .ctl .unit { font-size: 10px; color: var(--wzys-a); white-space: nowrap; }
+  .ctl select {
+    width: 100%; background: var(--hanbj); color: var(--wzys); border: 0; outline: none;
+    border-bottom: 2px solid transparent; border-radius: .15em; font-size: 12px; font-style: italic;
+    text-indent: 3px; box-shadow: 0 1px 5px var(--bjsdfz-a); padding: 2px 2px; cursor: default;
+  }
+  .ctl select:hover { box-shadow: 0 0 10px var(--bjsdfz-a); }
+  .ctl select:focus { border-bottom: 2px solid var(--bjsdfz-8); }
+  .ctl option { color: var(--bjsdfz); background: #fff; }
+
+  .btn {
+    display: block; width: 100%; text-align: center; cursor: default;
+    border: 1px solid var(--bjsdfz-8); background: transparent; color: var(--bjsdfz);
+    border-radius: .15em; font-family: Times New Roman, 宋体, serif;
+    font-size: 12px; letter-spacing: .5px; padding: 5px 0; margin-bottom: 7px;
+  }
+  .btn:hover:not(:disabled) { background: var(--bjsdfz); color: #fff; box-shadow: 0 1px 5px var(--bjsdfz); }
+  .btn:active:not(:disabled) { transform: scale(.96); }
+  .btn:disabled { opacity: .32; cursor: default; }
+  .btn.main { font-size: 14px; padding: 7px 0; border-width: 2px; }
+  .btn.tog.active { background: var(--bjsdfz-8); color: #fff; }
+  .btn.small { font-size: 11px; padding: 3px 0; }
+  .btnrow { margin-top: 2px; }
+  hr { border: 0; border-top: 1px solid var(--bjsdfz-8); margin: 9px 0; }
+
+  .st {
+    position: absolute; left: 0; right: 0; margin: auto; bottom: 14px;
+    width: 380px; text-align: center;
+    font-size: 12px; color: var(--wzys-a); font-style: italic; min-height: 18px;
+  }
+  .st.ready      { color: #1a7a52; }
+  .st.animating  { color: var(--bjsdfz); }
+  .st.recording  { color: #c24d2a; }
+  .st.warning    { color: #a06a00; }
+  .st.processing { color: #b3661a; }
+
+  .ldd {
+    position: absolute; top: 2px; left: 0; right: 0; margin: auto;
+    width: 180px; height: 3px; z-index: 114;
+    box-shadow: 0 3px 15px rgba(0,0,0,.5); border-radius: 50%;
+    overflow: hidden; display: none; background: rgba(124,10,33,.18);
+  }
+  .ldd.on { display: block; }
+  .ldd .bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--bjsdfz-8), var(--bjsdfz)); transition: width .1s linear; }
+  .ldd.rec .bar { background: linear-gradient(90deg, #ff9d5c, #ff6b8a); }
+
+  *::-webkit-scrollbar { width: 10px; height: 10px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb { background: var(--bjsdfz-8); border: 2px solid transparent; background-clip: padding-box; border-radius: .15em; }
+  *::-webkit-scrollbar-thumb:hover { background-color: var(--bjsdfz); }
+  *::-webkit-scrollbar-button { display: none; }
+  *::-webkit-scrollbar-corner { background: transparent; }
+
+  @media (max-width: 760px) {
+    body { overflow: auto; }
+    .app { position: relative; height: auto; min-height: 100%; overflow: visible; padding: 64px 10px 16px; }
+    .tl { left: 10px; top: 8px; }
+    .tl .az { font-size: 18px; }
+    .up { position: relative; left: auto; top: auto; width: 100%; margin-bottom: 10px; }
+    #upB { top: auto; }
+    .up .zone { height: 110px; }
+    .ctl { position: relative; right: auto; top: auto; bottom: auto; width: 100%; margin-top: 8px; }
+    .stage { position: relative; left: auto; right: auto; top: auto; bottom: auto; width: 100%; min-height: 260px; margin-top: 8px; }
+    .st { position: relative; width: 100%; margin-top: 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <svg style="display:none" aria-hidden="true">
+    <defs>
+      <filter id="glass" x="0%" y="0%" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="2" seed="114514" result="noise"/>
+        <feGaussianBlur in="noise" stdDeviation="2" result="blurred"/>
+        <feDisplacementMap in="SourceGraphic" in2="blurred" scale="20" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="ldd" id="ldd"><div class="bar" id="bar"></div></div>
+
+  <div class="tl">
+    <div class="az">Pixel Sort Morph</div>
+    <div class="sb">颜色合并中介 · 像素排序变形</div>
+  </div>
+
+  <div class="red-kuang up" id="upA">
+    <div class="ph"><span>源图片 A</span><span class="tag">SOURCE</span></div>
+    <div class="zone" id="zoneA"><div class="ph-ic"><span class="ic">▦</span>点击 / 拖拽</div></div>
+    <div class="info" id="infoA"></div>
+    <label class="filelabel" for="fileA">选择图片 A</label>
+    <input type="file" id="fileA" accept="image/*">
+  </div>
+
+  <div class="red-kuang up" id="upB">
+    <div class="ph"><span>目标图片 B</span><span class="tag">TARGET</span></div>
+    <div class="zone" id="zoneB"><div class="ph-ic"><span class="ic">▦</span>点击 / 拖拽</div></div>
+    <div class="info" id="infoB"></div>
+    <label class="filelabel" for="fileB">选择图片 B</label>
+    <input type="file" id="fileB" accept="image/*">
+  </div>
+
+  <div class="red-kuang stage" id="stageBox">
+    <canvas id="mainCanvas"></canvas>
+  </div>
+
+  <div class="red-kuang ctl" id="ctl">
+    <div class="grp">
+      <div class="lbl">分辨率 px · 正方形</div>
+      <div class="row">
+        <input type="number" id="resolution" min="1" max="4096" value="120" step="1">
+        <span class="unit" id="resInfo">120 × 120</span>
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="lbl">排序依据</div>
+      <select id="sortMethod">
+        <option value="luminance">明度</option>
+        <option value="saturation">饱和度</option>
+        <option value="hue">色相</option>
+        <option value="red">红色通道</option>
+        <option value="green">绿色通道</option>
+        <option value="blue">蓝色通道</option>
+      </select>
+    </div>
+
+    <div class="grp">
+      <div class="lbl">动画时长 (秒)</div>
+      <div class="row">
+        <input type="number" id="duration" min="0.1" max="600" value="2.5" step="0.1">
+        <span class="unit">s</span>
+      </div>
+    </div>
+
+    <hr>
+
+    <button class="btn tog" id="btnTrail">✦ 拖尾效果</button>
+    <button class="btn tog" id="btnBgImgA">❐ 背景图 A</button>
+    <button class="btn tog active" id="btnColorMorph">◈ 颜色渐变</button>
+    <button class="btn tog" id="btnReverse">↩ 倒放</button>
+
+    <hr>
+
+    <button class="btn small" id="btnPreprocess" disabled>🌈 颜色合并中介（统一颜色）</button>
+    <button class="btn main" id="btnTransform" disabled>⟳ 开始变换</button>
+    <button class="btn" id="btnReset" disabled>↺ 重置</button>
+
+    <hr>
+
+    <div class="grp">
+      <div class="lbl">导出帧率 (fps)</div>
+      <div class="row">
+        <input type="number" id="exportFps" min="1" max="120" value="30" step="1">
+        <span class="unit">fps</span>
+      </div>
+    </div>
+    <div class="grp">
+      <div class="lbl">导出播放方向</div>
+      <select id="exportDir">
+        <option value="forward">正放一次</option>
+        <option value="reverse">倒放一次</option>
+        <option value="pingpong">正放再倒放（两次）</option>
+      </select>
+    </div>
+    <div class="btnrow">
+      <button class="btn main" id="btnExportGif" disabled>GIF 导出</button>
+      <button class="btn" id="btnExport" disabled>输出短片 (WebM)</button>
+    </div>
+  </div>
+
+  <div class="st" id="status">请先上传两张图片</div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // DOM
+  const canvas        = document.getElementById('mainCanvas');
+  const ctx           = canvas.getContext('2d', { willReadFrequently: true });
+  const statusEl      = document.getElementById('status');
+  const ldd           = document.getElementById('ldd');
+  const barEl         = document.getElementById('bar');
+  const btnTransform  = document.getElementById('btnTransform');
+  const btnReset      = document.getElementById('btnReset');
+  const btnExport     = document.getElementById('btnExport');
+  const btnExportGif  = document.getElementById('btnExportGif');
+  const btnTrail      = document.getElementById('btnTrail');
+  const btnBgImgA     = document.getElementById('btnBgImgA');
+  const btnColorMorph = document.getElementById('btnColorMorph');
+  const btnReverse    = document.getElementById('btnReverse');
+  const btnPreprocess = document.getElementById('btnPreprocess');
+  const resInput      = document.getElementById('resolution');
+  const durInput      = document.getElementById('duration');
+  const resInfo       = document.getElementById('resInfo');
+  const sortSelect    = document.getElementById('sortMethod');
+  const fpsInput      = document.getElementById('exportFps');
+  const exportDir     = document.getElementById('exportDir');
+  const zoneA         = document.getElementById('zoneA');
+  const zoneB         = document.getElementById('zoneB');
+  const fileA         = document.getElementById('fileA');
+  const fileB         = document.getElementById('fileB');
+  const infoA         = document.getElementById('infoA');
+  const infoB         = document.getElementById('infoB');
+
+  // 状态
+  let originalImgA   = null;
+  let originalImgB   = null;
+  let rawImageAData  = null;   // 未经预处理的裁切数据 (基准)
+  let rawImageBData  = null;
+  let imageAData     = null;   // 当前工作数据 (可能被预处理覆盖)
+  let imageBData     = null;
+  let sortedA        = null;
+  let animationId    = null;
+  let isAnimating    = false;
+  let isRecording    = false;
+  let trailOn        = false;
+  let bgImgAOn       = false;
+  let colorMorphOn   = true;
+  let reversePlay    = false;
+  let trailBuffer    = null;
+  let autoRes        = true;
+  let naturalSizeA   = 0;
+  let naturalSizeB   = 0;
+
+  // 工具
+  const getResolution = () => Math.max(1, parseInt(resInput.value) || 120);
+  const getSortMethod = () => sortSelect.value;
+  const getDurationMs = () => Math.max(100, parseFloat(durInput.value) * 1000 || 2500);
+  const getExportFps  = () => Math.max(1, Math.min(120, parseInt(fpsInput.value) || 30));
+  const getExportDir  = () => exportDir.value || 'forward';
+  // 根据导出方向生成一帧帧的进度序列（首尾双向易用）
+  function buildTimeline() {
+    const fps = getExportFps();
+    const n = Math.max(1, Math.round(getDurationMs() / 1000 * fps));
+    const d = Math.max(1, n - 1);
+    const raw = [];
+    if (getExportDir() === 'reverse') {
+      for (let i = n - 1; i >= 0; i--) raw.push(i / d);
+    } else if (getExportDir() === 'pingpong') {
+      for (let i = 0; i < n; i++) raw.push(i / d);
+      for (let i = n - 2; i >= 0; i--) raw.push(Math.max(0, i / d)); // 正放接着倒放
+    } else {
+      for (let i = 0; i < n; i++) raw.push(i / d);
+    }
+    return raw.map(easeInOutCubic);
+  }
+  function naturalMaxSize() { return Math.max(naturalSizeA, naturalSizeB) || 0; }
+  function updateResInfo(size) { resInfo.textContent = size + ' × ' + size + ' 像素'; }
+  function setAutoResolution() { if (autoRes && naturalMaxSize() > 0) { resInput.value = naturalMaxSize(); updateResInfo(naturalMaxSize()); } }
+  function getDisplaySize() {
+    return window.innerWidth <= 760
+      ? Math.min(window.innerWidth - 40, 500)
+      : Math.min(Math.max(300, window.innerWidth - 480), 680, window.innerHeight - 160);
+  }
+  function downloadBlob(blob, name) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  }
+  function setProgress(ratio, recording) {
+    ldd.classList.toggle('on', ratio > 0 && ratio < 1);
+    barEl.style.width = (ratio * 100) + '%';
+    ldd.classList.toggle('rec', !!recording);
+  }
+  function lockButtons(lock) {
+    [btnTransform, btnReset, btnExport, btnExportGif, btnPreprocess, resInput, durInput, fpsInput, sortSelect, exportDir].forEach(el => {
+      if (el) el.disabled = lock;
+    });
+  }
+  function unlockButtons() {
+    [btnTransform, btnReset, btnExport, btnExportGif, btnPreprocess, resInput, durInput, fpsInput, sortSelect, exportDir].forEach(el => {
+      if (el) el.disabled = false;
+    });
+  }
+
+  // 排序键
+  function sortKey(r,g,b,method) {
+    switch (method) {
+      case 'luminance': return 0.299*r+0.587*g+0.114*b;
+      case 'saturation': { let mx=Math.max(r,g,b), mn=Math.min(r,g,b); return mx===0?0:(mx-mn)/mx; }
+      case 'hue': { let mx=Math.max(r,g,b), mn=Math.min(r,g,b); if(mx===mn) return 0; let d=mx-mn;
+        if(mx===r) return ((g-b)/d+(g<b?6:0))/6; if(mx===g) return ((b-r)/d+2)/6; return ((r-g)/d+4)/6; }
+      case 'red': return r; case 'green': return g; case 'blue': return b;
+      default: return 0.299*r+0.587*g+0.114*b;
+    }
+  }
+
+  // 裁切 & 缩放为正方形
+  function cropAndResize(img, size) {
+    const c = document.createElement('canvas'); c.width = size; c.height = size;
+    const octx = c.getContext('2d');
+    const iw = img.naturalWidth, ih = img.naturalHeight;
+    let sx, sy, sw, sh;
+    if (iw/ih > 1) { sh = ih; sw = ih; sx = (iw-sw)/2; sy = 0; }
+    else { sw = iw; sh = iw; sx = 0; sy = (ih-sh)/2; }
+    octx.drawImage(img, sx, sy, sw, sh, 0, 0, size, size);
+    return octx.getImageData(0,0,size,size);
+  }
+  // 核心映射 (预处理用)
+  function remapImageBySorting(sourceImgData, targetImgData, method) {
+    const size = sourceImgData.width;
+    function extractPixels(imgData) {
+      const d = imgData.data, arr = [];
+      for (let y=0; y<size; y++) for (let x=0; x<size; x++) {
+        const idx = (y*size + x) * 4;
+        const r = d[idx], g = d[idx+1], b = d[idx+2];
+        arr.push({ r, g, b, x, y, key: sortKey(r,g,b,method) });
+      }
+      arr.sort((a,b) => a.key - b.key);
+      return arr;
+    }
+    const srcPixels = extractPixels(sourceImgData);
+    const tgtPixels = extractPixels(targetImgData);
+    const outData = new Uint8ClampedArray(size * size * 4);
+    for (let i = 0; i < srcPixels.length; i++) {
+      const src = srcPixels[i], tgt = tgtPixels[i];
+      const outIdx = (tgt.y * size + tgt.x) * 4;
+      outData[outIdx] = src.r; outData[outIdx+1] = src.g; outData[outIdx+2] = src.b; outData[outIdx+3] = 255;
+    }
+    return new ImageData(outData, size, size);
+  }
+
+  // 标准排序与配对
+  function processImages() {
+    if (!imageAData || !imageBData) return;
+    const size = imageAData.width;
+    const method = getSortMethod();
+    function extract(imgData) {
+      const d = imgData.data, pixels = [];
+      for(let y=0; y<size; y++) for(let x=0; x<size; x++) {
+        const idx = (y*size+x)*4;
+        pixels.push({ r:d[idx], g:d[idx+1], b:d[idx+2], x, y, key: sortKey(d[idx],d[idx+1],d[idx+2],method) });
+      }
+      return pixels;
+    }
+    let pixelsA = extract(imageAData), pixelsB = extract(imageBData);
+    pixelsA.sort((a,b)=>a.key-b.key); pixelsB.sort((a,b)=>a.key-b.key);
+    sortedA = new Array(size*size);
+    for(let i=0;i<pixelsA.length;i++) {
+      sortedA[i] = {
+        r: pixelsA[i].r, g: pixelsA[i].g, b: pixelsA[i].b,
+        dr: pixelsB[i].r, dg: pixelsB[i].g, db: pixelsB[i].b,
+        sx: pixelsA[i].x, sy: pixelsA[i].y,
+        tx: pixelsB[i].x, ty: pixelsB[i].y,
+        key: pixelsA[i].key
+      };
+    }
+    optimizePairing(sortedA);
+  }
+  function optimizePairing(arr) {
+    let start=0, n=arr.length;
+    while(start<n) {
+      let end=start+1;
+      while(end<n && arr[end].key===arr[start].key) end++;
+      if(end-start>1) {
+        let srcs = arr.slice(start,end).map(p=>({sx:p.sx, sy:p.sy}));
+        let tgts = arr.slice(start,end).map(p=>({tx:p.tx, ty:p.ty, dr:p.dr, dg:p.dg, db:p.db}));
+        srcs.sort((a,b)=>(a.sx+a.sy)-(b.sx+b.sy)||a.sx-b.sx||a.sy-b.sy);
+        tgts.sort((a,b)=>(a.tx+a.ty)-(b.tx+b.ty)||a.tx-b.tx||a.ty-b.ty);
+        for(let i=start;i<end;i++) {
+          let t = tgts[i-start];
+          arr[i].tx=t.tx; arr[i].ty=t.ty; arr[i].dr=t.dr; arr[i].dg=t.dg; arr[i].db=t.db;
+        }
+      }
+      start=end;
+    }
+  }
+
+  // 渲染
+  function setCanvasSize(size) {
+    canvas.width = size; canvas.height = size;
+    let ds = getDisplaySize();
+    canvas.style.width = ds + 'px'; canvas.style.height = ds + 'px';
+  }
+  function renderImageA() { if(imageAData) { setCanvasSize(imageAData.width); ctx.putImageData(imageAData,0,0); } }
+  function pixelColor(p, progress) {
+    if(!colorMorphOn) return { r:p.r, g:p.g, b:p.b };
+    return { r:(p.r+(p.dr-p.r)*progress+0.5)|0, g:(p.g+(p.dg-p.g)*progress+0.5)|0, b:(p.b+(p.db-p.b)*progress+0.5)|0 };
+  }
+  function paintFrame(progress, dst) {
+    const size = imageAData.width;
+    let data = dst.data;
+    if(bgImgAOn && imageAData) data.set(imageAData.data);
+    else for(let i=0;i<data.length;i+=4) { data[i]=10; data[i+1]=8; data[i+2]=20; data[i+3]=255; }
+    for(const p of sortedA) {
+      let ix = Math.round(p.sx+(p.tx-p.sx)*progress), iy = Math.round(p.sy+(p.ty-p.sy)*progress);
+      if(ix>=0 && ix<size && iy>=0 && iy<size) {
+        let idx = (iy*size+ix)*4, c = pixelColor(p,progress);
+        data[idx]=c.r; data[idx+1]=c.g; data[idx+2]=c.b; data[idx+3]=255;
+      }
+    }
+  }
+  function renderFrame(progress) {
+    if(!sortedA) return;
+    const size = imageAData.width; setCanvasSize(size);
+    if(!trailOn) {
+      let imgData = ctx.createImageData(size,size);
+      paintFrame(progress, imgData);
+      ctx.putImageData(imgData,0,0);
+    } else {
+      if(!trailBuffer || trailBuffer.width!==size) { trailBuffer=ctx.createImageData(size,size); initTrailBuffer(size); }
+      let buf = trailBuffer.data, decay=0.98;
+      if(bgImgAOn && imageAData) { let src=imageAData.data;
+        for(let i=0;i<buf.length;i+=4) { buf[i]=buf[i]*decay+src[i]*(1-decay); buf[i+1]=buf[i+1]*decay+src[i+1]*(1-decay); buf[i+2]=buf[i+2]*decay+src[i+2]*(1-decay); buf[i+3]=255; } }
+      else for(let i=0;i<buf.length;i+=4) { buf[i]*=decay; buf[i+1]*=decay; buf[i+2]*=decay; buf[i+3]=255; }
+      for(const p of sortedA) {
+        let ix = Math.round(p.sx+(p.tx-p.sx)*progress), iy = Math.round(p.sy+(p.ty-p.sy)*progress);
+        if(ix>=0 && ix<size && iy>=0 && iy<size) {
+          let idx=(iy*size+ix)*4, c=pixelColor(p,progress);
+          buf[idx]=c.r; buf[idx+1]=c.g; buf[idx+2]=c.b; buf[idx+3]=255;
+        }
+      }
+      ctx.putImageData(trailBuffer,0,0);
+    }
+  }
+  function initTrailBuffer(size) {
+    if(bgImgAOn && imageAData) trailBuffer.data.set(imageAData.data);
+    else for(let i=0;i<trailBuffer.data.length;i+=4) { trailBuffer.data[i]=10; trailBuffer.data[i+1]=8; trailBuffer.data[i+2]=20; trailBuffer.data[i+3]=255; }
+  }
+  function easeInOutCubic(t) { return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2; }
+// 预处理：颜色合并中介
+  async function preprocessWithColorMerging() {
+    if (isAnimating || isRecording) return;
+    if (!rawImageAData || !rawImageBData) { statusEl.textContent='请先上传两张图片'; statusEl.className='status warning'; return; }
+    lockButtons(true); btnPreprocess.disabled = true;
+    statusEl.textContent = '🌈 颜色合并中介: 统计颜色 → 生成C → 映射回A/B ...';
+    statusEl.className = 'status processing';
+    await new Promise(r => setTimeout(r, 30));
+    try {
+      const size = rawImageAData.width;
+      const totalPixels = size * size;
+      const buildColorFreq = (imgData) => {
+        const freq = new Map(), data = imgData.data;
+        for (let i = 0; i < totalPixels; i++) {
+          const r=data[i*4], g=data[i*4+1], b=data[i*4+2], key=`${r},${g},${b}`;
+          freq.set(key, (freq.get(key) || 0) + 1);
+        }
+        return freq;
+      };
+      const freqA = buildColorFreq(rawImageAData), freqB = buildColorFreq(rawImageBData);
+      const mergedFreq = new Map();
+      for (let [c,n] of freqA.entries()) mergedFreq.set(c,n);
+      for (let [c,n] of freqB.entries()) mergedFreq.set(c, (mergedFreq.get(c)||0)+n);
+      let targetFreq = new Map(), sumTarget = 0;
+      for (let [color,total] of mergedFreq.entries()) {
+        let t = Math.round(total/2); if(t===0 && total>0) t=1;
+        targetFreq.set(color,t); sumTarget += t;
+      }
+      let diff = totalPixels - sumTarget;
+      if(diff!==0) {
+        const sortedColors = Array.from(targetFreq.entries()).sort((a,b)=>b[1]-a[1]);
+        let idx=0;
+        while(diff!==0 && idx<sortedColors.length) {
+          const color=sortedColors[idx][0];
+          if(diff>0){ targetFreq.set(color,targetFreq.get(color)+1); diff--; }
+          else if(targetFreq.get(color)>0){ targetFreq.set(color,targetFreq.get(color)-1); diff++; }
+          idx=(idx+1)%sortedColors.length;
+        }
+      }
+      let pixelList=[];
+      for (let [color,cnt] of targetFreq.entries()) {
+        const [r,g,b]=color.split(',').map(Number);
+        for(let i=0;i<cnt;i++) pixelList.push([r,g,b]);
+      }
+      if(pixelList.length!==totalPixels){ while(pixelList.length<totalPixels)pixelList.push([0,0,0]); pixelList=pixelList.slice(0,totalPixels); }
+      for(let i=pixelList.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pixelList[i],pixelList[j]]=[pixelList[j],pixelList[i]]; }
+      const cData = new Uint8ClampedArray(totalPixels*4);
+      for(let i=0;i<totalPixels;i++){ const [r,g,b]=pixelList[i]; cData[i*4]=r; cData[i*4+1]=g; cData[i*4+2]=b; cData[i*4+3]=255; }
+      const imageC = new ImageData(cData, size, size);
+      const method = getSortMethod();
+      imageAData = remapImageBySorting(imageC, rawImageAData, method);
+      imageBData = remapImageBySorting(imageC, rawImageBData, method);
+      infoA.textContent = infoA.textContent.split(' [中介]')[0] + ' [中介颜色统一]';
+      infoB.textContent = infoB.textContent.split(' [中介]')[0] + ' [中介颜色统一]';
+      processImages(); renderImageA();
+      const colorCount = targetFreq.size;
+      statusEl.textContent = `✅ 预处理完成！A/B 现共用 ${colorCount} 种颜色，数量完全一致。`;
+      statusEl.className = 'status ready';
+    } catch (err) {
+      console.error(err);
+      statusEl.textContent = '⚠ 预处理失败: ' + err.message;
+      statusEl.className = 'status warning';
+    } finally {
+      unlockButtons(); btnPreprocess.disabled = false;
+    }
+  }
+
+  // 动画预览
+  function startAnimation(onDone) {
+    if (isAnimating || !sortedA) return;
+    isAnimating=true; trailBuffer=null;
+    const duration=getDurationMs(), startTime=performance.now();
+    function frame(now){
+      let elapsed=now-startTime, raw=Math.min(elapsed/duration,1);
+      let t = reversePlay ? easeInOutCubic(1-raw) : easeInOutCubic(raw);
+      renderFrame(t); setProgress(reversePlay ? 1-raw : raw, false);
+      if(raw<1) animationId=requestAnimationFrame(frame);
+      else { isAnimating=false; animationId=null; trailBuffer=null; setProgress(0,false); if(onDone) onDone(); }
+    }
+    animationId=requestAnimationFrame(frame);
+  }
+  function handleTransform() {
+    if(isAnimating||isRecording||!sortedA) return;
+    lockButtons(true);
+    statusEl.textContent='变换中...'; statusEl.className='status animating';
+    startAnimation(()=>{ unlockButtons(); statusEl.textContent='变换完成！用A的像素拼出B的结构。'; statusEl.className='status ready'; });
+  }
+  function resetToOriginal() {
+    if(isAnimating){ cancelAnimationFrame(animationId); isAnimating=false; }
+    if(rawImageAData && rawImageBData) {
+      imageAData = rawImageAData; imageBData = rawImageBData;
+      processImages(); renderImageA();
+      statusEl.textContent = '已重置到原始图片 (未预处理)';
+    } else {
+      statusEl.textContent = '无原始备份';
+    }
+    setProgress(0,false); unlockButtons(); statusEl.className='status ready';
+  }
+// GIF 导出（gif.js）
+  function gifWorkerUrl() {
+    const el = document.getElementById('gifWorkerSrc');
+    return (el && el.textContent) ? URL.createObjectURL(new Blob([el.textContent], { type: 'text/javascript' })) : '';
+  }
+  async function exportGif() {
+    if (isAnimating || isRecording || !sortedA) return;
+    if (typeof window.GIF === 'undefined') {
+      statusEl.textContent = '⚠ GIF 编码器未就绪，请刷新后重试';
+      statusEl.className = 'status warning';
+      return;
+    }
+    lockButtons(true);
+    statusEl.textContent = 'GIF: 逐帧渲染中 ...';
+    statusEl.className = 'status recording';
+    const fps = getExportFps();
+    const timeline = buildTimeline();
+    const frames = timeline.length;
+    const size = imageAData.width;
+    const gif = new window.GIF({
+      workers: 2,
+      quality: 10,
+      width: size,
+      height: size,
+      workerScript: gifWorkerUrl()
+    });
+    try {
+      const scratch = document.createElement('canvas'); scratch.width = size; scratch.height = size;
+      const octx = scratch.getContext('2d');
+      const tmpImg = octx.createImageData(size, size);
+      for (let i = 0; i < frames; i++) {
+        paintFrame(timeline[i], tmpImg);
+        octx.putImageData(tmpImg, 0, 0);
+        gif.addFrame(scratch, { delay: Math.round(1000 / fps), copy: true });
+        setProgress(i / (frames - 1), true);
+        if (i % 12 === 11) await new Promise(r => setTimeout(r, 0));
+      }
+      gif.render();
+      const blob = await new Promise((resolve, reject) => {
+        gif.on('finished', resolve);
+        gif.on('abort', () => reject(new Error('GIF 编码被中断')));
+      });
+      downloadBlob(blob, `pixel-morph-${size}px.gif`);
+      statusEl.textContent = `✅ GIF 已导出 (${(blob.size / 1024 / 1024).toFixed(2)} MB)`;
+      statusEl.className = 'status ready';
+    } catch (err) {
+      console.error(err);
+      statusEl.textContent = '⚠ GIF 导出失败: ' + err.message;
+      statusEl.className = 'status warning';
+    } finally {
+      setProgress(0, false);
+      unlockButtons();
+    }
+  }
+
+  // WebM 导出：确定性逐帧渲染 + WebCodecs 编码（不丢帧，每帧都渲染）
+  async function pickEncoder(size, fps) {
+    const base = { width: size, height: size, framerate: fps, bitrate: Math.max(1_000_000, size * size * 8) };
+    const cands = [
+      { codec: 'vp09.00.10.08', ...base },
+      { codec: 'av01.0.04M.08', ...base },
+      { codec: 'vp8', ...base }
+    ];
+    for (const c of cands) {
+      try { const s = await VideoEncoder.isConfigSupported(c); if (s.supported) return c; } catch (e) {}
+    }
+    return null;
+  }
+  function vpCodecToMux(codec) {
+    if (/^vp9/.test(codec)) return 'V_VP9';
+    if (/^av0/.test(codec)) return 'V_AV1';
+    return 'V_VP8';
+  }
+  async function exportWebM() {
+    if (isAnimating || isRecording || !sortedA) return;
+    if (typeof VideoEncoder === 'undefined' || typeof VideoFrame === 'undefined') {
+      statusEl.textContent = '⚠ 浏览器不支持 WebCodecs（无法导出 WebM）';
+      statusEl.className = 'status warning';
+      return;
+    }
+    let MuxerCtor, ArrayBufferCtor;
+    try {
+      const el = document.getElementById('webmMuxerSrc');
+      const mod = await import(URL.createObjectURL(new Blob([el.textContent], { type: 'text/javascript' })));
+      MuxerCtor = mod.Muxer; ArrayBufferCtor = mod.ArrayBufferTarget;
+    } catch (e) {
+      statusEl.textContent = '⚠ webm-muxer 加载失败: ' + e.message;
+      statusEl.className = 'status warning';
+      return;
+    }
+    lockButtons(true);
+    statusEl.textContent = '视频: 逐帧编码中（每帧都渲染，不丢帧）...';
+    statusEl.className = 'status recording';
+
+    const size = imageAData.width;
+    const fps = getExportFps();
+    const timeline = buildTimeline();
+    const frames = timeline.length;
+    const cfg = await pickEncoder(size, fps);
+    if (!cfg) {
+      statusEl.textContent = '⚠ 没有可用的视频编码器';
+      statusEl.className = 'status warning';
+      setProgress(0, true); unlockButtons();
+      return;
+    }
+    const muxer = new MuxerCtor({
+      target: new ArrayBufferCtor(),
+      video: { codec: vpCodecToMux(cfg.codec), width: size, height: size, frameRate: fps }
+    });
+    let encoder = null;
+    try {
+      encoder = new VideoEncoder({
+        output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+        error: (e) => { console.error('encoder error', e); }
+      });
+      encoder.configure(cfg);
+      const scratch = document.createElement('canvas'); scratch.width = size; scratch.height = size;
+      const octx = scratch.getContext('2d');
+      const tmpImg = octx.createImageData(size, size);
+      const gop = Math.max(1, Math.round(fps * 2));
+      for (let i = 0; i < frames; i++) {
+        paintFrame(timeline[i], tmpImg);
+        octx.putImageData(tmpImg, 0, 0);
+        const frame = new VideoFrame(scratch, { timestamp: Math.round(i / fps * 1_000_000) });
+        encoder.encode(frame, { keyFrame: i % gop === 0 });
+        frame.close();
+        setProgress(i / (frames - 1), true);
+        if (i % 12 === 11) await new Promise(r => setTimeout(r, 0));
+      }
+      await encoder.flush();
+    } catch (err) {
+      console.error(err);
+      try { if (encoder) encoder.close(); } catch (e) {}
+      statusEl.textContent = '⚠ 视频编码失败: ' + err.message;
+      statusEl.className = 'status warning';
+      setProgress(0, true); unlockButtons();
+      return;
+    }
+    try { encoder.close(); } catch (e) {}
+    muxer.finalize();
+    const { buffer } = muxer.target;
+    downloadBlob(new Blob([buffer], { type: 'video/webm' }), `pixel-sort-${size}px.webm`);
+    statusEl.textContent = `✅ 视频已导出 (${(buffer.byteLength / 1024 / 1024).toFixed(2)} MB)`;
+    statusEl.className = 'status ready';
+    setProgress(0, true);
+    unlockButtons();
+  }
+
+  // 图片上传
+  function fileToImage(file) {
+    return new Promise((resolve, reject) => {
+      let r=new FileReader();
+      r.onload=e=>{ let img=new Image(); img.onload=()=>resolve(img); img.onerror=()=>reject(new Error('加载失败')); img.src=e.target.result; };
+      r.onerror=()=>reject(new Error('读取失败')); r.readAsDataURL(file);
+    });
+  }
+  function updateRawAndWorking(side, imgData) {
+    if(side==='A'){ rawImageAData=imgData; imageAData=imgData; }
+    else { rawImageBData=imgData; imageBData=imgData; }
+  }
+  function createUploadHandler(zoneEl, fileInput, infoEl, side) {
+    async function handleFile(file) {
+      infoEl.textContent='加载中...';
+      try {
+        let img=await fileToImage(file);
+        if(side==='A'){ originalImgA=img; naturalSizeA=Math.min(img.naturalWidth,img.naturalHeight); }
+        else { originalImgB=img; naturalSizeB=Math.min(img.naturalWidth,img.naturalHeight); }
+        zoneEl.querySelector('img')?.remove();
+        let ph=zoneEl.querySelector('.ph-ic'); if(ph) ph.style.display='none';
+        let thumb=document.createElement('img'); thumb.src=URL.createObjectURL(file); zoneEl.appendChild(thumb);
+        setAutoResolution();
+        let size=getResolution();
+        let imgData=cropAndResize(img,size);
+        updateRawAndWorking(side, imgData);
+        if(side==='A') infoA.textContent=`原始: ${img.naturalWidth}×${img.naturalHeight} → ${size}×${size}`;
+        else infoB.textContent=`原始: ${img.naturalWidth}×${img.naturalHeight} → ${size}×${size}`;
+        if(rawImageAData && rawImageBData) {
+          processImages(); renderImageA(); unlockButtons();
+          statusEl.textContent='准备就绪 — 可进行颜色合并预处理或直接变换';
+          statusEl.className='status ready';
+        } else {
+          statusEl.textContent=side==='A'?'已加载A — 请上传B':'已加载B — 请上传A';
+        }
+      } catch(err){ infoEl.textContent='失败'; console.error(err); }
+    }
+    zoneEl.addEventListener('click',()=>fileInput.click());
+    zoneEl.addEventListener('dragover',e=>{e.preventDefault(); zoneEl.style.borderColor='#7c0a21';});
+    zoneEl.addEventListener('dragleave',()=>zoneEl.style.borderColor='');
+    zoneEl.addEventListener('drop',e=>{e.preventDefault(); zoneEl.style.borderColor=''; if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);});
+    fileInput.addEventListener('change',()=>{if(fileInput.files[0]) handleFile(fileInput.files[0]);});
+  }
+  createUploadHandler(zoneA,fileA,infoA,'A');
+  createUploadHandler(zoneB,fileB,infoB,'B');
+
+  // 分辨率：原地重裁切，不再强制 120 或刷新页面
+  function applyResolution() {
+    const size=getResolution();
+    if(originalImgA){ rawImageAData=cropAndResize(originalImgA,size); imageAData=rawImageAData; infoA.textContent=`原始: ${originalImgA.naturalWidth}×${originalImgA.naturalHeight} → ${size}×${size}`; }
+    if(originalImgB){ rawImageBData=cropAndResize(originalImgB,size); imageBData=rawImageBData; infoB.textContent=`原始: ${originalImgB.naturalWidth}×${originalImgB.naturalHeight} → ${size}×${size}`; }
+    if(imageAData && imageBData){ processImages(); renderImageA(); }
+    updateResInfo(size);
+  }
+  resInput.addEventListener('input',()=>{ autoRes=false; updateResInfo(getResolution()); });
+  resInput.addEventListener('change',()=>{ if(isAnimating||isRecording)return; autoRes=false; applyResolution(); });
+
+  // 事件绑定
+  sortSelect.addEventListener('change',()=>{ if(!isAnimating&&!isRecording&&imageAData&&imageBData){ processImages(); renderImageA(); statusEl.textContent='排序方式已更新'; statusEl.className='status ready'; } });
+  btnTransform.addEventListener('click',handleTransform);
+  btnReset.addEventListener('click',resetToOriginal);
+  btnPreprocess.addEventListener('click',preprocessWithColorMerging);
+  btnTrail.addEventListener('click',()=>{trailOn=!trailOn; btnTrail.classList.toggle('active',trailOn); trailBuffer=null;});
+  btnBgImgA.addEventListener('click',()=>{bgImgAOn=!bgImgAOn; btnBgImgA.classList.toggle('active',bgImgAOn); trailBuffer=null;});
+  btnColorMorph.addEventListener('click',()=>{colorMorphOn=!colorMorphOn; btnColorMorph.classList.toggle('active',colorMorphOn);});
+  btnReverse.addEventListener('click',()=>{reversePlay=!reversePlay; btnReverse.classList.toggle('active',reversePlay);});
+  btnExportGif.addEventListener('click',exportGif);
+  btnExport.addEventListener('click',exportWebM);
+  window.addEventListener('resize',()=>{ if(imageAData&&!isAnimating&&!isRecording){ setCanvasSize(imageAData.width); ctx.putImageData(imageAData,0,0); } });
+
+  updateResInfo(getResolution());
+  setCanvasSize(getResolution());
+})();
+</script>
+</body>
+</html>
