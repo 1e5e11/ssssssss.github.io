@@ -1,0 +1,1955 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>字符复制 - 常用字符工具</title>
+<style id="szys">
+/* ===== 1. 配色变量(换主题只改这一处) ===== */
+:root {
+  --bjsdfz:  #7c0a21;              /* 强调色(酒红) */
+  --bjsdfz-a:#7c0a2164;            /* 强调色+hex alpha */
+  --wzys:    black;                /* 文字色 */
+  --wzys-a:  rgba(128,128,128,.7); /* 次要文字 / placeholder */
+  --hanbj:   rgba(255,255,255,.8); /* 面板/输入框底色 */
+}
+* { transition: 0.2s; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Times New Roman', '宋体', serif, 'Liberation Mono';
+  background-color: white;
+  color: var(--wzys);
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  cursor: default;
+}
+/* 背景图层 */
+#bgbox {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: -1;
+  background-color: white;
+  background-image: radial-gradient(circle at 15% 20%, rgba(124,10,33,.05) 0%, rgba(255,255,255,0) 40%),
+                    radial-gradient(circle at 85% 80%, rgba(124,10,33,.06) 0%, rgba(255,255,255,0) 45%);
+  background-size: cover;
+  background-position: center;
+}
+
+/* ===== 3. 玻璃面板 ===== */
+.red-kuang {
+  transform: translateZ(0);
+  position: relative;
+  border: 0;
+  border-radius: .15em;
+  background-color: var(--hanbj);
+  box-shadow: 0 2px 9px var(--bjsdfz-a);
+  overflow: auto;
+}
+.red-kuang::before {
+  content: "";
+  background: inherit;
+  background-size: cover;
+  filter: blur(8px);
+  backdrop-filter: url(#glass) blur(1px);
+  z-index: -1;
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+}
+/* 面板栏底边 */
+.red-kuang.bottom-bar { box-shadow: 0 -2px 9px 0 var(--bjsdfz-a); }
+
+/* ===== 2. 字体排版 ===== */
+.top-title {
+  font-size: 26px;
+  color: var(--bjsdfz);
+  text-align: center;
+  padding: 16px 10px 4px;
+  letter-spacing: 2px;
+}
+.top-subtitle {
+  font-size: 13px;
+  color: var(--wzys-a);
+  text-align: center;
+  padding: 0 10px 12px;
+  text-indent: 0;
+}
+.section-title {
+  font-size: 17px;
+  color: var(--bjsdfz);
+  margin: 0;
+  padding: 10px 14px 6px;
+  font-weight: normal;
+}
+.section-title::before {
+  content: "▍";
+  margin-right: 6px;
+}
+
+/* ===== 7. 输入框 / 下拉框 ===== */
+input, select, textarea {
+  background-color: var(--hanbj);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  outline: none;
+  border-radius: .15em;
+  color: var(--wzys);
+  text-indent: 3px;
+  box-shadow: 0 1px 5px var(--bjsdfz-a);
+  backdrop-filter: blur(15px);
+  font-family: 'Times New Roman', '宋体', serif;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+input:hover, select:hover, textarea:hover { box-shadow: 0 0 10px var(--bjsdfz-a); }
+input:focus, select:focus, textarea:focus { border-bottom: 2px solid var(--bjsdfz-a); }
+input::placeholder, textarea::placeholder { color: var(--wzys-a); }
+option { color: var(--bjsdfz); }
+
+input[type=button] {
+  font-style: normal;
+  text-indent: 0;
+  cursor: pointer;
+}
+input[type=button]:active {
+  transform: scale(.97);
+  box-shadow: 0 1px 5px var(--bjsdfz);
+}
+
+/* 无输入框样式 */
+.noneinp, .noneinp:hover, .noneinp:focus, .noneinp:active {
+  box-shadow: 0 0 0 0 transparent;
+  border: 0; background: transparent;
+  border-radius: 0;
+  backdrop-filter: blur(0);
+  cursor: default;
+  color: var(--wzys);
+}
+
+/* ===== 8. 按钮 ===== */
+.hero-btn {
+  position: relative;
+  width: 90%;
+  height: 46px;
+  border-radius: .15em;
+  border: 2px solid var(--bjsdfz);
+  background: transparent;
+  text-align: center;
+  line-height: 44px;
+  color: var(--bjsdfz);
+  cursor: pointer;
+  font-size: 17px;
+  margin: 6px auto;
+  display: block;
+  box-sizing: border-box;
+}
+.hero-btn:hover {
+  background: var(--bjsdfz);
+  color: #fff;
+  box-shadow: 0 1px 5px var(--bjsdfz);
+  transition: .3s;
+}
+.hero-btn:active {
+  transform: scale(.98);
+  transition: .1s;
+}
+.small-btn {
+  border: 1px solid var(--bjsdfz);
+  background: transparent;
+  color: var(--bjsdfz);
+  border-radius: .15em;
+  font-size: 13px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-style: normal;
+  font-family: 'Times New Roman', '宋体', serif;
+  box-shadow: none;
+  text-indent: 0;
+}
+.small-btn:hover {
+  background: var(--bjsdfz);
+  color: #fff;
+}
+select.small-btn {
+  background-color: var(--hanbj);
+  border: 1px solid var(--bjsdfz);
+  color: var(--bjsdfz);
+  border-radius: .15em;
+  font-size: 13px;
+  padding: 0 28px 0 10px;
+  height: auto;
+  min-height: 20px;
+  line-height: 20px;
+  cursor: default;
+  font-style: normal;
+  font-family: 'Times New Roman', 'Liberation Mono';
+  box-shadow: 0 1px 5px var(--bjsdfz-a);
+  backdrop-filter: blur(15px);
+  text-indent: 3px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='6'%3E%3Cpath d='M0 0l4 6 4-6z' fill='%237c0a21'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  overflow: visible;
+  white-space: nowrap;
+}
+select.small-btn:hover {
+  box-shadow: 0 0 10px var(--bjsdfz-a);
+}
+select.small-btn option {
+  color: var(--bjsdfz);
+  background: #fff;
+  padding: 2px 10px;
+}
+
+/* ===== 标签页 ===== */
+.gnN { display: none; }
+.gnN.show { display: block; }
+.tab-bar {
+  display: flex;
+  padding: 0 8px;
+  gap: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.tab-item {
+  flex: 1;
+  min-width: max-content;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--wzys);
+  text-align: center;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  font-family: 'Times New Roman', '宋体', serif;
+  cursor: pointer;
+}
+.tab-item.active {
+  color: var(--bjsdfz);
+  border-bottom: 2px solid var(--bjsdfz);
+  font-weight: bold;
+}
+
+/* ===== 字符网格 ===== */
+.char-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  gap: 8px;
+  padding: 8px 14px 16px;
+}
+.char-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 58px;
+  padding: 6px 2px;
+  background: var(--hanbj);
+  border: 1px solid rgba(124,10,33,.2);
+  border-radius: .15em;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.char-cell:hover {
+  box-shadow: 0 0 10px var(--bjsdfz-a);
+  border-color: var(--bjsdfz);
+}
+.char-cell:active { transform: scale(.95); }
+.char-cell.touch-active {
+  box-shadow: 0 0 15px var(--bjsdfz-a) inset;
+  background: var(--hanbj);
+}
+.char-main {
+  font-size: 26px;
+  line-height: 1.2;
+  word-break: break-all;
+}
+.char-label {
+  font-size: 10px;
+  color: var(--wzys-a);
+  margin-top: 3px;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.char-cell.emoji-cell .char-main { font-size: 32px; }
+.char-cell.wide .char-main { font-size: 18px; word-break: break-all; }
+.char-cell.wide .char-label { white-space: normal; line-height: 1.2; }
+.char-cell.fancy-cell .char-main { font-size: 30px; }
+
+/* ===== 分类说明 ===== */
+.cat-note {
+  font-size: 12px;
+  color: var(--wzys-a);
+  padding: 2px 14px 8px;
+  text-indent: 0;
+}
+
+/* ===== 提示条 ===== */
+#tipbar {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 24px;
+  max-width: 92%;
+  padding: 10px 22px;
+  background: rgba(124,10,33,.95);
+  color: #fff;
+  font-size: 14px;
+  border-radius: .15em;
+  box-shadow: 0 3px 15px rgba(0,0,0,.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s, transform .3s;
+  z-index: 100;
+  text-align: center;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-all;
+  transform: translateX(-50%) translateY(10px);
+  opacity: 0;
+  visibility: hidden;
+}
+#tipbar.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+#tipbar.show.success {
+  background: rgba(39,174,96,.95); /* green for success */
+}
+#tipbar.show.error {
+  background: rgba(231,76,60,.95); /* error red */
+}
+
+/* ===== 公式面板 ===== */
+.formula-panel {
+  margin: 8px 10px;
+  padding: 12px;
+}
+.formula-input {
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+  padding: 8px;
+  text-indent: 3px;
+  line-height: 1.5;
+  font-style: normal;
+}
+.formula-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.formula-actions .small-btn { flex: 1; min-width: 90px; text-align: center; }
+.formula-actions select.small-btn { flex: none; text-align: left; }
+#tab-fancy-convert { overflow: visible; }
+#tab-fancy-convert .formula-panel { overflow: visible; }
+.result-area {
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--hanbj);
+  border-radius: .15em;
+  box-shadow: 0 1px 5px var(--bjsdfz-a);
+  min-height: 40px;
+}
+.result-label {
+  font-size: 12px;
+  color: var(--wzys-a);
+  margin-bottom: 6px;
+}
+.result-text {
+  font-size: 18px;
+  word-wrap: break-word;
+  word-break: break-all;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  user-select: text;
+  -webkit-user-select: text;
+}
+.result-text.hidden { display: none; }
+.result-text.small { font-size: 14px; }
+.result-error {
+  font-size: 14px;
+  color: var(--bjsdfz);
+  word-wrap: break-word;
+  word-break: break-all;
+  line-height: 1.5;
+}
+.result-error.hidden { display: none; }
+
+/* ===== 示例按钮 ===== */
+.example-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+  padding: 0 2px;
+}
+.example-chip {
+  font-size: 12px;
+  color: var(--bjsdfz);
+  background: transparent;
+  border: 1px solid rgba(124,10,33,.35);
+  border-radius: .15em;
+  padding: 3px 8px;
+  cursor: pointer;
+  font-family: 'Times New Roman', '宋体', serif;
+}
+.example-chip:hover {
+  background: var(--bjsdfz);
+  color: #fff;
+}
+
+/* ===== 10. 滚动条 ===== */
+*::-webkit-scrollbar { width: 14px; height: 14px; border-radius: .15em; }
+*::-webkit-scrollbar-track {
+  transition: .2s;
+  background-color: rgba(255,255,255,0);
+  border-radius: 5px;
+}
+*::-webkit-scrollbar-thumb {
+  transition: .2s;
+  display: block;
+  background: rgba(0,0,0,.5);
+  background-color: var(--bjsdfz-a);
+  background-clip: padding-box;
+  border: 5px solid transparent;
+  border-radius: .15em;
+}
+*::-webkit-scrollbar-thumb:hover {
+  display: block;
+  border: 4px solid transparent;
+  background-color: var(--bjsdfz);
+}
+*::-webkit-scrollbar-button { display: none; }
+*::-webkit-scrollbar-corner { background-color: rgba(0,0,0,0); }
+
+/* ===== 花体字母样式栏 ===== */
+.font-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 6px 10px 10px;
+}
+.font-option {
+  display: inline-block;
+  height: 20px;
+  line-height: 20px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: .15em;
+  background-color: var(--hanbj);
+  color: var(--wzys);
+  font-family: 'Times New Roman', '宋体', serif, 'Liberation Mono';
+  font-size: 13px;
+  cursor: default;
+  transition: 0.2s;
+  box-shadow: 0 1px 5px var(--bjsdfz-a);
+  backdrop-filter: blur(15px);
+  text-indent: 3px;
+  user-select: none;
+}
+.font-option:hover {
+  box-shadow: 0 0 10px var(--bjsdfz-a);
+}
+.font-option.active {
+  background-color: var(--bjsdfz);
+  color: #fff;
+  box-shadow: 0 1px 5px var(--bjsdfz);
+  font-weight: bold;
+  text-indent: 0;
+}
+
+/* ===== 移动端适配 ===== */
+@media (max-width: 768px) {
+  .top-title { font-size: 22px; }
+  .char-grid { grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 6px; padding: 8px 10px 14px; }
+  .char-cell { min-height: 54px; }
+  .char-main { font-size: 24px; }
+  .char-cell.emoji-cell .char-main { font-size: 30px; }
+  .char-label { font-size: 9px; }
+  .tab-item { font-size: 13px; padding: 8px 8px; }
+  .formula-panel { margin: 6px 8px; padding: 10px; }
+  .hero-btn { height: 44px; line-height: 42px; font-size: 16px; }
+  .top-subtitle { font-size: 12px; }
+  .font-grid { gap: 4px; padding: 4px 8px 8px; }
+  .font-option { font-size: 11px; height: 18px; line-height: 18px; padding: 0 7px; }
+}
+</style>
+</head>
+<body onselectstart='return false'>
+<div id="bgbox"></div>
+
+<svg style="display:none">
+  <defs>
+    <filter id="glass" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="2" seed="114514" result="noise"/>
+      <feGaussianBlur in="noise" stdDeviation="2" result="blurred"/>
+      <feDisplacementMap in="SourceGraphic" in2="blurred" scale="20" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
+
+<div style="max-width:860px; margin:0 auto; padding:10px;">
+  <!-- 顶部 -->
+  <div class="top-title">字符复制</div>
+  <div class="top-subtitle">点击任意字符即可复制 · 常见符号一网打尽</div>
+
+  <!-- 标签页 -->
+  <div class="red-kuang" style="margin:10px 0;">
+    <div class="tab-bar">
+      <button class="tab-item active" data-tab="tab-emoji">😀 Emoji</button>
+      <button class="tab-item" data-tab="tab-roman">罗马数字</button>
+      <button class="tab-item" data-tab="tab-math">数学符号</button>
+      <button class="tab-item" data-tab="tab-mathops">运算符号</button>
+      <button class="tab-item" data-tab="tab-super">上下标</button>
+      <button class="tab-item" data-tab="tab-space">各种空格</button>
+      <button class="tab-item" data-tab="tab-other">其他符号</button>
+      <button class="tab-item" data-tab="tab-fancy">花体字母</button>
+      <button class="tab-item" data-tab="tab-latex">公式转换</button>
+      <button class="tab-item" data-tab="tab-fancy-convert">花体转换</button>
+    </div>
+  </div>
+
+  <!-- Emoji -->
+  <div class="red-kuang gnN show" id="tab-emoji">
+    <div class="section-title">Emoji 表情</div>
+    <div class="cat-note">点击即可复制到剪贴板</div>
+    <div class="char-grid" id="emoji-grid"></div>
+  </div>
+
+  <!-- 罗马数字 -->
+  <div class="red-kuang gnN" id="tab-roman">
+    <div class="section-title">罗马数字</div>
+    <div class="cat-note">1-12 常用罗马数字</div>
+    <div class="char-grid" id="roman-grid"></div>
+  </div>
+
+  <!-- 数学符号 -->
+  <div class="red-kuang gnN" id="tab-math">
+    <div class="section-title">数学符号</div>
+    <div class="char-grid" id="math-grid"></div>
+  </div>
+
+  <!-- 运算符号 -->
+  <div class="red-kuang gnN" id="tab-mathops">
+    <div class="section-title">运算符号</div>
+    <div class="char-grid" id="mathops-grid"></div>
+  </div>
+
+  <!-- 上下标 -->
+  <div class="red-kuang gnN" id="tab-super">
+    <div class="section-title">上下标符号</div>
+    <div class="char-grid" id="super-grid"></div>
+  </div>
+
+  <!-- 各种空格 -->
+  <div class="red-kuang gnN" id="tab-space">
+    <div class="section-title">各种空格</div>
+    <div class="cat-note">不同宽度的空格,用于对齐、排版与缩进。点击复制后可直接粘贴。</div>
+    <div class="char-grid" id="space-grid"></div>
+  </div>
+
+  <!-- 其他符号 -->
+  <div class="red-kuang gnN" id="tab-other">
+    <div class="section-title">其他符号</div>
+    <div class="char-grid" id="other-grid"></div>
+  </div>
+
+  <!-- 花体字母 -->
+  <div class="red-kuang gnN" id="tab-fancy">
+    <div class="section-title">花体字母</div>
+    <div class="cat-note">选择样式,点击任意字母即可复制</div>
+    <div class="font-grid" id="fancy-style-bar">
+      <div class="font-option" data-style="0">数学斜体</div>
+      <div class="font-option" data-style="1">数学粗体</div>
+      <div class="font-option" data-style="2">粗斜体</div>
+      <div class="font-option" data-style="3">花体(手写)</div>
+      <div class="font-option" data-style="4">粗花体</div>
+      <div class="font-option" data-style="5">德文尖角体</div>
+      <div class="font-option" data-style="6">粗尖角体</div>
+      <div class="font-option" data-style="7">空心体(黑板体)</div>
+      <div class="font-option" data-style="8">无衬线体</div>
+      <div class="font-option" data-style="9">无衬线粗体</div>
+      <div class="font-option" data-style="10">无衬线斜体</div>
+      <div class="font-option" data-style="11">无衬线粗斜体</div>
+      <div class="font-option" data-style="12">打字机体</div>
+    </div>
+    <div class="char-grid" id="fancy-grid"></div>
+    <div class="section-title">希腊字母</div>
+    <div class="cat-note">含变体形式,点击即可复制</div>
+    <div class="char-grid" id="greek-grid"></div>
+  </div>
+
+  <!-- 公式转换 -->
+
+  <!-- 公式转换 -->
+  <div class="red-kuang gnN" id="tab-latex">
+    <div class="section-title">公式转纯文本</div>
+    <div class="formula-panel">
+      <textarea class="formula-input" id="latex-input" placeholder="输入 LaTeX 公式,例如:\frac{a}{b} + x^2 - \sqrt{y} &#10;&#10;或输入数学公式,尽量转换为纯文本显示"></textarea>
+      <div class="formula-actions">
+        <input class="small-btn" type="button" value="转换" id="btn-convert">
+        <input class="small-btn" type="button" value="清空" id="btn-clear">
+      </div>
+      <div class="example-row" id="example-row"></div>
+      <div class="result-area">
+        <div class="result-label">转换结果(点击下方文本即可复制)</div>
+        <div class="result-text hidden" id="result-text" onclick="copyResult()"></div>
+        <div class="result-error hidden" id="result-error"></div>
+      </div>
+    </div>
+    <div class="section-title">纯文本转 LaTeX</div>
+    <div class="formula-panel">
+      <textarea class="formula-input" id="plain-input" placeholder="粘贴本页生成的纯文本公式,例如: 1/2 + 1/3 = 5/6 或 x² + y²"></textarea>
+      <div class="formula-actions">
+        <input class="small-btn" type="button" value="转换" id="btn-tolatex">
+        <input class="small-btn" type="button" value="清空" id="btn-clear-plain">
+      </div>
+      <div class="example-row" id="example-row-plain"></div>
+      <div class="result-area">
+        <div class="result-label">转换结果(点击下方文本即可复制)</div>
+        <div class="result-text hidden" id="result-latex" onclick="copyResultLatex()"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 花体文字转换 -->
+  <div class="red-kuang gnN" id="tab-fancy-convert">
+    <div class="section-title">花体文字转换</div>
+    <div class="cat-note">输入普通文字,自动转为花体字母;也可反向转换</div>
+    <div class="formula-panel">
+      <div class="formula-actions" style="margin-bottom:0.4em;">
+        <select class="small-btn" id="fancy-style-sel"></select>
+        <select class="small-btn" id="fancy-direction">
+          <option value="toFancy">普通→花体</option>
+          <option value="toPlain">花体→普通</option>
+        </select>
+      </div>
+      <textarea class="formula-input" id="fancy-input" placeholder="在此输入文字,例如: Hello" style="min-height:3.6em;"></textarea>
+      <div class="example-row" id="fancy-example-row"></div>
+      <div class="result-area">
+        <div class="result-label">转换结果(点击即可复制)</div>
+        <div class="result-text" id="fancy-output" onclick="copyFancyResult()" style="font-size:1.6em;letter-spacing:0.04em;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 提示条 -->
+  <div id="tipbar"></div>
+</div>
+
+<script>
+/* ===== 数据:字符分类 ===== */
+var DATA = {
+  emoji: [
+    ["😀","开心"],["😁","大笑"],["😂","笑哭"],["🤣","笑翻"],
+    ["😊","微笑"],["😍","花痴"],["😘","飞吻"],["😎","墨镜"],
+    ["🤔","思考"],["😴","睡觉"],["😭","大哭"],["😤","生气"],
+    ["😡","愤怒"],["😱","惊吓"],["😨","害怕"],["😰","冷汗"],
+    ["😅","汗"],["😳","脸红"],["🤗","拥抱"],["🤐","闭嘴"],
+    ["🤫","嘘"],["🤨","挑眉"],["😐","无语"],["😑","面无表情"],
+    ["😏","得意"],["😒","不屑"],["🙄","翻白眼"],["😢","伤心"],
+    ["😔","沮丧"],["🥺","委屈"],["😇","天使"],["😈","恶魔"],
+    ["👍","赞"],["👎","踩"],["👌","OK"],["✌️","胜利"],
+    ["🤞","祈祷"],["🤟","爱你"],["🤘","摇滚"],["👏","鼓掌"],
+    ["🙏","合十"],["💪","肌肉"],["👋","挥手"],["🤝","握手"],
+    ["👐","张开"],["👆","上指"],["👇","下指"],["👈","左指"],
+    ["👉","右指"],["🖕","中指"],["✍️","书写"],["💅","美甲"],
+    ["❤️","红心"],["🧡","橙心"],["💛","黄心"],["💚","绿心"],
+    ["💙","蓝心"],["💜","紫心"],["🖤","黑心"],["🤍","白心"],
+    ["💔","碎心"],["💕","双心"],["💖","闪心"],["💗","跳心"],
+    ["💓","心搏"],["💞","旋心"],["💘","箭心"],["💯","百分"],
+    ["🔥","火"],["✨","闪亮"],["⭐","星"],["🌟","亮星"],
+    ["💫","晕眩"],["🎉","庆祝"],["🎊","彩带"],["🥳","派对"],
+    ["🎈","气球"],["🎁","礼物"],["🎀","蝴蝶结"],["🏆","奖杯"],
+    ["🥇","金牌"],["🥈","银牌"],["🥉","铜牌"],["🎯","靶心"],
+    ["🎮","游戏"],["🎲","骰子"],["🎧","耳机"],["📱","手机"],
+    ["💻","电脑"],["⌨️","键盘"],["🖥️","显示器"],["🖱️","鼠标"],
+    ["📷","相机"],["🎥","摄像机"],["📚","书本"],["📝","笔记"],
+    ["✏️","铅笔"],["📌","图钉"],["📍","定位"],["📎","回形针"],
+    ["📁","文件夹"],["📂","打开夹"],["🗑️","垃圾桶"],["🔍","放大镜"],
+    ["🔒","锁"],["🔓","开锁"],["🔑","钥匙"],["💡","灯泡"],
+    ["🔔","铃铛"],["📢","喇叭"],["📣","扩音"],["⏰","闹钟"],
+    ["🕐","一点"],["🕑","两点"],["🕒","三点"],["🕓","四点"],
+    ["🕔","五点"],["🕕","六点"],["🕖","七点"],["🕗","八点"],
+    ["🕘","九点"],["🕙","十点"],["🕚","十一点"],["🕛","十二点"],
+    ["☀️","太阳"],["🌙","月亮"],["⭐","星星"],["🌈","彩虹"],
+    ["☁️","云"],["⛅","多云"],["🌧️","雨"],["⛈️","雷雨"],
+    ["❄️","雪"],["🌊","浪"],["🍀","四叶草"],["🌹","玫瑰"],
+    ["🌸","樱花"],["🌻","向日葵"],["🌵","仙人掌"],["🎄","圣诞树"],
+    ["🍎","苹果"],["🍊","橙子"],["🍋","柠檬"],["🍌","香蕉"],
+    ["🍉","西瓜"],["🍇","葡萄"],["🍓","草莓"],["🍑","桃子"],
+    ["🍒","樱桃"],["🍍","菠萝"],["🥑","牛油果"],["🍔","汉堡"],
+    ["🍟","薯条"],["🍕","披萨"],["🌭","热狗"],["🍿","爆米花"],
+    ["🍰","蛋糕"],["🍩","甜甜圈"],["🍪","饼干"],["🍫","巧克力"],
+    ["🍬","糖果"],["🍭","棒棒糖"],["🍦","冰淇淋"],["🍺","啤酒"],
+    ["🍻","干杯"],["🥂","香槟"],["☕","咖啡"],["🍵","茶"],
+    ["💧","水滴"],["⚽","足球"],["🏀","篮球"],["🏈","橄榄球"],
+    ["⚾","棒球"],["🎾","网球"],["🏐","排球"],["🏓","乒乓球"],
+    ["🎱","台球"],["🏸","羽毛球"],["🥊","拳击"],["🎳","保龄球"],
+    ["🚗","汽车"],["🚕","出租车"],["🚌","公交"],["🚲","自行车"],
+    ["🏍️","摩托"],["✈️","飞机"],["🚀","火箭"],["⛵","帆船"],
+    ["🚢","轮船"],["🚄","高铁"],["🚇","地铁"],["🛸","飞碟"],
+    ["🐶","狗"],["🐱","猫"],["🐭","老鼠"],["🐹","仓鼠"],
+    ["🐰","兔子"],["🦊","狐狸"],["🐻","熊"],["🐼","熊猫"],
+    ["🐨","考拉"],["🐯","老虎"],["🦁","狮子"],["🐮","牛"],
+    ["🐷","猪"],["🐸","青蛙"],["🐵","猴子"],["🐔","鸡"],
+    ["🐧","企鹅"],["🐦","鸟"],["🐤","小鸡"],["🦆","鸭子"],
+    ["🦅","鹰"],["🦉","猫头鹰"],["🐺","狼"],["🐴","马"],
+    ["🦄","独角兽"],["🐝","蜜蜂"],["🐛","虫子"],["🦋","蝴蝶"],
+    ["🐌","蜗牛"],["🐞","瓢虫"],["🐢","乌龟"],["🐍","蛇"],
+    ["🐙","章鱼"],["🦑","鱿鱼"],["🦐","虾"],["🦀","螃蟹"],
+    ["🐳","鲸鱼"],["🐬","海豚"],["🐟","鱼"],["🐠","热带鱼"],
+    ["🦈","鲨鱼"],["🐊","鳄鱼"],["🦖","恐龙"],["🦕","腕龙"],
+    ["👦","男孩"],["👧","女孩"],["👨","男人"],["👩","女人"],
+    ["👴","老人"],["👵","老妇"],["👶","婴儿"],["👮","警察"],
+    ["💂","卫兵"],["👷","工人"],["👨‍⚕️","医生"],["👩‍🎓","学生"],
+    ["👨‍🍳","厨师"],["👨‍🚒","消防"],["👨‍🎤","歌手"],["👨‍💻","程序员"],
+    ["👨‍🔧","技师"],["👨‍🏫","老师"],["👨‍✈️","飞行员"],["👨‍🚀","宇航员"],
+    ["💃","跳舞"],["🕺","男舞"],["👯","双人"],["🧘","瑜伽"],
+    ["🏃","跑步"],["🚶","走路"],["💇","理发"],["💆","按摩"],
+    ["🛀","洗澡"],["🚿","淋浴"],["🛏️","床"],["🛋️","沙发"],
+    ["🍽️","餐具"],["🔪","刀"],["🥄","勺子"],["🍴","叉勺"],
+    ["⚡","闪电"],["💥","爆炸"],["💦","汗水"],["🫧","泡泡"],
+    ["🎵","音符"],["🎶","乐谱"],["🎤","麦克风"],["🎹","钢琴"],
+    ["🎸","吉他"],["🥁","鼓"],["🎻","小提琴"],["🪗","手风琴"],
+    ["📞","电话"],["📟","寻呼机"],["📠","传真"],["📺","电视"],
+    ["🔋","电池"],["🔌","插头"],["💾","软盘"],["💿","光盘"],
+    ["📀","DVD"],["🖨️","打印机"],["🖊️","圆珠笔"],["🖍️","蜡笔"],
+    ["🔮","水晶球"],["🎭","面具"],["🎪","马戏团"],["🎡","摩天轮"],
+    ["🎠","旋转木马"],["🎢","过山车"],["🛍️","购物袋"],["💰","钱袋"],
+    ["💎","钻石"],["🪙","硬币"],["💵","美元"],["💶","欧元"],
+    ["💷","英镑"],["💴","日元"],["💸","飞钱"],["🏦","银行"],
+    ["🧧","红包"],["🎴","花牌"],["🀄","麻将"],["♠️","黑桃"],
+    ["♥️","红桃"],["♦️","方块"],["♣️","梅花"],["🃏","小丑"]
+  ],
+  roman: [
+    ["Ⅰ","罗马1"],["Ⅱ","罗马2"],["Ⅲ","罗马3"],["Ⅳ","罗马4"],
+    ["Ⅴ","罗马5"],["Ⅵ","罗马6"],["Ⅶ","罗马7"],["Ⅷ","罗马8"],
+    ["Ⅸ","罗马9"],["Ⅹ","罗马10"],["Ⅺ","罗马11"],["Ⅻ","罗马12"],
+    ["ⅰ","小写1"],["ⅱ","小写2"],["ⅲ","小写3"],["ⅳ","小写4"],
+    ["ⅴ","小写5"],["ⅵ","小写6"],["ⅶ","小写7"],["ⅷ","小写8"],
+    ["ⅸ","小写9"],["ⅹ","小写10"],["ⅺ","小写11"],["ⅻ","小写12"],
+    ["Ⅼ","50"],["Ⅽ","100"],["Ⅾ","500"],["Ⅿ","1000"],
+    ["ↀ","1000变体"],["ↁ","5000"],["ↂ","10000"]
+  ],
+  math: [
+    ["∞","无穷大"],["π","圆周率"],["e","自然常数"],["φ","黄金比例"],
+    ["α","阿尔法"],["β","贝塔"],["γ","伽马"],["δ","德尔塔"],
+    ["ε","艾普西龙"],["ζ","泽塔"],["η","伊塔"],["θ","西塔"],
+    ["ι","艾欧塔"],["κ","卡帕"],["λ","兰布达"],["μ","缪"],
+    ["ν","纽"],["ξ","克西"],["ο","欧米克隆"],["π","派"],
+    ["ρ","柔"],["σ","西格玛"],["τ","陶"],["υ","宇普西龙"],
+    ["φ","费"],["χ","凯"],["ψ","普赛"],["ω","欧米伽"],
+    ["Γ","大写伽马"],["Δ","大写德尔塔"],["Θ","大写西塔"],["Λ","大写兰布达"],
+    ["Ξ","大写克西"],["Π","大写派"],["Σ","大写西格玛"],["Φ","大写费"],
+    ["Ψ","大写普赛"],["Ω","大写欧米伽"],
+    ["∈","属于"],["∉","不属于"],["⊂","子集"],["⊃","超集"],
+    ["⊆","子集或等"],["⊇","超集或等"],["∅","空集"],["∪","并集"],
+    ["∩","交集"],["⊄","不包含"],["⊅","不包含"],["⊈","不包含于"],
+    ["⊉","不包含于"],["∋","包含"],["∌","不包含"],["∉","不属于"]
+  ],
+  mathops: [
+    ["＋","加号"],["－","减号"],["×","乘号"],["÷","除号"],
+    ["±","正负号"],["∓","负正号"],["∑","求和"],["∏","求积"],
+    ["∐","余积"],["∫","积分"],["∬","二重积分"],["∭","三重积分"],
+    ["∮","曲线积分"],["∯","面积分"],["∰","体积分"],["∂","偏微分"],
+    ["∇","纳布拉"],["√","根号"],["∛","立方根"],["∜","四次根"],
+    ["∴","所以"],["∵","因为"],["≡","恒等于"],["≠","不等于"],
+    ["≈","约等于"],["≌","全等"],["≃","相似约等"],["≅","全等约等"],
+    ["≒","近似等"],["≓","约等于变体"],["∝","正比"],["≍","渐近等"],
+    ["∼","相似"],["≪","远小于"],["≫","远大于"],["≤","小于等于"],
+    ["≥","大于等于"],["<","小于"],[">","大于"],["≦","小于等于变体"],
+    ["≧","大于等于变体"],["≨","不大于等于"],["≩","不小于等于"],
+    ["≠","不等于"],["≢","不恒等"],["≮","不小于"],["≯","不大于"],
+    ["⊰","小关系"],["⊥","垂直"],["∥","平行"],["∦","不平行"],
+    ["∠","角"],["∡","测量角"],["∢","球面角"],["°","度"],
+    ["′","分"],["″","秒"],["‴","三撇"],["§","节"],
+    ["‰","千分号"],["‱","万分号"],["%","百分号"],["µ","微"],
+    ["℧","姆欧"],["Ω","欧姆"],["Å","埃"],["ℓ","升"]
+  ],
+  super: [
+    ["⁰","上标0"],["¹","上标1"],["²","上标2"],["³","上标3"],
+    ["⁴","上标4"],["⁵","上标5"],["⁶","上标6"],["⁷","上标7"],
+    ["⁸","上标8"],["⁹","上标9"],["⁺","上标+"],["⁻","上标-"],
+    ["⁽","上标("],["⁾","上标)"],["ⁿ","上标n"],["ⁱ","上标i"],
+    ["ª","上标a"],["º","上标o"],["⁰","上标0"],["₁","下标1"],
+    ["₂","下标2"],["₃","下标3"],["₄","下标4"],["₅","下标5"],
+    ["₆","下标6"],["₇","下标7"],["₈","下标8"],["₉","下标9"],
+    ["₀","下标0"],["₊","下标+"],["₋","下标-"],["₍","下标("],
+    ["₎","下标)"],["ₐ","下标a"],["ₑ","下标e"],["ₒ","下标o"],
+    ["ₓ","下标x"],["ₔ","下标schwa"],["ₕ","下标h"],["ₖ","下标k"],
+    ["ₗ","下标l"],["ₘ","下标m"],["ₙ","下标n"],["ₚ","下标p"],
+    ["ₛ","下标s"],["ₜ","下标t"],["ₓ","下标x"],["ₖ","下标k"],
+    ["ₚ","下标p"],["ᵢ","下标i"],["ⱼ","下标j"],["ᵣ","下标r"],
+    ["ᵤ","下标u"],["ᵥ","下标v"],["ᵦ","下标β"],["ᵧ","下标γ"],
+    ["ᵨ","下标ρ"],["ᵩ","下标φ"],["ᵪ","下标χ"],["₊","下标+"],
+    ["₋","下标-"],["₌","下标="],["₍","下标("],["₎","下标)"],
+    ["ₐ","下标a"],["ₑ","下标e"],["ₒ","下标o"],["ₓ","下标x"]
+  ],
+  space: [
+    [" ", "半角空格"],["\u00A0", "不间断空格"],["\u2002", "En空格"],["\u2003", "Em空格"],
+    ["\u2004", "三分Em空格"],["\u2005", "四分Em空格"],["\u2006", "六分Em空格"],
+    ["\u2007", "数字空格"],["\u2008", "标点空格"],["\u2009", "细空格"],
+    ["\u200A", "极细空格"],["\u200B", "零宽空格"],["\u200C", "零宽不连字"],
+    ["\u200D", "零宽连字"],["\u202F", "窄不间断空格"],["\u205F", "数学空格"],
+    ["\u3000", "全角空格"],["\u1680", "欧甘空格"],["\u180E", "蒙古文分离符"],
+    ["\u2000", "En quad空格"],["\u2001", "Em quad空格"],["\u2060", "字连接符"],
+    ["\uFEFF", "零宽无断空格"]
+  ],
+  other: [
+    ["①","圆圈1"],["②","圆圈2"],["③","圆圈3"],["④","圆圈4"],
+    ["⑤","圆圈5"],["⑥","圆圈6"],["⑦","圆圈7"],["⑧","圆圈8"],
+    ["⑨","圆圈9"],["⑩","圆圈10"],["⑪","圆圈11"],["⑫","圆圈12"],
+    ["⑬","圆圈13"],["⑭","圆圈14"],["⑮","圆圈15"],["⑯","圆圈16"],
+    ["⑰","圆圈17"],["⑱","圆圈18"],["⑲","圆圈19"],["⑳","圆圈20"],
+    ["㉑","圆圈21"],["㉒","圆圈22"],["㉓","圆圈23"],["㉔","圆圈24"],
+    ["㉕","圆圈25"],["㉖","圆圈26"],["㉗","圆圈27"],["㉘","圆圈28"],
+    ["㉙","圆圈29"],["㉚","圆圈30"],
+    ["❶","黑圈1"],["❷","黑圈2"],["❸","黑圈3"],["❹","黑圈4"],
+    ["❺","黑圈5"],["❻","黑圈6"],["❼","黑圈7"],["❽","黑圈8"],
+    ["❾","黑圈9"],["❿","黑圈10"],
+    ["⒈","括号1"],["⒉","括号2"],["⒊","括号3"],["⒋","括号4"],
+    ["⒌","括号5"],["⒍","括号6"],["⒎","括号7"],["⒏","括号8"],
+    ["⒐","括号9"],["⒑","括号10"],["⒒","括号11"],["⒓","括号12"],
+    ["⒔","括号13"],["⒕","括号14"],["⒖","括号15"],["⒗","括号16"],
+    ["⒘","括号17"],["⒙","括号18"],["⒚","括号19"],["⒛","括号20"],
+    ["㊀","中文圈1"],["㊁","中文圈2"],["㊂","中文圈3"],["㊃","中文圈4"],
+    ["㊄","中文圈5"],["㊅","中文圈6"],["㊆","中文圈7"],["㊇","中文圈8"],
+    ["㊈","中文圈9"],["㊉","中文圈10"],
+    ["（","全角括号"],["）","全角括号"],["《","书名号"],["》","书名号"],
+    ["【","方头括号"],["】","方头括号"],["「","日式括号"],["」","日式括号"],
+    ["『","日式括号"],["』","日式括号"],["〔","菱形括号"],["〕","菱形括号"],
+    ["〖","空心括号"],["〗","空心括号"],["§","节号"],["¶","段落号"],
+    ["†","剑号"],["‡","双剑号"],["※","参考标记"],["〃","重音号"],
+    ["—","破折号"],["–","连接号"],["—","破折号"],["…","省略号"],
+    ["—","破折号"],["――","长破折"],["‥","双点省略"],["—","破折号"],
+    ["★","实心星"],["☆","空心星"],["✩","星"],["✪","圈星"],
+    ["✦","四角星"],["✧","四角星"],["◆","实心菱"],["◇","空心菱"],
+    ["●","实心圆"],["○","空心圆"],["◐","半圆"],["◑","半圆"],
+    ["◕","半圆"],["◍","半圆"],["◎","双环"],["◉","靶心"],
+    ["□","空心方块"],["■","实心方块"],["▢","方块"],["▣","方块"],
+    ["▤","方块"],["▥","方块"],["▦","方块"],["▧","方块"],
+    ["▨","方块"],["▩","方块"],["▪","小方块"],["▫","小方块"],
+    ["▲","实心三角"],["△","空心三角"],["▶","右三角"],["◀","左三角"],
+    ["▼","下三角"],["▽","上三角"],["◄","左三角"],["►","右三角"],
+    ["◈","菱形点"],["◉","靶心"],["◯","大圆"],["◍","半圆"],
+    ["✓","对勾"],["✔","粗对勾"],["✗","叉"],["✘","粗叉"],
+    ["✕","叉"],["✖","乘"],["✚","加"],["✤","星"],
+    ["✽","星"],["❋","花星"],["❀","花"],["❁","花"],
+    ["❃","花"],["❄","雪花"],["❅","雪花"],["❆","雪花"],
+    ["✎","铅笔"],["✏","铅笔"],["✐","铅笔"],["✑","笔"],
+    ["✒","笔"],["🖊","笔"],["🖋","笔"],["🖌","画笔"],
+    ["✔","对"],["☑","选中"],["☐","未选"],["☒","勾选"],
+    ["☺","笑脸"],["☻","黑脸"],["☹","苦脸"],["☀","太阳"],
+    ["☁","云"],["☂","伞"],["☃","雪人"],["☄","彗星"],
+    ["☎","电话"],["☏","电话"],["☚","手指"],["☛","手指"],
+    ["☜","手指"],["☝","手指"],["☞","手指"],["☟","手指"],
+    ["☠","骷髅"],["☡","警示"],["☢","辐射"],["☣","生物危害"],
+    ["☤","蛇杖"],["☥","安卡"],["☦","十字"],["☨","十字"],
+    ["☩","十字"],["☪","星月"],["☫","星月"],["☬","星月"],
+    ["☭","锤镰"],["☮","和平"],["☯","太极"],["☰","三线"],
+    ["☱","三线"],["☲","三线"],["☳","三线"],["☴","三线"],
+    ["☵","三线"],["☶","三线"],["☷","三线"],["☸","法轮"],
+    ["☹","苦脸"],["☺","笑脸"],["☻","黑脸"],["☼","太阳"],
+    ["☽","月"],["☾","月"],["♠","黑桃"],["♡","红心"],
+    ["♢","方块"],["♣","梅花"],["♥","红心"],["♦","方块"],
+    ["♧","梅花"],["♨","温泉"],["♩","音符"],["♪","音符"],
+    ["♫","音符"],["♬","音符"],["♭","降号"],["♮","还原"],
+    ["♯","升号"],["♰","十字"],["♱","十字"],["♲","回收"],
+    ["♳","回收"],["♴","回收"],["♵","回收"],["♶","回收"],
+    ["♷","回收"],["♸","回收"],["♹","回收"],["♺","回收"],
+    ["♻","回收"],["♼","回收"],["♽","回收"],["♾","无穷"],
+    ["♿","轮椅"],["⚀","骰子1"],["⚁","骰子2"],["⚂","骰子3"],
+    ["⚃","骰子4"],["⚄","骰子5"],["⚅","骰子6"],["⚆","圆点"],
+    ["⚈","圆点"],["⚉","圆点"],["⚊","短线"],["⚋","短线"],
+    ["⚌","短线"],["⚍","短线"],["⚎","短线"],["⚏","短线"],
+    ["⚐","旗"],["⚑","旗"],["⚒","锤"],["⚓","锚"],
+    ["⚔","剑"],["⚕","医学"],["⚖","天平"],["⚗","蒸馏"],
+    ["⚘","花"],["⚙","齿轮"],["⚚","杖"],["⚛","原子"],
+    ["⚜","鸢尾"],["⚝","星"],["⚞","圆"],["⚟","圆"],
+    ["⚠","警告"],["⚡","闪电"],["⚢","双女"],["⚣","双男"],
+    ["⚤","男女"],["⚥","中性"],["⚦","男"],["⚧","跨性"],
+    ["⚨","闪电"],["⚩","闪电"],["⚪","空心圆"],["⚫","实心圆"],
+    ["⚬","点"],["⚭","婚戒"],["⚮","婚戒"],["⚯","婚戒"],
+    ["⚰","棺材"],["⚱","骨灰"],["⚲","未知"],["⚳","行星"],
+    ["⚴","行星"],["⚵","行星"],["⚶","行星"],["⚷","行星"],
+    ["⚸","行星"],["⚹","行星"],["⚺","行星"],["⚻","行星"],
+    ["⚼","行星"],["⚽","足球"],["⚾","棒球"],["⛄","雪人"],
+    ["⛅","多云"],["⛆","雨"],["⛇","雪"],["⛈","雷雨"],
+    ["⛉","雪"],["⛊","雪"],["⛋","雪"],["⛌","雪"],
+    ["⛍","雪"],["⛎","宝瓶"],["⛏","镐"],["⛐","雪"],
+    ["⛑","头盔"],["⛒","路"],["⛓","链"],["⛔","禁行"],
+    ["⛕","禁行"],["⛖","禁行"],["⛗","禁行"],["⛘","禁行"],
+    ["⛙","禁行"],["⛚","禁行"],["⛛","禁行"],["⛜","禁行"],
+    ["⛝","禁行"],["⛞","禁行"],["⛟","船"],["⛠","禁行"],
+    ["⛡","禁行"],["⛢","天王星"],["⛣","禁行"],["⛤","禁行"],
+    ["⛥","禁行"],["⛦","禁行"],["⛧","禁行"],["⛨","禁行"],
+    ["⛩","神社"],["⛪","教堂"],["⛫","禁行"],["⛬","禁行"],
+    ["⛭","齿轮"],["⛮","禁行"],["⛯","禁行"],["⛰","山"],
+    ["⛱","伞"],["⛲","喷泉"],["⛳","高尔夫"],["⛴","渡轮"],
+    ["⛵","帆船"],["⛶","方形"],["⛷","滑雪"],["⛸","滑冰"],
+    ["⛹","投篮"],["⛺","帐篷"],["⛻","禁行"],["⛼","禁行"],
+    ["⛽","加油"],["⛾","禁行"],["⛿","禁行"]
+  ]
+};
+
+/* ===== 空格数据(单独,因需区分名字) ===== */
+var SPACE_DATA = [
+  [" ", "半角空格", "Halfwidth Space"],
+  ["\u00A0", "不间断空格", "NBSP"],
+  ["\u2000", "En Quad", "En Quad"],
+  ["\u2001", "Em Quad", "Em Quad"],
+  ["\u2002", "En空格", "En Space"],
+  ["\u2003", "Em空格", "Em Space"],
+  ["\u2004", "三分Em空格", "Three-per-Em"],
+  ["\u2005", "四分Em空格", "Four-per-Em"],
+  ["\u2006", "六分Em空格", "Six-per-Em"],
+  ["\u2007", "数字空格", "Figure Space"],
+  ["\u2008", "标点空格", "Punctuation Space"],
+  ["\u2009", "细空格", "Thin Space"],
+  ["\u200A", "极细空格", "Hair Space"],
+  ["\u200B", "零宽空格", "Zero Width Space"],
+  ["\u200C", "零宽不连字", "ZWNJ"],
+  ["\u200D", "零宽连字", "ZWJ"],
+  ["\u202F", "窄不间断空格", "NNBSP"],
+  ["\u205F", "数学空格", "MMSP"],
+  ["\u3000", "全角空格", "Ideographic Space"],
+  ["\u1680", "欧甘空格", "Ogham Space"],
+  ["\u180E", "蒙古文分离符", "MVS"],
+  ["\u2060", "字连接符", "Word Joiner"],
+  ["\uFEFF", "零宽无断空格", "ZWNBSP/BOM"]
+];
+
+/* ===== 上标下标数据(合并,去重) ===== */
+var SUPER_DATA = [
+  ["⁰","上标0"],["¹","上标1"],["²","上标2"],["³","上标3"],
+  ["⁴","上标4"],["⁵","上标5"],["⁶","上标6"],["⁷","上标7"],
+  ["⁸","上标8"],["⁹","上标9"],["⁺","上标+"],["⁻","上标-"],
+  ["⁽","上标("],["⁾","上标)"],["ⁿ","上标n"],["ⁱ","上标i"],
+  ["ª","上标a"],["º","上标o"],
+  ["₁","下标1"],["₂","下标2"],["₃","下标3"],["₄","下标4"],
+  ["₅","下标5"],["₆","下标6"],["₇","下标7"],["₈","下标8"],
+  ["₉","下标9"],["₀","下标0"],["₊","下标+"],["₋","下标-"],
+  ["₍","下标("],["₎","下标)"],["ₐ","下标a"],["ₑ","下标e"],
+  ["ₒ","下标o"],["ₓ","下标x"],["ₕ","下标h"],["ₖ","下标k"],
+  ["ₗ","下标l"],["ₘ","下标m"],["ₙ","下标n"],["ₚ","下标p"],
+  ["ₛ","下标s"],["ₜ","下标t"],["ᵢ","下标i"],["ⱼ","下标j"],
+  ["ᵣ","下标r"],["ᵤ","下标u"],["ᵥ","下标v"],["ᵦ","下标β"],
+  ["ᵧ","下标γ"],["ᵨ","下标ρ"],["ᵩ","下标φ"],["ᵪ","下标χ"],
+  ["₌","下标="]
+];
+
+/* ===== 花体字母与希腊字母 ===== */
+var FANCY_STYLES = [
+  {name: '数学斜体', str: '𝐴𝐵𝐶𝐷𝐸𝐹𝐺𝐻𝐼𝐽𝐾𝐿𝑀𝑁𝑂𝑃𝑄𝑅𝑆𝑇𝑈𝑉𝑊𝑋𝑌𝑍𝑎𝑏𝑐𝑑𝑒𝑓𝑔ℎ𝑖𝑗𝑘𝑙𝑚𝑛𝑜𝑝𝑞𝑟𝑠𝑡𝑢𝑣𝑤𝑥𝑦𝑧'},
+  {name: '数学粗体', str: '𝐀𝐁𝐂𝐃𝐄𝐅𝐆𝐇𝐈𝐉𝐊𝐋𝐌𝐍𝐎𝐏𝐐𝐑𝐒𝐓𝐔𝐕𝐖𝐗𝐘𝐙𝐚𝐛𝐜𝐝𝐞𝐟𝐠𝐡𝐢𝐣𝐤𝐥𝐦𝐧𝐨𝐩𝐪𝐫𝐬𝐭𝐮𝐯𝐰𝐱𝐲𝐳𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗'},
+  {name: '粗斜体', str: '𝑨𝑩𝑪𝑫𝑬𝑭𝑮𝑯𝑰𝑱𝑲𝑳𝑴𝑵𝑶𝑷𝑸𝑹𝑺𝑻𝑼𝑽𝑾𝑿𝒀𝒁𝒂𝒃𝒄𝒅𝒆𝒇𝒈𝒉𝒊𝒋𝒌𝒍𝒎𝒏𝒐𝒑𝒒𝒓𝒔𝒕𝒖𝒗𝒘𝒙𝒚𝒛'},
+  {name: '花体(手写)', str: '𝒜ℬ𝒞𝒟ℰℱ𝒢ℋℐ𝒥𝒦ℒℳ𝒩𝒪𝒫𝒬ℛ𝒮𝒯𝒰𝒱𝒲𝒳𝒴𝒵𝒶𝒷𝒸𝒹ℯ𝒻ℊ𝒽𝒾𝒿𝓀𝓁𝓂𝓃ℴ𝓅𝓆𝓇𝓈𝓉𝓊𝓋𝓌𝓍𝓎𝓏'},
+  {name: '粗花体', str: '𝓐𝓑𝓒𝓓𝓔𝓕𝓖𝓗𝓘𝓙𝓚𝓛𝓜𝓝𝓞𝓟𝓠𝓡𝓢𝓣𝓤𝓥𝓦𝓧𝓨𝓩𝓪𝓫𝓬𝓭𝓮𝓯𝓰𝓱𝓲𝓳𝓴𝓵𝓶𝓷𝓸𝓹𝓺𝓻𝓼𝓽𝓾𝓿𝔀𝔁𝔂𝔃'},
+  {name: '德文尖角体', str: '𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨ𝔞𝔟𝔠𝔡𝔢𝔣𝔤𝔥𝔦𝔧𝔨𝔩𝔪𝔫𝔬𝔭𝔮𝔯𝔰𝔱𝔲𝔳𝔴𝔵𝔶𝔷'},
+  {name: '粗尖角体', str: '𝕬𝕭𝕮𝕯𝕰𝕱𝕲𝕳𝕴𝕵𝕶𝕷𝕸𝕹𝕺𝕻𝕼𝕽𝕾𝕿𝖀𝖁𝖂𝖃𝖄𝖅𝖆𝖇𝖈𝖉𝖊𝖋𝖌𝖍𝖎ⓙ𝖐𝖑𝖒𝖓𝖔𝖕𝖖𝖗𝖘𝖙𝖚𝖛𝖜𝖝𝖞𝖟'},
+  {name: '空心体(黑板体)', str: '𝔸𝔹ℂ𝔻𝔼𝔽𝔾ℍ𝕀𝕁𝕂𝕃𝕄ℕ𝕆ℙℚℝ𝕊𝕋𝕌𝕍𝕎𝕏𝕐ℤ𝕒𝕓𝕔𝕕𝕖𝕗𝕘𝕙𝕚𝕛𝕜𝕝𝕞𝕟𝕠𝕡𝕢𝕣𝕤𝕥𝕦𝕧𝕨𝕩𝕪𝕫𝟘𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡'},
+  {name: '无衬线体', str: '𝖠𝖡𝖢𝖣𝖤𝖥𝖦𝖧𝖨𝖩𝖪𝖫𝖬𝖭𝖮𝖯𝖰𝖱𝖲𝖳𝖴𝖵𝖶𝖷𝖸𝖹𝖺𝖻𝖼𝖽𝖾𝖿𝗀𝗁𝗂𝗃𝗄𝗅𝗆𝗇𝗈𝗉𝗊𝗋𝗌𝗍𝗎𝗏𝗐𝗑𝗒𝗓𝟢𝟣𝟤𝟩𝟦𝟧𝟨𝟩𝟪𝟫'},
+  {name: '无衬线粗体', str: '𝗔𝗕𝗖𝗗𝗘𝗙𝗚𝗛𝗜𝗝𝗞𝗟𝗠𝗡𝗢𝗣𝗤𝗥𝗦𝗧𝗨𝗩𝗪𝗫𝗬𝗭𝗮𝗯𝗰𝗱𝗲𝗳𝗴𝗵𝗶𝗷𝗸𝗹𝗺𝗻𝗼𝗽𝗾𝗿𝘀𝘁𝘂𝘃𝘄𝘅𝘆𝘇𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵'},
+  {name: '无衬线斜体', str: '𝘈𝘉𝘊𝘋𝘌𝘍𝘎𝘏𝘐𝘑𝘒𝘓𝘔𝘕𝘖𝘗𝘘𝘙𝘚𝘛𝘜𝘝𝘞𝘟𝘠𝘡𝘢𝘣𝘤𝘥𝘦𝘧𝘨𝘩𝘪𝘫𝘬𝘭𝘮𝘯𝘰𝘱𝘲𝘳𝘴𝘵𝘶𝘷𝘸𝘹𝘺𝘻'},
+  {name: '无衬线粗斜体', str: '𝘼𝘽𝘾𝘿𝙀𝙁𝙂𝙃𝙄𝙅𝙆𝙇𝙈𝙉𝙊𝙋𝙌𝙍𝙎𝙏𝙐𝙑𝙒𝙓𝙔𝙕𝙖𝙗𝙘𝙙𝙚𝙛𝙜𝙝𝙞𝙟𝙠𝙡𝙢𝙣𝙤𝙥𝙦𝙧𝙨𝙩𝙪𝙫𝙬𝙭𝙮𝙯'},
+  {name: '打字机体', str: '𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚇𝚈𝚉𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿'}
+];
+var GREEK_DATA = [
+  ['α','alpha'],['β','beta'],['γ','gamma'],['δ','delta'],
+  ['ε','epsilon'],['ζ','zeta'],['η','eta'],['θ','theta'],
+  ['ι','iota'],['κ','kappa'],['λ','lambda'],['μ','mu'],
+  ['ν','nu'],['ξ','xi'],['ο','omicron'],['π','pi'],
+  ['ρ','rho'],['σ','sigma'],['τ','tau'],['υ','upsilon'],
+  ['φ','phi'],['χ','chi'],['ψ','psi'],['ω','omega'],
+  ['ς','final sigma'],['ϑ','theta变体'],['ϕ','phi变体'],['ϖ','pi变体'],['ϱ','rho变体'],
+  ['Γ','Gamma'],['Δ','Delta'],['Θ','Theta'],['Λ','Lambda'],
+  ['Ξ','Xi'],['Π','Pi'],['Σ','Sigma'],['Υ','Upsilon'],
+  ['Φ','Phi'],['Ψ','Psi'],['Ω','Omega']
+];
+
+/* ===== 渲染选中花体样式的字符网格 ===== */
+function renderFancyStyle(styleIndex) {
+  var grid = document.getElementById('fancy-grid');
+  if (!grid) return;
+  var style = FANCY_STYLES[styleIndex] || FANCY_STYLES[0];
+  grid.innerHTML = '';
+  var chars = Array.from(style.str);
+  var total = chars.length;
+  var hasDigits = total > 52;
+  for (var i = 0; i < total; i++) {
+    var ch = chars[i];
+    if (!ch) continue;
+    var cell = document.createElement('div');
+    cell.className = 'char-cell fancy-cell';
+    var main = document.createElement('div');
+    main.className = 'char-main';
+    main.textContent = ch;
+    var label = document.createElement('div');
+    label.className = 'char-label';
+    if (i < 26) {
+      label.textContent = String.fromCharCode(65 + i);
+    } else if (i < 52) {
+      label.textContent = String.fromCharCode(97 + i - 26);
+    } else {
+      label.textContent = '0' + (i - 52);
+    }
+    cell.appendChild(main);
+    cell.appendChild(label);
+    cell.addEventListener('click', (function(c) { return function() { copyText(c); }; })(ch));
+    cell.addEventListener('touchstart', function() {
+      this.classList.add('touch-active');
+    });
+    cell.addEventListener('touchend', function() {
+      this.classList.remove('touch-active');
+    });
+    cell.addEventListener('touchstart', function(e) {
+      e.stopPropagation();
+    });
+    grid.appendChild(cell);
+  }
+}
+
+/* ===== 渲染函数 ===== */
+function renderGrid(containerId, data, isEmoji, isWide) {
+  var grid = document.getElementById(containerId);
+  if (!grid) return;
+  grid.innerHTML = '';
+  data.forEach(function(item) {
+    var cell = document.createElement('div');
+    cell.className = 'char-cell' + (isEmoji ? ' emoji-cell' : '') + (isWide ? ' wide' : '');
+    var main = document.createElement('div');
+    main.className = 'char-main';
+    main.textContent = item[0];
+    var label = document.createElement('div');
+    label.className = 'char-label';
+    label.textContent = item[1] || '';
+    cell.appendChild(main);
+    cell.appendChild(label);
+    cell.addEventListener('click', function() {
+      copyText(item[0]);
+    });
+    cell.addEventListener('touchstart', function() {
+      this.classList.add('touch-active');
+    });
+    cell.addEventListener('touchend', function() {
+      this.classList.remove('touch-active');
+    });
+    cell.addEventListener('touchstart', function(e) {
+      e.stopPropagation();
+    });
+    grid.appendChild(cell);
+  });
+}
+
+function renderSpaceGrid() {
+  var grid = document.getElementById('space-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  SPACE_DATA.forEach(function(item) {
+    var cell = document.createElement('div');
+    cell.className = 'char-cell wide';
+    var main = document.createElement('div');
+    main.className = 'char-main';
+    main.textContent = item[0];
+    main.setAttribute('title', '空格字符');
+    var label = document.createElement('div');
+    label.className = 'char-label';
+    label.textContent = item[1] + (item[2] ? ' · ' + item[2] : '');
+    cell.appendChild(main);
+    cell.appendChild(label);
+    cell.addEventListener('click', function() {
+      copyText(item[0]);
+    });
+    cell.addEventListener('touchstart', function() {
+      this.classList.add('touch-active');
+    });
+    cell.addEventListener('touchend', function() {
+      this.classList.remove('touch-active');
+    });
+    cell.addEventListener('touchstart', function(e) {
+      e.stopPropagation();
+    });
+    grid.appendChild(cell);
+  });
+}
+
+/* ===== 复制功能 ===== */
+function copyText(text) {
+  if (!text) return;
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(function() {
+      showTip('已复制: ' + text);
+    }).catch(function() {
+      fallbackCopy(text);
+    });
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text) {
+  var textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.top = '0';
+  textarea.style.left = '0';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  textarea.setSelectionRange(0, textarea.value.length);
+  var ok = false;
+  try {
+    ok = document.execCommand('copy');
+  } catch(e) {}
+  document.body.removeChild(textarea);
+  if (ok) {
+    showTip('已复制: ' + text);
+  } else {
+    showTip('复制失败,请手动复制');
+  }
+}
+
+function showTip(msg, type) {
+  var tip = document.getElementById('tipbar');
+  tip.textContent = msg;
+  tip.classList.remove('success', 'error');
+  if (type === 'success') tip.classList.add('success');
+  else if (type === 'error') tip.classList.add('error');
+  else tip.classList.add('show'); // default
+  clearTimeout(tip._timer);
+  tip._timer = setTimeout(function() {
+    tip.classList.remove('show');
+  }, 2000);
+}
+
+/* ===== 标签页切换 ===== */
+var tabs = document.querySelectorAll('.tab-item');
+var panels = document.querySelectorAll('.gnN');
+
+// Keyboard navigation for tabs
+var currentTabIndex = 0;
+tabs.forEach(function(tab, index) {
+  tab.tabIndex = 0;
+  tab.setAttribute('role', 'button');
+  tab.setAttribute('aria-label', '切换 ' + tab.dataset.tab + ' 标签页');
+  tab.addEventListener('click', function() {
+    selectTab(index);
+  });
+});
+
+// Initialize first tab as active
+selectTab(0);
+
+function selectTab(index) {
+  // Wrap around for keyboard navigation
+  currentTabIndex = index;
+  if (currentTabIndex >= tabs.length) currentTabIndex = 0;
+  if (currentTabIndex < 0) currentTabIndex = tabs.length - 1;
+
+  tabs.forEach(function(t, i) {
+    t.classList.toggle('active', i === currentTabIndex);
+    t.setAttribute('aria-selected', i === currentTabIndex);
+    panels[i].classList.toggle('show', i === currentTabIndex);
+  });
+}
+
+// Arrow key navigation
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+    e.preventDefault();
+    selectTab((currentTabIndex + 1) % tabs.length);
+  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    selectTab((currentTabIndex - 1 + tabs.length) % tabs.length);
+  }
+});
+
+// Number key shortcuts (1-9 for tabs)
+document.addEventListener('keydown', function(e) {
+  if (e.key >= '1' && e.key <= '9') {
+    var idx = parseInt(e.key) - 1;
+    if (idx < tabs.length) {
+      e.preventDefault();
+      selectTab(idx);
+    }
+  }
+});
+
+/* ===== 公式转换:Unicode 上标/下标映射 ===== */
+var SUPER_SCRIPT_MAP = {
+  '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
+  '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
+  '+': '⁺', '-': '⁻', '=': '⁼', '(': '⁽', ')': '⁾',
+  'a': 'ᵃ', 'b': 'ᵇ', 'c': 'ᶜ', 'd': 'ᵈ', 'e': 'ᵉ',
+  'f': 'ᶠ', 'g': 'ᵍ', 'h': 'ʰ', 'i': 'ⁱ', 'j': 'ʲ',
+  'k': 'ᵏ', 'l': 'ˡ', 'm': 'ᵐ', 'n': 'ⁿ', 'o': 'ᵒ',
+  'p': 'ᵖ', 'r': 'ʳ', 's': 'ˢ', 't': 'ᵗ', 'u': 'ᵘ',
+  'v': 'ᵛ', 'w': 'ʷ', 'x': 'ˣ', 'y': 'ʸ', 'z': 'ᶻ',
+  'A': 'ᴬ', 'B': 'ᴮ', 'D': 'ᴰ', 'E': 'ᴱ', 'G': 'ᴳ',
+  'H': 'ᴴ', 'I': 'ᴵ', 'J': 'ᴶ', 'K': 'ᴷ', 'L': 'ᴸ',
+  'M': 'ᴹ', 'N': 'ᴺ', 'O': 'ᴼ', 'P': 'ᴾ', 'R': 'ᴿ',
+  'T': 'ᵀ', 'U': 'ᵁ', 'V': 'ⱽ', 'W': 'ᵂ'
+};
+var SUB_SCRIPT_MAP = {
+  '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄',
+  '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉',
+  '+': '₊', '-': '₋', '=': '₌', '(': '₍', ')': '₎',
+  'a': 'ₐ', 'e': 'ₑ', 'h': 'ₕ', 'i': 'ᵢ', 'j': 'ⱼ',
+  'k': 'ₖ', 'l': 'ₗ', 'm': 'ₘ', 'n': 'ₙ', 'o': 'ₒ',
+  'p': 'ₚ', 'r': 'ᵣ', 's': 'ₛ', 't': 'ₜ', 'u': 'ᵤ',
+  'v': 'ᵥ', 'x': 'ₓ'
+};
+
+function convertToSuperScript(content) {
+  var out = '';
+  for (var i = 0; i < content.length; i++) {
+    var ch = content.charAt(i);
+    if (SUPER_SCRIPT_MAP[ch]) out += SUPER_SCRIPT_MAP[ch];
+    else return '^(' + content + ')';
+  }
+  return out;
+}
+function convertToSubScript(content) {
+  var out = '';
+  for (var i = 0; i < content.length; i++) {
+    var ch = content.charAt(i);
+    if (SUB_SCRIPT_MAP[ch]) out += SUB_SCRIPT_MAP[ch];
+    else return '_(' + content + ')';
+  }
+  return out;
+}
+function isSimpleAtom(x) {
+  return /^[\w\u00A1-\uFFFF]+$/.test(x);
+}
+function frac(a, b) {
+  return (isSimpleAtom(a) ? a : '(' + a + ')') + '/' + (isSimpleAtom(b) ? b : '(' + b + ')');
+}
+
+/* ===== LaTeX → 纯文本 转换规则(长命令/变体在前) ===== */
+var LATEX_RULES = [
+  {re: /\^\{([^{}]*)\}/g, fn: function(_, c) { return convertToSuperScript(c); }},
+  {re: /\_\{([^{}]*)\}/g, fn: function(_, c) { return convertToSubScript(c); }},
+  {re: /\^(\w)/g, fn: function(_, c) { return convertToSuperScript(c); }},
+  {re: /\_(\w)/g, fn: function(_, c) { return convertToSubScript(c); }},
+  {re: /\\binom\{([^{}]*)\}\{([^{}]*)\}/g, fn: function(_, a, b) { return 'C(' + a + ',' + b + ')'; }},
+  {re: /\\sqrt\[([^\[\]]*)\]\{([^{}]*)\}/g, fn: function(_, n, x) { return '∛[' + n + '](' + x + ')'; }},
+  {re: /\\sqrt\{([^{}]*)\}/g, fn: function(_, x) { return '√(' + x + ')'; }},
+  {re: /\\displaystyle/g, fn: function() { return ''; }},
+  {re: /\\textstyle/g, fn: function() { return ''; }},
+  {re: /\\scriptstyle/g, fn: function() { return ''; }},
+  {re: /\\limits/g, fn: function() { return ''; }},
+  {re: /\\nolimits/g, fn: function() { return ''; }},
+  {re: /\\arcsinh/g, fn: function() { return 'arcsinh'; }},
+  {re: /\\arccosh/g, fn: function() { return 'arccosh'; }},
+  {re: /\\arctanh/g, fn: function() { return 'arctanh'; }},
+  {re: /\\arcsin/g, fn: function() { return 'arcsin'; }},
+  {re: /\\arccos/g, fn: function() { return 'arccos'; }},
+  {re: /\\arctan/g, fn: function() { return 'arctan'; }},
+  {re: /\\sinh/g, fn: function() { return 'sinh'; }},
+  {re: /\\cosh/g, fn: function() { return 'cosh'; }},
+  {re: /\\tanh/g, fn: function() { return 'tanh'; }},
+  {re: /\\coth/g, fn: function() { return 'coth'; }},
+  {re: /\\limsup/g, fn: function() { return 'limsup'; }},
+  {re: /\\liminf/g, fn: function() { return 'liminf'; }},
+  {re: /\\operatorname\{([^{}]*)\}/g, fn: function(_, x) { return x; }},
+  {re: /\\max/g, fn: function() { return 'max'; }},
+  {re: /\\min/g, fn: function() { return 'min'; }},
+  {re: /\\gcd/g, fn: function() { return 'gcd'; }},
+  {re: /\\det/g, fn: function() { return 'det'; }},
+  {re: /\\sin/g, fn: function() { return 'sin'; }},
+  {re: /\\cos/g, fn: function() { return 'cos'; }},
+  {re: /\\tan/g, fn: function() { return 'tan'; }},
+  {re: /\\cot/g, fn: function() { return 'cot'; }},
+  {re: /\\sec/g, fn: function() { return 'sec'; }},
+  {re: /\\csc/g, fn: function() { return 'csc'; }},
+  {re: /\\lim/g, fn: function() { return 'lim'; }},
+  {re: /\\ln/g, fn: function() { return 'ln'; }},
+  {re: /\\log/g, fn: function() { return 'log'; }},
+  {re: /\\exp/g, fn: function() { return 'exp'; }},
+  {re: /\\arg/g, fn: function() { return 'arg'; }},
+  {re: /\\deg/g, fn: function() { return '°'; }},
+  {re: /\\bmod/g, fn: function() { return ' mod '; }},
+  {re: /\\pmod\{([^{}]*)\}/g, fn: function(_, m) { return ' (mod ' + m + ') '; }},
+  {re: /\\iint/g, fn: function() { return '∬'; }},
+  {re: /\\iiint/g, fn: function() { return '∭'; }},
+  {re: /\\oint/g, fn: function() { return '∮'; }},
+  {re: /\\int/g, fn: function() { return '∫'; }},
+  {re: /\\sum/g, fn: function() { return '∑'; }},
+  {re: /\\prod/g, fn: function() { return '∏'; }},
+  {re: /\\coprod/g, fn: function() { return '∐'; }},
+  {re: /\\infty/g, fn: function() { return '∞'; }},
+  {re: /\\pm/g, fn: function() { return '±'; }},
+  {re: /\\mp/g, fn: function() { return '∓'; }},
+  {re: /\\times/g, fn: function() { return '×'; }},
+  {re: /\\div/g, fn: function() { return '÷'; }},
+  {re: /\\ast/g, fn: function() { return '*'; }},
+  {re: /\\star/g, fn: function() { return '⋆'; }},
+  {re: /\\circ/g, fn: function() { return '°'; }},
+  {re: /\\prime/g, fn: function() { return '′'; }},
+  {re: /\\partial/g, fn: function() { return '∂'; }},
+  {re: /\\nabla/g, fn: function() { return '∇'; }},
+  {re: /\\angle/g, fn: function() { return '∠'; }},
+  {re: /\\perp/g, fn: function() { return '⊥'; }},
+  {re: /\\parallel/g, fn: function() { return '∥'; }},
+  {re: /\\therefore/g, fn: function() { return '∴'; }},
+  {re: /\\because/g, fn: function() { return '∵'; }},
+  {re: /\\propto/g, fn: function() { return '∝'; }},
+  {re: /\\simeq/g, fn: function() { return '≃'; }},
+  {re: /\\sim/g, fn: function() { return '∼'; }},
+  {re: /\\approx/g, fn: function() { return '≈'; }},
+  {re: /\\equiv/g, fn: function() { return '≡'; }},
+  {re: /\\neq/g, fn: function() { return '≠'; }},
+  {re: /\\neg/g, fn: function() { return '¬'; }},
+  {re: /\\ne/g, fn: function() { return '≠'; }},
+  {re: /\\leq/g, fn: function() { return '≤'; }},
+  {re: /\\le/g, fn: function() { return '≤'; }},
+  {re: /\\geq/g, fn: function() { return '≥'; }},
+  {re: /\\ge/g, fn: function() { return '≥'; }},
+  {re: /\\ll/g, fn: function() { return '≪'; }},
+  {re: /\\gg/g, fn: function() { return '≫'; }},
+  {re: /\\mid/g, fn: function() { return '|'; }},
+  {re: /\\vert/g, fn: function() { return '|'; }},
+  {re: /\\Vert/g, fn: function() { return '‖'; }},
+  {re: /\\Leftrightarrow/g, fn: function() { return '⇔'; }},
+  {re: /\\leftrightarrow/g, fn: function() { return '↔'; }},
+  {re: /\\Rightarrow/g, fn: function() { return '⇒'; }},
+  {re: /\\Leftarrow/g, fn: function() { return '⇐'; }},
+  {re: /\\rightarrow/g, fn: function() { return '→'; }},
+  {re: /\\leftarrow/g, fn: function() { return '←'; }},
+  {re: /\\uparrow/g, fn: function() { return '↑'; }},
+  {re: /\\downarrow/g, fn: function() { return '↓'; }},
+  {re: /\\updownarrow/g, fn: function() { return '↕'; }},
+  {re: /\\mapsto/g, fn: function() { return '↦'; }},
+  {re: /\\to/g, fn: function() { return '→'; }},
+  {re: /\\gets/g, fn: function() { return '←'; }},
+  {re: /\\nexists/g, fn: function() { return '∄'; }},
+  {re: /\\notin/g, fn: function() { return '∉'; }},
+  {re: /\\forall/g, fn: function() { return '∀'; }},
+  {re: /\\exists/g, fn: function() { return '∃'; }},
+  {re: /\\in/g, fn: function() { return '∈'; }},
+  {re: /\\ni/g, fn: function() { return '∋'; }},
+  {re: /\\supseteq/g, fn: function() { return '⊇'; }},
+  {re: /\\supset/g, fn: function() { return '⊃'; }},
+  {re: /\\subseteq/g, fn: function() { return '⊆'; }},
+  {re: /\\subset/g, fn: function() { return '⊂'; }},
+  {re: /\\sup/g, fn: function() { return 'sup'; }},
+  {re: /\\cup/g, fn: function() { return '∪'; }},
+  {re: /\\cap/g, fn: function() { return '∩'; }},
+  {re: /\\inf/g, fn: function() { return 'inf'; }},
+  {re: /\\land/g, fn: function() { return '∧'; }},
+  {re: /\\wedge/g, fn: function() { return '∧'; }},
+  {re: /\\lor/g, fn: function() { return '∨'; }},
+  {re: /\\vee/g, fn: function() { return '∨'; }},
+  {re: /\\emptyset/g, fn: function() { return '∅'; }},
+  {re: /\\varnothing/g, fn: function() { return '∅'; }},
+  {re: /\\varepsilon/g, fn: function() { return 'ε'; }},
+  {re: /\\epsilon/g, fn: function() { return 'ε'; }},
+  {re: /\\vartheta/g, fn: function() { return 'ϑ'; }},
+  {re: /\\theta/g, fn: function() { return 'θ'; }},
+  {re: /\\varphi/g, fn: function() { return 'φ'; }},
+  {re: /\\phi/g, fn: function() { return 'φ'; }},
+  {re: /\\varrho/g, fn: function() { return 'ϱ'; }},
+  {re: /\\rho/g, fn: function() { return 'ρ'; }},
+  {re: /\\varpi/g, fn: function() { return 'ϖ'; }},
+  {re: /\\pi/g, fn: function() { return 'π'; }},
+  {re: /\\varsigma/g, fn: function() { return 'ς'; }},
+  {re: /\\sigma/g, fn: function() { return 'σ'; }},
+  {re: /\\alpha/g, fn: function() { return 'α'; }},
+  {re: /\\beta/g, fn: function() { return 'β'; }},
+  {re: /\\gamma/g, fn: function() { return 'γ'; }},
+  {re: /\\delta/g, fn: function() { return 'δ'; }},
+  {re: /\\zeta/g, fn: function() { return 'ζ'; }},
+  {re: /\\eta/g, fn: function() { return 'η'; }},
+  {re: /\\iota/g, fn: function() { return 'ι'; }},
+  {re: /\\kappa/g, fn: function() { return 'κ'; }},
+  {re: /\\lambda/g, fn: function() { return 'λ'; }},
+  {re: /\\mu/g, fn: function() { return 'μ'; }},
+  {re: /\\nu/g, fn: function() { return 'ν'; }},
+  {re: /\\xi/g, fn: function() { return 'ξ'; }},
+  {re: /\\omicron/g, fn: function() { return 'ο'; }},
+  {re: /\\tau/g, fn: function() { return 'τ'; }},
+  {re: /\\upsilon/g, fn: function() { return 'υ'; }},
+  {re: /\\chi/g, fn: function() { return 'χ'; }},
+  {re: /\\psi/g, fn: function() { return 'ψ'; }},
+  {re: /\\omega/g, fn: function() { return 'ω'; }},
+  {re: /\\Gamma/g, fn: function() { return 'Γ'; }},
+  {re: /\\Delta/g, fn: function() { return 'Δ'; }},
+  {re: /\\Theta/g, fn: function() { return 'Θ'; }},
+  {re: /\\Lambda/g, fn: function() { return 'Λ'; }},
+  {re: /\\Xi/g, fn: function() { return 'Ξ'; }},
+  {re: /\\Pi/g, fn: function() { return 'Π'; }},
+  {re: /\\Sigma/g, fn: function() { return 'Σ'; }},
+  {re: /\\Upsilon/g, fn: function() { return 'Υ'; }},
+  {re: /\\Phi/g, fn: function() { return 'Φ'; }},
+  {re: /\\Psi/g, fn: function() { return 'Ψ'; }},
+  {re: /\\Omega/g, fn: function() { return 'Ω'; }},
+  {re: /\\dfrac\{([^{}]*)\}\{([^{}]*)\}/g, fn: function(_, a, b) { return frac(a, b); }},
+  {re: /\\tfrac\{([^{}]*)\}\{([^{}]*)\}/g, fn: function(_, a, b) { return frac(a, b); }},
+  {re: /\\frac\{([^{}]*)\}\{([^{}]*)\}/g, fn: function(_, a, b) { return frac(a, b); }},
+  {re: /\\left\./g, fn: function() { return ''; }},
+  {re: /\\right\./g, fn: function() { return ''; }},
+  {re: /\\left\(/g, fn: function() { return '('; }},
+  {re: /\\right\)/g, fn: function() { return ')'; }},
+  {re: /\\left\[/g, fn: function() { return '['; }},
+  {re: /\\right\]/g, fn: function() { return ']'; }},
+  {re: /\\left\{/g, fn: function() { return '{'; }},
+  {re: /\\right\}/g, fn: function() { return '}'; }},
+  {re: /\\left\|/g, fn: function() { return '|'; }},
+  {re: /\\right\|/g, fn: function() { return '|'; }},
+  {re: /\\langle/g, fn: function() { return '⟨'; }},
+  {re: /\\rangle/g, fn: function() { return '⟩'; }},
+  {re: /\\lfloor/g, fn: function() { return '⌊'; }},
+  {re: /\\rfloor/g, fn: function() { return '⌋'; }},
+  {re: /\\lceil/g, fn: function() { return '⌈'; }},
+  {re: /\\rceil/g, fn: function() { return '⌉'; }},
+  {re: /\\left/g, fn: function() { return ''; }},
+  {re: /\\right/g, fn: function() { return ''; }},
+  {re: /\\Biggl/g, fn: function() { return ''; }},
+  {re: /\\Biggr/g, fn: function() { return ''; }},
+  {re: /\\biggl/g, fn: function() { return ''; }},
+  {re: /\\biggr/g, fn: function() { return ''; }},
+  {re: /\\Bigl/g, fn: function() { return ''; }},
+  {re: /\\Bigr/g, fn: function() { return ''; }},
+  {re: /\\bigl/g, fn: function() { return ''; }},
+  {re: /\\bigr/g, fn: function() { return ''; }},
+  {re: /\\Bigg/g, fn: function() { return ''; }},
+  {re: /\\bigg/g, fn: function() { return ''; }},
+  {re: /\\Big/g, fn: function() { return ''; }},
+  {re: /\\big/g, fn: function() { return ''; }},
+  {re: /\\text\{([^{}]*)\}/g, fn: function(_, x) { return x; }},
+  {re: /\\mathrm\{([^{}]*)\}/g, fn: function(_, x) { return x; }},
+  {re: /\\mathbf\{([^{}]*)\}/g, fn: function(_, x) { return x; }},
+  {re: /\\mathit\{([^{}]*)\}/g, fn: function(_, x) { return x; }},
+  {re: /\\mathsf\{([^{}]*)\}/g, fn: function(_, x) { return x; }},
+  {re: /\\mathtt\{([^{}]*)\}/g, fn: function(_, x) { return x; }},
+  {re: /\\mathbb\{([^{}]*)\}/g, fn: function(_, x) { return x; }},
+  {re: /\\mathcal\{([^{}]*)\}/g, fn: function(_, x) { return x; }},
+  {re: /\\mathscr\{([^{}]*)\}/g, fn: function(_, x) { return x; }},
+  {re: /\\mathfrak\{([^{}]*)\}/g, fn: function(_, x) { return x; }},
+  {re: /\\mbox\{([^{}]*)\}/g, fn: function(_, x) { return x; }},
+  {re: /\\textbf\{([^{}]*)\}/g, fn: function(_, x) { return x; }},
+  {re: /\\textit\{([^{}]*)\}/g, fn: function(_, x) { return x; }},
+  {re: /\\texttt\{([^{}]*)\}/g, fn: function(_, x) { return x; }},
+  {re: /\\emph\{([^{}]*)\}/g, fn: function(_, x) { return x; }},
+  {re: /\\overline\{([^{}]*)\}/g, fn: function(_, x) { return x + '\u0304'; }},
+  {re: /\\bar\{([^{}]*)\}/g, fn: function(_, x) { return x + '\u0304'; }},
+  {re: /\\hat\{([^{}]*)\}/g, fn: function(_, x) { return x + '\u0302'; }},
+  {re: /\\vec\{([^{}]*)\}/g, fn: function(_, x) { return x + '\u20D7'; }},
+  {re: /\\ddot\{([^{}]*)\}/g, fn: function(_, x) { return x + '\u0308'; }},
+  {re: /\\dot\{([^{}]*)\}/g, fn: function(_, x) { return x + '\u0307'; }},
+  {re: /\\cdots/g, fn: function() { return '⋯'; }},
+  {re: /\\ldots/g, fn: function() { return '…'; }},
+  {re: /\\dots/g, fn: function() { return '…'; }},
+  {re: /\\vdots/g, fn: function() { return '⋮'; }},
+  {re: /\\ddots/g, fn: function() { return '⋱'; }},
+  {re: /\\cdot/g, fn: function() { return '·'; }},
+  {re: /\\qquad/g, fn: function() { return '\u2003\u2003'; }},
+  {re: /\\quad/g, fn: function() { return '\u2003'; }},
+  {re: /\\enspace/g, fn: function() { return '\u2002'; }},
+  {re: /\\hspace\*?\{[^{}]*\}/g, fn: function() { return ' '; }},
+  {re: /\\,/, fn: function() { return '\u2009'; }},
+  {re: /\\;/, fn: function() { return '\u2005'; }},
+  {re: /\\:/, fn: function() { return '\u2004'; }},
+  {re: /\\!/, fn: function() { return '\u200A'; }},
+  {re: /\\ /, fn: function() { return ' '; }},
+  {re: /\\space/g, fn: function() { return ' '; }},
+  {re: /\\\\/g, fn: function() { return '\n'; }},
+  {re: /\\\{/g, fn: function() { return '{'; }},
+  {re: /\\\}/g, fn: function() { return '}'; }},
+  {re: /\\_/g, fn: function() { return '_'; }},
+  {re: /\\%/g, fn: function() { return '%'; }},
+  {re: /\\\$/g, fn: function() { return '$'; }},
+  {re: /\\#/g, fn: function() { return '#'; }},
+  {re: /\\&/g, fn: function() { return '&'; }},
+  {re: /\\backslash/g, fn: function() { return '\\'; }}
+];
+
+function latexToPlain(latex) {
+  var result = String(latex)
+    .replace(/\\_/g, '\uE000')
+    .replace(/\\\^/g, '\uE001');
+  var errors = [];
+  for (var iter = 0; iter < 5; iter++) {
+    var changed = false;
+    for (var i = 0; i < LATEX_RULES.length; i++) {
+      var rule = LATEX_RULES[i];
+      result = result.replace(rule.re, function() {
+        changed = true;
+        try {
+          return rule.fn.apply(null, arguments);
+        } catch (e) {
+          errors.push('转换失败: ' + arguments[0]);
+          return arguments[0];
+        }
+      });
+    }
+    if (!changed) break;
+  }
+  result = result.replace(/\uE000/g, '_').replace(/\uE001/g, '^');
+  var leftovers = result.match(/\\[a-zA-Z]+/g);
+  if (leftovers) {
+    for (var j = 0; j < leftovers.length; j++) {
+      var name = leftovers[j].slice(1);
+      result = result.replace(leftovers[j], '\u27E8' + name + '\u27E9');
+    }
+  }
+  result = result.replace(/\{([^{}]*)\}/g, function(_, content) {
+    if (!/[\\{}]/.test(content)) return content;
+    return '{' + content + '}';
+  });
+  return result;
+}
+
+function convertLatex(input) {
+  var s = input.replace(/^\\\[/, '').replace(/\\\]$/, '');
+  s = s.replace(/^\$\$/, '').replace(/\$\$$/, '');
+  s = s.replace(/^\$/, '').replace(/\$$/, '');
+  s = s.replace(/^\\\(/, '').replace(/\\\)$/, '');
+  s = latexToPlain(s);
+  var errors = [];
+  var m = s.match(/\u27E8[^\u27E9]+\u27E9/g);
+  if (m) {
+    m.forEach(function(e) {
+      var name = e.slice(1, -1).replace(/^\\/, '');
+      if (errors.indexOf(name) === -1) errors.push(name);
+    });
+  }
+  s = s.replace(/\u27E8[^\u27E9]+\u27E9/g, '');
+  s = s.replace(/[ \t\r]+/g, ' ').replace(/^[ \t\r]+|[ \t\r]+$/g, '');
+  return {ok: errors.length === 0, text: s, errors: errors};
+}
+
+/* ===== 公式UI ===== */
+var latexInput = document.getElementById('latex-input');
+var resultText = document.getElementById('result-text');
+var resultError = document.getElementById('result-error');
+
+var EXAMPLES = [
+  '\\frac{a}{b} + \\frac{c}{d}',
+  'x^2 + y^2 = z^2',
+  'x^{10} + a_3',
+  'H_2O',
+  '\\sqrt{x^2 + y^2}',
+  '\\sum_{i=1}^{n} i^2',
+  '\\int_0^1 x^2 \\, dx',
+  '\\lim_{x \\to \\infty} \\frac{1}{x}',
+  '\\alpha^2 + \\beta^2',
+  '\\frac{1}{2} + \\frac{1}{3} = \\frac{5}{6}'
+];
+
+var exampleRow = document.getElementById('example-row');
+EXAMPLES.forEach(function(ex) {
+  var chip = document.createElement('button');
+  chip.className = 'example-chip';
+  chip.textContent = ex;
+  chip.addEventListener('click', function() {
+    latexInput.value = ex;
+    convertBtn();
+  });
+  exampleRow.appendChild(chip);
+});
+
+function convertBtn() {
+  var raw = latexInput.value.trim();
+  if (!raw) {
+    resultText.classList.add('hidden');
+    resultError.classList.remove('hidden');
+    resultError.textContent = '请输入公式';
+    return;
+  }
+  // Show loading state
+  resultText.classList.add('hidden');
+  resultError.classList.add('hidden');
+  resultText.textContent = '转换中...';
+  resultText.classList.remove('small');
+  resultError.textContent = '';
+  // Simulate async then do actual conversion
+  setTimeout(function() {
+    var r = convertLatex(raw);
+    if (r.ok) {
+      resultText.classList.remove('hidden');
+      resultError.classList.add('hidden');
+      resultText.textContent = r.text;
+      resultText.classList.remove('small');
+    } else {
+      resultText.classList.remove('hidden');
+      resultText.classList.add('small');
+      resultError.classList.remove('hidden');
+      resultError.textContent = '⚠ 无法完全转换,以下命令不支持:' + r.errors.join(', ');
+      resultText.textContent = r.text;
+    }
+    // Remove loading state after a brief delay
+    resultText.textContent = r.text || '转换完成';
+  }, 300);
+}
+
+function copyResult() {
+  var txt = resultText.textContent;
+  if (!txt) return;
+  copyText(txt);
+}
+
+document.getElementById('btn-convert').addEventListener('click', convertBtn);
+document.getElementById('btn-clear').addEventListener('click', function() {
+  latexInput.value = '';
+  resultText.classList.add('hidden');
+  resultError.classList.add('hidden');
+  latexInput.focus();
+});
+
+/* ===== 纯文本 → LaTeX ===== */
+var REV_SUPER = {};
+for (var rs in SUPER_SCRIPT_MAP) REV_SUPER[SUPER_SCRIPT_MAP[rs]] = rs;
+var REV_SUB = {};
+for (var rb in SUB_SCRIPT_MAP) REV_SUB[SUB_SCRIPT_MAP[rb]] = rb;
+
+function convertScriptRuns(s) {
+  var out = '';
+  var i = 0;
+  while (i < s.length) {
+    var ch = s.charAt(i);
+    if (REV_SUPER[ch]) {
+      var run = '';
+      while (i < s.length && REV_SUPER[s.charAt(i)]) { run += REV_SUPER[s.charAt(i)]; i++; }
+      out += '^{' + run + '}';
+    } else if (REV_SUB[ch]) {
+      var run2 = '';
+      while (i < s.length && REV_SUB[s.charAt(i)]) { run2 += REV_SUB[s.charAt(i)]; i++; }
+      out += '_{' + run2 + '}';
+    } else {
+      out += ch;
+      i++;
+    }
+  }
+  return out;
+}
+
+var TEX_SYMBOL_MAP = {
+  'α': '\\alpha', 'β': '\\beta', 'γ': '\\gamma', 'δ': '\\delta',
+  'ε': '\\epsilon', 'ζ': '\\zeta', 'η': '\\eta', 'θ': '\\theta',
+  'ϑ': '\\vartheta', 'ι': '\\iota', 'κ': '\\kappa', 'λ': '\\lambda',
+  'μ': '\\mu', 'ν': '\\nu', 'ξ': '\\xi', 'ο': '\\omicron',
+  'π': '\\pi', 'ϖ': '\\varpi', 'ρ': '\\rho', 'ϱ': '\\varrho',
+  'σ': '\\sigma', 'ς': '\\varsigma', 'τ': '\\tau', 'υ': '\\upsilon',
+  'φ': '\\phi', 'ϕ': '\\varphi', 'χ': '\\chi', 'ψ': '\\psi',
+  'ω': '\\omega', 'Γ': '\\Gamma', 'Δ': '\\Delta', 'Θ': '\\Theta',
+  'Λ': '\\Lambda', 'Ξ': '\\Xi', 'Π': '\\Pi', 'Σ': '\\Sigma',
+  'Υ': '\\Upsilon', 'Φ': '\\Phi', 'Ψ': '\\Psi', 'Ω': '\\Omega',
+  '∑': '\\sum', '∏': '\\prod', '∐': '\\coprod', '∫': '\\int',
+  '∬': '\\iint', '∭': '\\iiint', '∮': '\\oint', '∞': '\\infty',
+  '±': '\\pm', '∓': '\\mp', '×': '\\times', '÷': '\\div',
+  '·': '\\cdot', '∂': '\\partial', '∇': '\\nabla', '∠': '\\angle',
+  '⊥': '\\perp', '∥': '\\parallel', '∴': '\\therefore', '∵': '\\because',
+  '∝': '\\propto', '∼': '\\sim', '≃': '\\simeq', '≈': '\\approx',
+  '≡': '\\equiv', '≠': '\\neq', '≤': '\\leq', '≥': '\\geq',
+  '≪': '\\ll', '≫': '\\gg', '∈': '\\in', '∉': '\\notin',
+  '∋': '\\ni', '∅': '\\emptyset', '⊂': '\\subset', '⊃': '\\supset',
+  '⊆': '\\subseteq', '⊇': '\\supseteq', '∪': '\\cup', '∩': '\\cap',
+  '∧': '\\wedge', '∨': '\\vee', '¬': '\\neg', '∀': '\\forall',
+  '∃': '\\exists', '∄': '\\nexists', '→': '\\to', '←': '\\leftarrow',
+  '⇒': '\\Rightarrow', '⇐': '\\Leftarrow', '⇔': '\\Leftrightarrow',
+  '↔': '\\leftrightarrow', '↑': '\\uparrow', '↓': '\\downarrow',
+  '↕': '\\updownarrow', '↦': '\\mapsto', '⋯': '\\cdots', '…': '\\ldots',
+  '⋮': '\\vdots', '⋱': '\\ddots', 'ℓ': '\\ell', '⟨': '\\langle',
+  '⟩': '\\rangle', '°': '^{\\circ}', '′': '\\prime'
+};
+
+function convertSymbols(s) {
+  var out = '';
+  for (var i = 0; i < s.length; i++) {
+    var ch = s.charAt(i);
+    if (TEX_SYMBOL_MAP[ch]) {
+      out += TEX_SYMBOL_MAP[ch];
+      var nx = s.charAt(i + 1);
+      if (nx && /[A-Za-z0-9]/.test(nx)) out += ' ';
+    } else {
+      out += ch;
+    }
+  }
+  return out;
+}
+
+var TEX_RULES_A = [
+  {re: /√\(([^()]*)\)/g, out: '\\sqrt{$1}'},
+  {re: /∛\[([^\[\]]*)\]\(([^()]*)\)/g, out: '\\sqrt[$1]{$2}'},
+  {re: /½/g, out: '\\frac{1}{2}'},
+  {re: /⅓/g, out: '\\frac{1}{3}'},
+  {re: /⅔/g, out: '\\frac{2}{3}'},
+  {re: /¼/g, out: '\\frac{1}{4}'},
+  {re: /¾/g, out: '\\frac{3}{4}'},
+  {re: /⅕/g, out: '\\frac{1}{5}'},
+  {re: /⅖/g, out: '\\frac{2}{5}'},
+  {re: /⅗/g, out: '\\frac{3}{5}'},
+  {re: /⅘/g, out: '\\frac{4}{5}'},
+  {re: /⅙/g, out: '\\frac{1}{6}'},
+  {re: /⅚/g, out: '\\frac{5}{6}'},
+  {re: /⅐/g, out: '\\frac{1}{7}'},
+  {re: /⅛/g, out: '\\frac{1}{8}'},
+  {re: /⅜/g, out: '\\frac{3}{8}'},
+  {re: /⅝/g, out: '\\frac{5}{8}'},
+  {re: /⅞/g, out: '\\frac{7}{8}'},
+  {re: /⅑/g, out: '\\frac{1}{9}'},
+  {re: /⅒/g, out: '\\frac{1}{10}'},
+  {re: /\(([^()]*)\)\s*\/\s*\(([^()]*)\)/g, out: '\\frac{$1}{$2}'},
+  {re: /\(([^()]*)\)\s*\/\s*([\w\u00A1-\uFFFF]+)/g, out: '\\frac{$1}{$2}'},
+  {re: /([\w\u00A1-\uFFFF]+)\s*\/\s*\(([^()]*)\)/g, out: '\\frac{$1}{$2}'},
+  {re: /([\w\u00A1-\uFFFF]+)\s*\/\s*([\w\u00A1-\uFFFF]+)/g, out: '\\frac{$1}{$2}'},
+  {re: /([\w\u00A1-\uFFFF])\u0304/g, out: '\\bar{$1}'},
+  {re: /([\w\u00A1-\uFFFF])\u0302/g, out: '\\hat{$1}'},
+  {re: /([\w\u00A1-\uFFFF])\u20D7/g, out: '\\vec{$1}'},
+  {re: /([\w\u00A1-\uFFFF])\u0307/g, out: '\\dot{$1}'},
+  {re: /([\w\u00A1-\uFFFF])\u0308/g, out: '\\ddot{$1}'}
+];
+
+var TEX_RULES_B = [
+  {re: /(^|[^A-Za-z0-9\\])lim(?![A-Za-z0-9])/g, out: '$1\\lim'},
+  {re: /(^|[^A-Za-z0-9\\])ln(?![A-Za-z0-9])/g, out: '$1\\ln'},
+  {re: /(^|[^A-Za-z0-9\\])log(?![A-Za-z0-9])/g, out: '$1\\log'},
+  {re: /(^|[^A-Za-z0-9\\])exp(?![A-Za-z0-9])/g, out: '$1\\exp'},
+  {re: /(^|[^A-Za-z0-9\\])sin(?![A-Za-z0-9])/g, out: '$1\\sin'},
+  {re: /(^|[^A-Za-z0-9\\])cos(?![A-Za-z0-9])/g, out: '$1\\cos'},
+  {re: /(^|[^A-Za-z0-9\\])tan(?![A-Za-z0-9])/g, out: '$1\\tan'},
+  {re: /(^|[^A-Za-z0-9\\])cot(?![A-Za-z0-9])/g, out: '$1\\cot'},
+  {re: /(^|[^A-Za-z0-9\\])sec(?![A-Za-z0-9])/g, out: '$1\\sec'},
+  {re: /(^|[^A-Za-z0-9\\])csc(?![A-Za-z0-9])/g, out: '$1\\csc'},
+  {re: /(^|[^A-Za-z0-9\\])max(?![A-Za-z0-9])/g, out: '$1\\max'},
+  {re: /(^|[^A-Za-z0-9\\])min(?![A-Za-z0-9])/g, out: '$1\\min'},
+  {re: /(^|[^A-Za-z0-9\\])sup(?![A-Za-z0-9])/g, out: '$1\\sup'},
+  {re: /(^|[^A-Za-z0-9\\])inf(?![A-Za-z0-9])/g, out: '$1\\inf'},
+  {re: /(^|[^A-Za-z0-9\\])det(?![A-Za-z0-9])/g, out: '$1\\det'},
+  {re: /(^|[^A-Za-z0-9\\])gcd(?![A-Za-z0-9])/g, out: '$1\\gcd'},
+  {re: /(^|[^A-Za-z0-9\\])deg(?![A-Za-z0-9])/g, out: '$1\\deg'},
+  {re: /(^|[^A-Za-z0-9\\])mod(?![A-Za-z0-9])/g, out: '$1\\bmod'},
+  {re: /_\(([^()]*)\)/g, out: '_{$1}'},
+  {re: /\^\(([^()]*)\)/g, out: '^{$1}'},
+  {re: /_(\w)/g, out: '_{$1}'},
+  {re: /\^(\w)/g, out: '^{$1}'},
+  {re: /\u2003\u2003/g, out: '\\qquad'},
+  {re: /\u2003/g, out: '\\quad'},
+  {re: /\u2002/g, out: '\\enspace'},
+  {re: /\u2009/g, out: '\\,'},
+  {re: /\u200A/g, out: '\\!'},
+  {re: /\u2005/g, out: '\\;'},
+  {re: /\u2004/g, out: '\\:'},
+  {re: /\u3000/g, out: '\\quad'},
+  {re: /\u00A0/g, out: '~'},
+  {re: /\u200B/g, out: ''},
+  {re: /(^|[^\\])%/g, out: '$1\\%'},
+  {re: /(^|[^\\])&/g, out: '$1\\&'},
+  {re: /(^|[^\\])\$/g, out: '$1\\$'},
+  {re: /(^|[^\\])#/g, out: '$1\\#'},
+  {re: /(^|[^\\])_(?!\{)/g, out: '$1\\_'},
+  {re: /(^|[^\\])\^(?!\{)/g, out: '$1\\^{}'}
+];
+
+function textToLatex(input) {
+  var s = String(input);
+  s = convertScriptRuns(s);
+  for (var i = 0; i < TEX_RULES_A.length; i++) {
+    s = s.replace(TEX_RULES_A[i].re, TEX_RULES_A[i].out);
+  }
+  s = convertSymbols(s);
+  for (var j = 0; j < TEX_RULES_B.length; j++) {
+    s = s.replace(TEX_RULES_B[j].re, TEX_RULES_B[j].out);
+  }
+  return s;
+}
+
+/* ===== 花体字母双向转换 ===== */
+function buildFancyMaps(styleIndex) {
+  var style = FANCY_STYLES[styleIndex] || FANCY_STYLES[0];
+  var chars = Array.from(style.str);
+  var toFancy = {};
+  var toPlain = {};
+  for (var i = 0; i < 26 && i < chars.length; i++) {
+    toFancy[String.fromCharCode(65 + i)] = chars[i];
+    toPlain[chars[i]] = String.fromCharCode(65 + i);
+  }
+  for (var i = 0; i < 26 && (i + 26) < chars.length; i++) {
+    toFancy[String.fromCharCode(97 + i)] = chars[i + 26];
+    toPlain[chars[i + 26]] = String.fromCharCode(97 + i);
+  }
+  for (var i = 0; i < 10 && (i + 52) < chars.length; i++) {
+    toFancy[String.fromCharCode(48 + i)] = chars[i + 52];
+    toPlain[chars[i + 52]] = String.fromCharCode(48 + i);
+  }
+  return { toFancy: toFancy, toPlain: toPlain };
+}
+
+function textToFancy(input, styleIndex) {
+  var m = buildFancyMaps(styleIndex);
+  var result = '';
+  for (var i = 0; i < input.length; i++) {
+    var ch = input.charAt(i);
+    result += m.toFancy[ch] || ch;
+  }
+  return result;
+}
+
+function fancyToText(input, styleIndex) {
+  var m = buildFancyMaps(styleIndex);
+  var result = '';
+  for (var i = 0; i < input.length; i++) {
+    var ch = input.charAt(i);
+    result += m.toPlain[ch] || ch;
+  }
+  return result;
+}
+
+var fancyInput = document.getElementById('fancy-input');
+var fancyOutput = document.getElementById('fancy-output');
+var fancyExampleRow = document.getElementById('fancy-example-row');
+var fancyStyleSel = document.getElementById('fancy-style-sel');
+var fancyDirection = document.getElementById('fancy-direction');
+
+var FANCY_EXAMPLES = [
+  'Hello World',
+  'Good Morning',
+  'ABCDabcd',
+  'Love',
+  'Test123',
+  'ABCxyz'
+];
+
+FANCY_EXAMPLES.forEach(function(ex) {
+  var chip = document.createElement('button');
+  chip.className = 'example-chip';
+  chip.textContent = ex;
+  chip.addEventListener('click', function() {
+    fancyInput.value = ex;
+    convertFancy();
+  });
+  fancyExampleRow.appendChild(chip);
+});
+
+function convertFancy() {
+  var raw = fancyInput.value;
+  if (!raw) { fancyOutput.textContent = ''; return; }
+  var styleIdx = parseInt(fancyStyleSel.value) || 0;
+  var dir = fancyDirection.value;
+  // Show loading state
+  fancyOutput.textContent = '转换中...';
+  setTimeout(function() {
+    var output;
+    if (dir === 'toFancy') {
+      output = textToFancy(raw, styleIdx);
+    } else {
+      output = fancyToText(raw, styleIdx);
+    }
+    fancyOutput.textContent = output;
+  }, 200);
+}
+
+function copyFancyResult() {
+  var txt = fancyOutput.textContent;
+  if (!txt) return;
+  copyText(txt);
+}
+
+if (fancyStyleSel) fancyStyleSel.addEventListener('change', convertFancy);
+if (fancyDirection) fancyDirection.addEventListener('change', convertFancy);
+if (fancyInput) fancyInput.addEventListener('input', convertFancy);
+
+var plainInput = document.getElementById('plain-input');
+var resultLatex = document.getElementById('result-latex');
+
+var PLAIN_EXAMPLES = [
+  '1/2 + 1/3 = 5/6',
+  'x² + y² = z²',
+  'H₂O',
+  'x¹⁰ + a₃',
+  '∑ᵢ₌₁ⁿ i²',
+  '∫₀¹ x² dx',
+  '√(x² + y²)',
+  'lim_(x → ∞) 1/x',
+  'πr²'
+];
+
+var exampleRowPlain = document.getElementById('example-row-plain');
+PLAIN_EXAMPLES.forEach(function(ex) {
+  var chip = document.createElement('button');
+  chip.className = 'example-chip';
+  chip.textContent = ex;
+  chip.addEventListener('click', function() {
+    plainInput.value = ex;
+    convertPlain();
+  });
+  exampleRowPlain.appendChild(chip);
+});
+
+function convertPlain() {
+  var raw = plainInput.value.trim();
+  if (!raw) return;
+  resultLatex.classList.remove('hidden');
+  resultLatex.textContent = textToLatex(raw);
+}
+
+function copyResultLatex() {
+  var txt = resultLatex.textContent;
+  if (!txt) return;
+  copyText(txt);
+}
+
+document.getElementById('btn-tolatex').addEventListener('click', convertPlain);
+document.getElementById('btn-clear-plain').addEventListener('click', function() {
+  plainInput.value = '';
+  resultLatex.classList.add('hidden');
+  plainInput.focus();
+});
+
+/* ===== 初始化 ===== */
+renderGrid('emoji-grid', DATA.emoji, true, false);
+renderGrid('roman-grid', DATA.roman, false, false);
+renderGrid('math-grid', DATA.math, false, false);
+renderGrid('mathops-grid', DATA.mathops, false, false);
+renderGrid('super-grid', SUPER_DATA, false, false);
+renderSpaceGrid();
+renderGrid('other-grid', DATA.other, false, false);
+renderGrid('greek-grid', GREEK_DATA, false, false);
+
+// Set focus to first interactive element after rendering
+setTimeout(function() {
+  var firstFocusable = document.querySelector('.tab-item, input, select');
+  if (firstFocusable) firstFocusable.focus();
+}, 100);
+
+/* ===== 花体字母平铺选项卡初始化 ===== */
+var fancyOpts = document.querySelectorAll('#fancy-style-bar .font-option');
+fancyOpts.forEach(function(opt) {
+  opt.addEventListener('click', function() {
+    var styleIdx = parseInt(this.getAttribute('data-style'));
+    fancyOpts.forEach(function(o) { o.classList.remove('active'); });
+    this.classList.add('active');
+    renderFancyStyle(styleIdx);
+  });
+});
+if (fancyOpts.length > 0) {
+  fancyOpts[0].classList.add('active');
+  renderFancyStyle(0);
+}
+
+/* ===== 花体文字转换初始化 ===== */
+var fancySel2 = document.getElementById('fancy-style-sel');
+if (fancySel2) {
+  FANCY_STYLES.forEach(function(st, i) {
+    var op = document.createElement('option');
+    op.value = i;
+    op.textContent = st.name;
+    fancySel2.appendChild(op);
+  });
+}
+</script>
+</body>
+</html>
