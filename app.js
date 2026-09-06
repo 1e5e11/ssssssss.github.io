@@ -9,7 +9,7 @@ var content = [
     { type: "工具", t: "啊这起始页", s: "", d: "", o: "https://qsy.ssssssss.eu.org/", g: "#", ai: 0, firstDev: "2022-02", lastUpdate: "" },
     { type: "", t: "AZOS", s: "", d: "", o: "https://bjsdfz.ssssssss.eu.org/azos", g: "#", ai: 0, firstDev: "2021-10", lastUpdate: "" },
     { type: "工具", t: "像素移动", s: "由一张图片的像素生成另一张", d: "", o: "https://ssssssss.eu.org/pixelmove/", g: "#", ai: 0, firstDev: "2026-05-16", lastUpdate: "2026-08-04" },
-{ type: "工具", t: "字符复制", s: "常用字符复制，公式、花体转换", d: "", o: "https://ssssssss.eu.org/copy/", g: "#", ai: 0, firstDev: "2026-09-06", lastUpdate: "" },
+{ type: "工具", t: "字符复制", s: "常用字符复制，公式、花体转换", d: "", o: "https://ssssssss.eu.org/copy/", g: "#", ai: 1, firstDev: "2026-09-06", lastUpdate: "" },
 ];
 
 ];
