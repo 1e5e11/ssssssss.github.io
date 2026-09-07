@@ -12,7 +12,6 @@ var content = [
     { type: "工具", t: "字符复制", s: "常用字符复制，公式、花体转换", d: "", o: "https://ssssssss.eu.org/copy/", g: "#", ai: 1, firstDev: "2026-09-06", lastUpdate: "2026-09-07" },
 ];
 
-];
 
 
 function openjc(x) {
