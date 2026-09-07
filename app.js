@@ -1,5 +1,5 @@
 var content = [
-    { type: "", t: "啊这软件园", s: "点击docs查看更多信息", d: "", o: "https://ssssssss.eu.org/", g: "https://ssssssss.eu.org/docs", ai: 1, firstDev: "2026-08-23", lastUpdate: "" },
+    { type: "", t: "啊这软件园", s: "欢迎使用啊这软件", d: "", o: "https://ssssssss.eu.org/", g: "https://ssssssss.eu.org/docs", ai: 1, firstDev: "2026-08-23", lastUpdate: "" },
     { type: "函数画板", t: "啊这函数画板", s: "推荐使用啊这函数画板", d: "", o: "http://h.ssssssss.eu.org/", g: "http://h.ssssssss.eu.org/v/19/course.txt", ai: 0, firstDev: "2022-04-23", lastUpdate: "2025-03-07" },
     { type: "数学工具", t: "啊这数字性质查看器", s: "AZNumberChecker", d: "", o: "https://ssssssss.eu.org/n/", g: "#", ai: 0, firstDev: "2025-07-21", lastUpdate: "" },
     { type: "数学游戏", t: "啊这猜数字游戏", s: "AZNumberGuess", d: "", o: "https://ssssssss.eu.org/ng/", g: "#", ai: 0, firstDev: "2025-11-08", lastUpdate: "" },
