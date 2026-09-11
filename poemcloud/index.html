@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>AZ PoemCloud</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      color-scheme: dark;
+
+      /* 布局 */
+      --topbar-height: 48px;
+
+      /* 深色主题（默认） */
+      --bg: #0b1120;
+      --surface: #0f172a;
+      --surface-hover: rgba(148, 163, 184, 0.10);
+      --surface-selected: rgba(59, 130, 246, 0.16);
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --accent: #60a5fa;
+      --accent-strong: #bfdbfe;
+      --border: #1f2937;
+      --border-soft: rgba(148, 163, 184, 0.12);
+      --input-bg: #111827;
+      --focus-ring: rgba(96, 165, 250, 0.28);
+      --shadow: 0 8px 20px rgba(2, 6, 23, 0.28);
+    }
+
+    /* 浅色主题：只替换令牌，不改变结构和组件样式 */
+    body.light {
+      color-scheme: light;
+
+      --bg: #f3f6fb;
+      --surface: #ffffff;
+      --surface-hover: #eef2f7;
+      --surface-selected: #e8f0fe;
+      --text: #1f2937;
+      --muted: #64748b;
+      --accent: #2563eb;
+      --accent-strong: #1d4ed8;
+      --border: #e5e7eb;
+      --border-soft: #edf2f7;
+      --input-bg: #f1f5f9;
+      --focus-ring: rgba(37, 99, 235, 0.20);
+      --shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    /* 顶部栏 */
+    .topbar {
+      height: var(--topbar-height);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .back {
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 0;
+      color: var(--text);
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .back:hover {
+      background: var(--surface-hover);
+    }
+
+    .back:active {
+      transform: translateY(1px);
+    }
+
+    .back:focus-visible,
+    .search:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 1px;
+    }
+
+    .logo {
+      font-weight: 650;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+
+    .path {
+      flex: 1;
+      min-width: 0;
+      color: var(--muted);
+      font-size: 13px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* 主体 */
+    .layout {
+      display: flex;
+      height: calc(100vh - var(--topbar-height));
+    }
+
+    body.has-search-hit .layout {
+      height: calc(100vh - var(--topbar-height) - 36px);
+    }
+
+    /* 左侧栏 */
+    .sidebar {
+      width: 220px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 10px;
+      overflow-y: auto;
+    }
+
+    .sidebar h3 {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+      margin: 12px 0 6px;
+    }
+
+    .sidebar .item {
+      height: 34px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--text);
+      cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .sidebar .item:hover {
+      background: var(--surface-hover);
+    }
+
+    .sidebar .item.active {
+      background: var(--surface-selected);
+      color: var(--accent-strong);
+      font-weight: 600;
+    }
+
+    /* 内容区 */
+    .content {
+      flex: 1;
+      min-width: 0;
+      overflow: auto;
+      padding: 0 0 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--border-soft);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    th {
+      height: 36px;
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      background: var(--surface);
+      color: var(--muted);
+      font-weight: 500;
+      border-bottom-color: var(--border);
+    }
+
+    td {
+      height: 40px;
+    }
+
+    tbody tr.clickable {
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    tbody tr.clickable:hover {
+      background: var(--surface-hover);
+    }
+
+    .file {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .icon {
+      width: 20px;
+      flex: 0 0 20px;
+      text-align: center;
+      opacity: 0.85;
+    }
+
+    .filename {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .download-status {
+      flex: 0 0 auto;
+      color: var(--muted);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .search {
+      width: min(220px, 34vw);
+      height: 32px;
+      flex: 0 0 auto;
+      background: var(--input-bg);
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 0 10px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .search::placeholder {
+      color: var(--muted);
+    }
+
+    .search:hover {
+      border-color: var(--border);
+    }
+
+    .search:focus {
+      border-color: var(--accent);
+      background: var(--surface);
+    }
+
+    .search-result {
+      display: none;
+      height: 36px;
+      align-items: center;
+      justify-content: center;
+      padding: 0 16px;
+      background: var(--surface-selected);
+      color: var(--accent-strong);
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .search-result.visible {
+      display: flex;
+    }
+
+    #vs-top-spacer,
+    #vs-bottom-spacer {
+      all: unset;
+      /* 清掉 tr 的所有样式 */
+      display: table-row;
+      /* 保留 table 语义 */
+      height: 0 !important;
+    }
+
+    /* 虚拟滚动的占位单元格不能继承表格行的分隔线 */
+    #vs-top-spacer > td,
+    #vs-bottom-spacer > td {
+      border: 0 !important;
+      padding: 0 !important;
+      background: transparent !important;
+    }
+
+    #vs-top-spacer > td {
+      height: auto !important;
+    }
+
+    .vs-info {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 16px;
+      font-size: 13px;
+      color: var(--muted);
+      background: transparent;
+    }
+
+    .vs-counts {
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .search-hit {
+      display: none;
+      flex: 0 0 auto;
+      max-width: 58%;
+      align-items: center;
+      height: 24px;
+      padding: 0 9px;
+      border-radius: 999px;
+      background: var(--surface-selected);
+      color: var(--accent-strong);
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .search-hit.visible {
+      display: inline-flex;
+    }
+
+    @keyframes flash {
+      0% {
+        background: rgba(255, 0, 0, 0.1);
+      }
+
+      50% {
+        background: rgba(255, 0, 0, 0.5);
+      }
+
+      100% {
+        background: rgba(255, 0, 0, 0.1);
+      }
+    }
+
+    .flash {
+      animation: flash 0.6s ease-in-out 3;
+    }
+
+
+
+
+    .empty {
+      min-height: 240px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+    }
+
+    /* ===== 手机竖屏适配 ===== */
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+
+      .layout {
+        flex-direction: column;
+      }
+
+      .content {
+        padding: 0 8px 16px;
+      }
+
+      thead {
+        display: none;
+      }
+
+      #fileTable,
+      #fileList {
+        display: block;
+        width: 100%;
+      }
+
+      #fileList tr {
+        display: grid;
+      }
+
+      #fileList tr.clickable {
+        height: 72px;
+        grid-template-columns: auto auto 1fr;
+        grid-template-rows: 24px 18px;
+        column-gap: 12px;
+        row-gap: 6px;
+        margin-bottom: 10px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+
+      #fileList tr.clickable td {
+        display: block;
+        height: auto;
+        border: 0;
+        padding: 0;
+        line-height: 18px;
+      }
+
+      #fileList tr.clickable td:first-child {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        height: 24px;
+      }
+
+      #fileList tr.clickable td:nth-child(2) {
+        grid-column: 1;
+        grid-row: 2;
+      }
+
+      #fileList tr.clickable td:nth-child(3) {
+        grid-column: 2;
+        grid-row: 2;
+      }
+
+      #fileList tr.clickable td:nth-child(4) {
+        grid-column: 3;
+        grid-row: 2;
+        justify-self: end;
+        text-align: right;
+      }
+
+      #fileList tr.clickable td:nth-child(n+2) {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      #vs-top-spacer,
+      #vs-bottom-spacer {
+        display: block;
+        height: auto !important;
+      }
+
+      #vs-top-spacer > td,
+      #vs-bottom-spacer > td {
+        display: block;
+      }
+
+      .vs-info {
+        padding: 0 8px;
+      }
+
+      .vs-info.has-hit .vs-counts {
+        display: none;
+      }
+
+      .search-hit {
+        max-width: 100%;
+      }
+
+      .search-result {
+        padding: 0 10px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 顶部栏（UI-only） -->
+  <div class="topbar">
+    <button class="back" aria-label="back" onclick="back()">⬅</button>
+    <div class="logo">PoemCloud</div>
+    <div class="path" id="path">/</div>
+    <div id="downloadStatus" class="download-status" role="status" aria-live="polite" hidden></div>
+    <input class="search" type="search" placeholder="搜索…" aria-label="搜索" onsubmit="search(this.value)" />
+    <button id="themeToggle" class="back" title="切换主题">🌙</button>
+
+  </div>
+
+  <div id="searchResult" class="search-result" aria-live="polite"></div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <h3>浏览</h3>
+      <div class="item active" data-view="files">文件</div>
+      <div class="item" data-view="recent">最近</div>
+      <div class="item" data-view="favorite">收藏</div>
+    </aside>
+
+    <main class="content" id="scrollContainer">
+      <div id="emptyView" class="empty">暂无内容</div>
+
+      <table id="fileTable">
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>大小</th>
+            <th>修改时间</th>
+          </tr>
+        </thead>
+        <tbody id="fileList"></tbody>
+      </table>
+    </main>
+
+  </div>
+
+  <script>
+    let vsList = null;
+    let rowHeight = 40;
+    let rowPitch = 40; // 移动端卡片包含 10px 间距，滚动步长与视觉高度不同
+    let buffer = 5;
+    let lastStart = -1;
+    let ticking = false;
+    let vsPinned = -1;   // >=0：搜索“钉住显示”的目标行（占位清零，直接展示该行附近）
+    const INFO_HEIGHT = 36;
+    let searchHit = null;
+
+    function searchHitLabel(hit) {
+        if (!hit) return "";
+        const lineText = hit.endLine && hit.endLine !== hit.line
+            ? hit.line.toLocaleString("zh-CN") + "-" + hit.endLine.toLocaleString("zh-CN")
+            : hit.line.toLocaleString("zh-CN");
+        return "目标诗：第 " + lineText +
+            " 行 / 共 " + hit.totalLines.toLocaleString("zh-CN") + " 行（含空行）";
+    }
+
+    function setSearchHit(hit) {
+        searchHit = hit || null;
+        document.body.classList.toggle("has-search-hit", !!searchHit);
+        const result = document.getElementById("searchResult");
+        if (result) {
+            result.textContent = searchHitLabel(searchHit);
+            result.classList.toggle("visible", !!searchHit);
+        }
+
+        const info = document.querySelector(".vs-info");
+        if (!info) return;
+        info.classList.toggle("has-hit", !!searchHit);
+        const badge = info.querySelector(".search-hit");
+        if (badge) {
+            badge.textContent = searchHitLabel(searchHit);
+            badge.classList.toggle("visible", !!searchHit);
+        }
+    }
+
+    function countRows() {
+        return vsList ? vsList.count : 0;
+    }
+    function rowOf(i) {
+        return vsList ? vsList.rowAt(i) : null;
+    }
+    function detectRowHeight() {
+        const isMobile = window.innerWidth <= 768;
+        rowHeight = isMobile ? 72 : 40;  // 手机卡片 / 桌面表格
+        rowPitch = isMobile ? 82 : 40;   // 卡片高度 + 10px 间距
+    }
+
+    // 真实排版虚拟滚动：行像素位置 = 行号 × rowPitch，与浏览器原生滚动一致
+    // pinned=true 时用于“钉住”远处目标行：不画大占位，直接展示该行附近窗口
+    function renderVirtual(startIndex, pinned) {
+        const container = document.getElementById("scrollContainer");
+        const tbody = document.getElementById("fileList");
+        const total = countRows();
+        if (!total || !vsList) return;
+
+        const visible = Math.ceil(container.clientHeight / rowPitch) + buffer * 2;
+
+        let start = Math.max(0, startIndex - buffer);
+        let end = Math.min(total, start + visible);
+        if (pinned) {
+            start = Math.max(0, startIndex);
+            end = Math.min(total, start + visible);
+        }
+        if (start === lastStart && tbody.childElementCount > 0) return;
+        lastStart = start;
+
+        const topSpace = pinned ? 0 : start * rowPitch;
+        const bottomSpace = pinned ? 0 : (total - end) * rowPitch;
+
+        tbody.innerHTML = "";
+
+        const top = document.createElement("tr");
+        top.id = "vs-top-spacer";
+
+        const topTd = document.createElement("td");
+        topTd.colSpan = 4;
+        topTd.style.padding = "0";
+
+        const info = document.createElement("div");
+        info.className = "vs-info" + (searchHit ? " has-hit" : "");
+
+        const counts = document.createElement("span");
+        counts.className = "vs-counts";
+        counts.textContent =
+            "文件夹 " + (vsList.dirCount || 0).toLocaleString() + " 个 · " +
+            "文件 " + (vsList.fileCount || 0).toLocaleString() + " 个";
+
+        const hitBadge = document.createElement("span");
+        hitBadge.className = "search-hit" + (searchHit ? " visible" : "");
+        hitBadge.textContent = searchHitLabel(searchHit);
+
+        info.appendChild(counts);
+        info.appendChild(hitBadge);
+
+        const spacer = document.createElement("div");
+        spacer.style.height = Math.max(0, topSpace - INFO_HEIGHT) + "px";
+
+        topTd.appendChild(info);
+        topTd.appendChild(spacer);
+        top.appendChild(topTd);
+        tbody.appendChild(top);
+
+        // 内容行（行号 i 的内容像素位置恒等于 i*rowPitch）
+        for (let i = start; i < end; i++) {
+            const f = vsList.rowAt(i);
+            const tr = document.createElement("tr");
+            tr.className = "clickable";
+            tr.style.height = rowHeight + "px";
+            tr.dataset.check = f.check;
+
+            tr.innerHTML = [
+                '<td>',
+                '  <div class="file">',
+                '    <span class="icon">' + (f.type === "dir" ? "📁" : "📄") + '</span>',
+                '    <span class="filename">' + f.name + '</span>',
+                '  </div>',
+                '</td>',
+                '<td class="muted">' + (f.type === "dir" ? "文件夹" : "文件") + '</td>',
+                '<td class="muted">' + f.size + '</td>',
+                '<td class="muted">' + f.mtime + '</td>'
+            ].join('');
+
+            tr.addEventListener("click", () => downloadfile(f.type, f.check));
+            tbody.appendChild(tr);
+        }
+
+        // 底部占位
+        const bottom = document.createElement("tr");
+        bottom.id = "vs-bottom-spacer";
+        const bottomTd = document.createElement("td");
+        bottomTd.colSpan = 4;
+        bottomTd.style.height = bottomSpace + "px";
+        bottom.appendChild(bottomTd);
+        tbody.appendChild(bottom);
+    }
+
+    function onScroll() {
+        if (ticking) return;
+        ticking = true;
+
+        requestAnimationFrame(() => {
+            const c = document.getElementById("scrollContainer");
+            vsPinned = -1;   // 用户手动滚动：退出“钉住”模式
+            const startIndex = Math.max(0, Math.floor(c.scrollTop / rowPitch));
+            renderVirtual(startIndex);
+            ticking = false;
+        });
+    }
+
+    // 钉住显示：把第 idx 行附近直接渲染到当前视口（用于搜索定位超远行）
+    function pinToRow(idx) {
+        vsPinned = idx;
+        lastStart = -1;
+        const c = document.getElementById("scrollContainer");
+        c.scrollTop = 0;
+        renderVirtual(Math.max(0, idx - 3), true);
+    }
+
+    // 展示一个列表（由 az.js 提供 list 对象：{count, rowAt, dirCount, fileCount}）
+    function renderListing(pathLabel, list) {
+        vsList = list;
+        document.getElementById("path").textContent = pathLabel;
+
+        if (!list || list.count === 0) {
+            renderEmpty();
+            return;
+        }
+
+        document.getElementById("fileTable").style.display = "table";
+        document.getElementById("emptyView").style.display = "none";
+
+        detectRowHeight();
+        lastStart = -1;
+        vsPinned = -1;
+        const c = document.getElementById("scrollContainer");
+        c.scrollTop = 0;
+        c.removeEventListener("scroll", onScroll);
+        c.addEventListener("scroll", onScroll);
+        renderVirtual(0);
+    }
+
+    // 桌面/手机切换时，重新计算行高并保持当前滚动位置
+    window.addEventListener("resize", () => {
+        if (!vsList || !vsList.count) return;
+        detectRowHeight();
+        lastStart = -1;
+        const c = document.getElementById("scrollContainer");
+        renderVirtual(Math.max(0, Math.floor(c.scrollTop / rowPitch)));
+    });
+
+    function renderEmpty() {
+        document.getElementById("fileTable").style.display = "none";
+        document.getElementById("emptyView").style.display = "flex";
+    }
+
+    // ===== 主题系统：自动适配 + 记忆 =====
+    const toggleBtn = document.getElementById("themeToggle");
+    const THEME_KEY = "theme"; // localStorage key
+
+    function applyTheme(theme) {
+        const isLight = theme === "light";
+        document.body.classList.toggle("light", isLight);
+        toggleBtn.textContent = isLight ? "☀️" : "🌙";
+    }
+
+    // 1️⃣ 初始化主题
+    (function initTheme() {
+        const saved = localStorage.getItem(THEME_KEY);
+
+        if (saved === "light" || saved === "dark") {
+            applyTheme(saved);
+        } else {
+            const prefersDark = window.matchMedia(
+                "(prefers-color-scheme: dark)"
+            ).matches;
+            applyTheme(prefersDark ? "dark" : "light");
+        }
+    })();
+
+    // 2️⃣ 手动切换（写入记忆）
+    toggleBtn.addEventListener("click", () => {
+        const isLight = document.body.classList.contains("light");
+        const next = isLight ? "dark" : "light";
+        applyTheme(next);
+        localStorage.setItem(THEME_KEY, next);
+    });
+
+    // 3️⃣ 浏览器主题变化时自动跟随（仅在用户没手动选过时）
+    window.matchMedia("(prefers-color-scheme: dark)")
+        .addEventListener("change", e => {
+            if (!localStorage.getItem(THEME_KEY)) {
+                applyTheme(e.matches ? "dark" : "light");
+            }
+        });
+
+    document.querySelectorAll('.sidebar .item').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('.sidebar .item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+
+            const view = item.dataset.view;
+            if (view === 'files') {
+                document.getElementById("fileTable").style.display = "table";
+                document.getElementById("emptyView").style.display = "none";
+            } else renderEmpty();
+        });
+    });
+    document.querySelector(".search").addEventListener("keydown", e => {
+        if (e.key === "Enter") {
+            search(e.target.value.trim());
+        }
+    });
+
+  </script>
+
+  <script src="dictionary.js"></script>
+  <script src="az.js"></script>
+</body>
+
+</html>
