@@ -4,10 +4,8 @@
 // - 目录树：底层 txt 每文件 10 万首诗，文件夹按层分叉
 //     单句/双句(5,7,10,14字)：每层 10 万个文件夹
 //     四句/八句(20,28,40,56字)：每层 8 千万个文件夹
-// - 真实排版：列表行按真实行距(rowPitch)计算，
-//   原生浏览器滚动（可停在任意位置，不量化行）；
-//   单目录超过 MAX_CHUNK_ROWS 行时，自动拆成若干“区间子目录”
-//   （容量/大小/搜索路径仍按每层 8 千万/10 万计算，浏览时每层只多一级）
+// - 列表按真实行距(rowPitch)原生滚动；超高目录分段铺设占位，
+//   接近段边缘时补偿原点和滚动位置，保持可见内容连续。
 // - 搜索：先像人一样平滑滚到目标行，停住后高亮，再点击进入
 // ============================================================
 
@@ -592,14 +590,12 @@ function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 // 平滑滚动到第 idx 行（行顶对齐到信息条下方），停稳后回调。
 // 沿用旧版的 requestAnimationFrame + 900ms easeOutCubic 动画。
 function scrollToRowSmooth(idx, cb) {
-    const c = document.getElementById("scrollContainer");
-    const maxTop = Math.max(0, c.scrollHeight - c.clientHeight);
-    const target = Math.min(maxTop, scrollTopForRow(idx));
-    const from = c.scrollTop;
+    const target = Math.max(0, Math.min(logicalScrollRange(), idx * rowPitch));
+    const from = currentLogicalTop();
     const dist = target - from;
 
     if (Math.abs(dist) < 3) {
-        c.scrollTop = target;
+        setLogicalScrollPosition(target);
         lastStart = -1;
         renderVirtual(idx);
         requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(cb, 90)));
@@ -613,7 +609,7 @@ function scrollToRowSmooth(idx, cb) {
     function finish() {
         if (done) return;
         done = true;
-        c.scrollTop = target;
+        setLogicalScrollPosition(target);
         // 强制把精确目标行渲染出来，再等待两帧让 DOM 稳定。
         lastStart = -1;
         renderVirtual(idx);
@@ -624,7 +620,7 @@ function scrollToRowSmooth(idx, cb) {
         if (done) return;
         const k = Math.min(1, (now - startedAt) / duration);
         const eased = 1 - Math.pow(1 - k, 3);
-        c.scrollTop = from + dist * eased;
+        setLogicalScrollPosition(from + dist * eased);
         if (k < 1) {
             requestAnimationFrame(step);
         } else {
@@ -670,7 +666,7 @@ function actRow(idx, doClick, isLast) {
             }
         }
 
-        // 超大目录已由 scrollTopForRow() 比例映射，不再因浏览器高度上限直接跳转。
+        // 搜索动画使用全目录逻辑坐标，跨段时保持目标行定位准确。
         scrollToRowSmooth(idx, afterShow);
     });
 }

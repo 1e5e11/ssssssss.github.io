@@ -173,6 +173,7 @@
 
     /* 内容区 */
     .content {
+      overflow-anchor: none;
       flex: 1;
       min-width: 0;
       overflow: auto;
@@ -635,11 +636,11 @@
     let buffer = 5;
     let lastStart = -1;
     let ticking = false;
-    let vsPinned = -1;   // >=0：搜索“钉住显示”的目标行（占位清零，直接展示该行附近）
     const INFO_HEIGHT = 36;
-    // Chromium/WebKit 对单个滚动容器的高度有限制。把超大目录按比例映射到
-    // 一个安全高度，既能浏览数千万行，也能让搜索继续显示真实滚动动画。
+    // 为浏览器保留安全的布局高度；超高目录只铺设当前段，段内像素与行距一一对应。
     const MAX_VIRTUAL_SCROLL_HEIGHT = 16000000;
+    let segmentStart = 0;
+    let segmentRows = 0;
     let searchHit = null;
 
     function searchHitLabel(hit) {
@@ -676,20 +677,44 @@
     function rowOf(i) {
         return vsList ? vsList.rowAt(i) : null;
     }
-    function virtualScrollScale() {
-        const logicalHeight = countRows() * rowPitch;
-        return logicalHeight > MAX_VIRTUAL_SCROLL_HEIGHT
-            ? MAX_VIRTUAL_SCROLL_HEIGHT / logicalHeight
-            : 1;
-    }
-    function scrollTopForRow(index) {
-        return Math.max(0, index * rowPitch * virtualScrollScale());
-    }
     function rowIndexForScrollTop(scrollTop) {
-        const scaledPitch = rowPitch * virtualScrollScale();
-        if (!scaledPitch) return 0;
-        // 浮点缩放可能刚好落在 idx - ε，补一个极小值避免少一行。
-        return Math.max(0, Math.floor(scrollTop / scaledPitch + 1e-7));
+        return Math.max(0, Math.min(countRows() - 1, segmentStart + Math.floor(scrollTop / rowPitch)));
+    }
+    function listingOverhead() {
+        return INFO_HEIGHT + (window.innerWidth <= 768 ? 0 : 36) + 16;
+    }
+    function segmentCapacity() {
+        return Math.max(1, Math.floor((MAX_VIRTUAL_SCROLL_HEIGHT - listingOverhead()) / rowPitch));
+    }
+    function currentLogicalTop() {
+        return segmentStart * rowPitch + document.getElementById("scrollContainer").scrollTop;
+    }
+    // 进入段边缘前重置占位原点，同时补偿 scrollTop；同一行在屏幕上的位置保持不变。
+    function selectSegment(logicalTop, force = false) {
+        const capacity = segmentCapacity();
+        const rows = Math.min(countRows(), capacity);
+        const c = document.getElementById("scrollContainer");
+        const localTop = logicalTop - segmentStart * rowPitch;
+        const localRange = Math.max(0, rows * rowPitch + listingOverhead() - c.clientHeight);
+        const guard = Math.min(localRange / 4, Math.max(c.clientHeight * 4, 100000));
+        if (!force && rows === segmentRows &&
+            (segmentStart === 0 || localTop >= guard) &&
+            (segmentStart + rows === countRows() || localTop <= localRange - guard)) return false;
+        const nextStart = Math.max(0, Math.min(countRows() - rows,
+            Math.floor((logicalTop - localRange / 2) / rowPitch)));
+        const changed = nextStart !== segmentStart || rows !== segmentRows;
+        segmentStart = nextStart;
+        segmentRows = rows;
+        if (changed || force) lastStart = -1;
+        return changed;
+    }
+    function setLogicalScrollPosition(top, force = false) {
+        const c = document.getElementById("scrollContainer");
+        const logicalTop = Math.max(0, Math.min(logicalScrollRange(), top));
+        selectSegment(logicalTop, force);
+        // 先建立新段高度，再写入滚动位置，避免被旧段高度截断。
+        renderVirtual(Math.floor(logicalTop / rowPitch));
+        c.scrollTop = logicalTop - segmentStart * rowPitch;
     }
     function detectRowHeight() {
         const isMobile = window.innerWidth <= 768;
@@ -697,9 +722,13 @@
         rowPitch = isMobile ? 82 : 40;   // 卡片高度 + 10px 间距
     }
 
+    function logicalScrollRange() {
+        const c = document.getElementById("scrollContainer");
+        return Math.max(0, countRows() * rowPitch + listingOverhead() - c.clientHeight);
+    }
+
     // 真实排版虚拟滚动：行像素位置 = 行号 × rowPitch，与浏览器原生滚动一致
-    // pinned=true 时用于“钉住”远处目标行：不画大占位，直接展示该行附近窗口
-    function renderVirtual(startIndex, pinned) {
+    function renderVirtual(startIndex) {
         const container = document.getElementById("scrollContainer");
         const tbody = document.getElementById("fileList");
         const total = countRows();
@@ -707,19 +736,14 @@
 
         const visible = Math.ceil(container.clientHeight / rowPitch) + buffer * 2;
 
-        let start = Math.max(0, startIndex - buffer);
-        let end = Math.min(total, start + visible);
-        if (pinned) {
-            start = Math.max(0, startIndex);
-            end = Math.min(total, start + visible);
-        }
+        const segmentEnd = segmentStart + segmentRows;
+        const start = Math.max(segmentStart, Math.min(segmentEnd - 1, startIndex - buffer));
+        const end = Math.min(segmentEnd, start + visible);
         if (start === lastStart && tbody.childElementCount > 0) return;
         lastStart = start;
 
-        const scale = virtualScrollScale();
-        // 信息条占固定 36px；数据行的位置从信息条之后开始。
-        const topSpace = pinned ? 0 : INFO_HEIGHT + start * rowPitch * scale;
-        const bottomSpace = pinned ? 0 : (total - end) * rowPitch * scale;
+        const topSpace = INFO_HEIGHT + (start - segmentStart) * rowPitch;
+        const bottomSpace = (segmentEnd - end) * rowPitch;
 
         tbody.innerHTML = "";
 
@@ -754,7 +778,7 @@
         top.appendChild(topTd);
         tbody.appendChild(top);
 
-        // 内容行（行号 i 的内容像素位置恒等于 i*rowPitch）
+        // 内容行在当前段内按真实行距排布。
         for (let i = start; i < end; i++) {
             const f = vsList.rowAt(i);
             const tr = document.createElement("tr");
@@ -794,25 +818,38 @@
 
         requestAnimationFrame(() => {
             const c = document.getElementById("scrollContainer");
-            vsPinned = -1;   // 用户手动滚动：退出“钉住”模式
-            const startIndex = rowIndexForScrollTop(c.scrollTop);
-            renderVirtual(startIndex);
+            const logicalTop = currentLogicalTop();
+            if (selectSegment(logicalTop)) {
+                renderVirtual(Math.floor(logicalTop / rowPitch));
+                c.scrollTop = logicalTop - segmentStart * rowPitch;
+            } else {
+                renderVirtual(rowIndexForScrollTop(c.scrollTop));
+            }
             ticking = false;
         });
     }
 
-    // 钉住显示：把第 idx 行附近直接渲染到当前视口（用于搜索定位超远行）
+    const scrollContainer = document.getElementById("scrollContainer");
+    scrollContainer.tabIndex = 0;
+    // 原生滚轮、触摸、方向键和翻页键均不拦截。Home/End 定位整个目录的首尾。
+    scrollContainer.addEventListener("keydown", event => {
+        if (event.target !== scrollContainer || countRows() <= segmentCapacity()) return;
+        if (event.key === "Home" || event.key === "End") {
+            event.preventDefault();
+            setLogicalScrollPosition(event.key === "Home" ? 0 : logicalScrollRange(), true);
+        }
+    });
+
+    // 搜索的兜底定位同样建立完整分段，后续仍可向前、向后原生滚动。
     function pinToRow(idx) {
-        vsPinned = idx;
-        lastStart = -1;
-        const c = document.getElementById("scrollContainer");
-        c.scrollTop = 0;
-        renderVirtual(Math.max(0, idx - 3), true);
+        setLogicalScrollPosition(idx * rowPitch, true);
     }
 
     // 展示一个列表（由 az.js 提供 list 对象：{count, rowAt, dirCount, fileCount}）
     function renderListing(pathLabel, list) {
         vsList = list;
+        segmentStart = 0;
+        segmentRows = 0;
         document.getElementById("path").textContent = pathLabel;
         setPathExpanded(false);
 
@@ -826,25 +863,19 @@
 
         detectRowHeight();
         lastStart = -1;
-        vsPinned = -1;
         const c = document.getElementById("scrollContainer");
         c.scrollTop = 0;
         c.removeEventListener("scroll", onScroll);
         c.addEventListener("scroll", onScroll);
-        renderVirtual(0);
+        setLogicalScrollPosition(0, true);
     }
 
     // 桌面/手机切换时，重新计算行高并保持当前滚动位置
     window.addEventListener("resize", () => {
         if (!vsList || !vsList.count) return;
-        const currentRow = rowIndexForScrollTop(
-            document.getElementById("scrollContainer").scrollTop
-        );
+        const currentRow = currentLogicalTop() / rowPitch;
         detectRowHeight();
-        lastStart = -1;
-        const c = document.getElementById("scrollContainer");
-        c.scrollTop = scrollTopForRow(currentRow);
-        renderVirtual(currentRow);
+        setLogicalScrollPosition(currentRow * rowPitch, true);
     });
 
     function renderEmpty() {
