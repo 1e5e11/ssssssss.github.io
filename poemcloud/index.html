@@ -191,6 +191,31 @@
       padding: 0 16px;
       border-bottom: 1px solid var(--border-soft);
       white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .path:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 3px;
+    }
+
+    .path-details {
+      position: absolute;
+      top: calc(var(--topbar-height) + 4px);
+      left: 12px;
+      right: 12px;
+      z-index: 20;
+      padding: 12px 16px;
+      max-height: min(50vh, 320px);
+      overflow: auto;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      user-select: text;
       overflow: hidden;
       text-overflow: ellipsis;
     }
@@ -229,8 +254,26 @@
     .icon {
       width: 20px;
       flex: 0 0 20px;
-      text-align: center;
-      opacity: 0.85;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+    }
+
+    .ui-icon {
+      display: block;
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.7;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .icon-file {
+      color: var(--muted);
     }
 
     .filename {
@@ -497,18 +540,38 @@
 </head>
 
 <body>
+  <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;overflow:hidden">
+    <defs>
+      <symbol id="icon-folder" viewBox="0 0 24 24">
+        <path d="M3 8V6a2 2 0 0 1 2-2h4l2 3h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Z" fill="currentColor" fill-opacity=".1" />
+        <path d="M3 10h18" />
+      </symbol>
+      <symbol id="icon-file" viewBox="0 0 24 24">
+        <path d="M13 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10Z" />
+        <path d="M13 3v7h7M8 14h8M8 17h5" />
+      </symbol>
+      <symbol id="icon-moon" viewBox="0 0 24 24">
+        <path d="M20.5 14.1A8.7 8.7 0 0 1 9.9 3.5a8.8 8.8 0 1 0 10.6 10.6Z" fill="currentColor" fill-opacity=".1" />
+      </symbol>
+      <symbol id="icon-sun" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="4" fill="currentColor" fill-opacity=".1" />
+        <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42" />
+      </symbol>
+    </defs>
+  </svg>
 
   <!-- 顶部栏（UI-only） -->
   <div class="topbar">
-    <button class="back" aria-label="back" onclick="back()">⬅</button>
+    <button class="back" aria-label="返回上一级" title="返回上一级" onclick="back()"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6" /></svg></button>
     <div class="logo">PoemCloud</div>
-    <div class="path" id="path">/</div>
+    <div class="path" id="path" role="button" tabindex="0" aria-expanded="false" aria-controls="pathDetails" title="点击查看完整路径">/</div>
     <div id="downloadStatus" class="download-status" role="status" aria-live="polite" hidden></div>
     <input class="search" type="search" placeholder="搜索…" aria-label="搜索" onsubmit="search(this.value)" />
-    <button id="themeToggle" class="back" title="切换主题">🌙</button>
+    <button id="themeToggle" class="back" title="切换主题" aria-label="切换主题"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icon-moon"></use></svg></button>
 
   </div>
 
+  <div id="pathDetails" class="path-details" role="region" aria-label="完整路径" hidden></div>
   <div id="searchResult" class="search-result" aria-live="polite"></div>
 
   <div class="layout">
@@ -538,6 +601,34 @@
   </div>
 
   <script>
+    const pathElement = document.getElementById("path");
+    const pathDetails = document.getElementById("pathDetails");
+
+    function setPathExpanded(expanded) {
+        pathDetails.textContent = pathElement.textContent;
+        pathDetails.hidden = !expanded;
+        pathElement.setAttribute("aria-expanded", String(expanded));
+    }
+
+    pathElement.addEventListener("click", () => setPathExpanded(pathDetails.hidden));
+    pathElement.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            setPathExpanded(pathDetails.hidden);
+        }
+    });
+    document.addEventListener("click", event => {
+        if (!pathElement.contains(event.target) && !pathDetails.contains(event.target)) {
+            setPathExpanded(false);
+        }
+    });
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && !pathDetails.hidden) {
+            setPathExpanded(false);
+            pathElement.focus();
+        }
+    });
+
     let vsList = null;
     let rowHeight = 40;
     let rowPitch = 40; // 移动端卡片包含 10px 间距，滚动步长与视觉高度不同
@@ -546,6 +637,9 @@
     let ticking = false;
     let vsPinned = -1;   // >=0：搜索“钉住显示”的目标行（占位清零，直接展示该行附近）
     const INFO_HEIGHT = 36;
+    // Chromium/WebKit 对单个滚动容器的高度有限制。把超大目录按比例映射到
+    // 一个安全高度，既能浏览数千万行，也能让搜索继续显示真实滚动动画。
+    const MAX_VIRTUAL_SCROLL_HEIGHT = 16000000;
     let searchHit = null;
 
     function searchHitLabel(hit) {
@@ -582,6 +676,21 @@
     function rowOf(i) {
         return vsList ? vsList.rowAt(i) : null;
     }
+    function virtualScrollScale() {
+        const logicalHeight = countRows() * rowPitch;
+        return logicalHeight > MAX_VIRTUAL_SCROLL_HEIGHT
+            ? MAX_VIRTUAL_SCROLL_HEIGHT / logicalHeight
+            : 1;
+    }
+    function scrollTopForRow(index) {
+        return Math.max(0, index * rowPitch * virtualScrollScale());
+    }
+    function rowIndexForScrollTop(scrollTop) {
+        const scaledPitch = rowPitch * virtualScrollScale();
+        if (!scaledPitch) return 0;
+        // 浮点缩放可能刚好落在 idx - ε，补一个极小值避免少一行。
+        return Math.max(0, Math.floor(scrollTop / scaledPitch + 1e-7));
+    }
     function detectRowHeight() {
         const isMobile = window.innerWidth <= 768;
         rowHeight = isMobile ? 72 : 40;  // 手机卡片 / 桌面表格
@@ -607,8 +716,10 @@
         if (start === lastStart && tbody.childElementCount > 0) return;
         lastStart = start;
 
-        const topSpace = pinned ? 0 : start * rowPitch;
-        const bottomSpace = pinned ? 0 : (total - end) * rowPitch;
+        const scale = virtualScrollScale();
+        // 信息条占固定 36px；数据行的位置从信息条之后开始。
+        const topSpace = pinned ? 0 : INFO_HEIGHT + start * rowPitch * scale;
+        const bottomSpace = pinned ? 0 : (total - end) * rowPitch * scale;
 
         tbody.innerHTML = "";
 
@@ -654,7 +765,7 @@
             tr.innerHTML = [
                 '<td>',
                 '  <div class="file">',
-                '    <span class="icon">' + (f.type === "dir" ? "📁" : "📄") + '</span>',
+                '    <span class="icon"><svg class="ui-icon ' + (f.type === "dir" ? 'icon-folder' : 'icon-file') + '" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icon-' + (f.type === "dir" ? 'folder' : 'file') + '"></use></svg></span>',
                 '    <span class="filename">' + f.name + '</span>',
                 '  </div>',
                 '</td>',
@@ -684,7 +795,7 @@
         requestAnimationFrame(() => {
             const c = document.getElementById("scrollContainer");
             vsPinned = -1;   // 用户手动滚动：退出“钉住”模式
-            const startIndex = Math.max(0, Math.floor(c.scrollTop / rowPitch));
+            const startIndex = rowIndexForScrollTop(c.scrollTop);
             renderVirtual(startIndex);
             ticking = false;
         });
@@ -703,6 +814,7 @@
     function renderListing(pathLabel, list) {
         vsList = list;
         document.getElementById("path").textContent = pathLabel;
+        setPathExpanded(false);
 
         if (!list || list.count === 0) {
             renderEmpty();
@@ -725,10 +837,14 @@
     // 桌面/手机切换时，重新计算行高并保持当前滚动位置
     window.addEventListener("resize", () => {
         if (!vsList || !vsList.count) return;
+        const currentRow = rowIndexForScrollTop(
+            document.getElementById("scrollContainer").scrollTop
+        );
         detectRowHeight();
         lastStart = -1;
         const c = document.getElementById("scrollContainer");
-        renderVirtual(Math.max(0, Math.floor(c.scrollTop / rowPitch)));
+        c.scrollTop = scrollTopForRow(currentRow);
+        renderVirtual(currentRow);
     });
 
     function renderEmpty() {
@@ -743,7 +859,9 @@
     function applyTheme(theme) {
         const isLight = theme === "light";
         document.body.classList.toggle("light", isLight);
-        toggleBtn.textContent = isLight ? "☀️" : "🌙";
+        toggleBtn.querySelector("use").setAttribute("href", isLight ? "#icon-sun" : "#icon-moon");
+        toggleBtn.title = isLight ? "切换为深色主题" : "切换为浅色主题";
+        toggleBtn.setAttribute("aria-label", toggleBtn.title);
     }
 
     // 1️⃣ 初始化主题

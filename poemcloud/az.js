@@ -295,6 +295,70 @@ function makeListing(n, rowsLayer, parentStart, parentEnd) {
     return makeModelList(n, rowsLayer, parentStart, parentEnd);
 }
 
+// 页面中的虚拟 README：说明内容与下载内容共用同一份文本。
+const README_TEXT = `# PoemCloud · 虚拟诗词云盘
+
+PoemCloud 把汉字的排列组合展示成一个可以浏览、搜索和下载的云盘。
+这里的目录与诗词文件按规则即时计算，下载时才在浏览器中生成文本；页面显示的巨大容量是组合空间对应的理论文本大小。
+
+## 这里有什么
+
+项目使用内置字表中的 ${base.toLocaleString("zh-CN")} 个字符，枚举指定长度的所有组合。若字表包含 B 个字符，一首诗有 N 个字，该诗体就有 B 的 N 次方种组合。
+它按字表顺序排列文字，不判断语义、押韵或平仄，因此既包含可以读通的诗句，也包含大量没有意义的组合。它不是经过整理的古诗文数据库，也不是 AI 写诗工具。
+
+支持以下八种诗体（字数不含标点和空白）：
+
+| 诗体 | 每句字数 | 句数 | 总字数 |
+| --- | --- | --- | --- |
+| 五言单句诗 | 5 | 1 | 5 |
+| 七言单句诗 | 7 | 1 | 7 |
+| 五言双句诗 | 5 | 2 | 10 |
+| 七言双句诗 | 7 | 2 | 14 |
+| 五言四句诗 | 5 | 4 | 20 |
+| 七言四句诗 | 7 | 4 | 28 |
+| 五言八句诗 | 5 | 8 | 40 |
+| 七言八句诗 | 7 | 8 | 56 |
+
+## 浏览目录
+
+1. 在根目录点击一种诗体，进入对应的组合空间。
+2. 点击文件夹逐层浏览。文件夹名称表示其包含的起始文字与结束文字，区间包含两端。
+3. 到达最底层后，点击 .txt 文件即可生成并下载该区间的全部组合。
+4. 点击左上角返回按钮回到上一层。
+
+每个文本文件最多包含 100,000 首诗，末尾文件可能不足这个数量。列表按需显示可见条目，因此不需要预先加载整个目录。
+
+## 搜索一首诗
+
+在顶部搜索框输入完整诗句，按 Enter 开始定位。例如输入：床前明月光。
+
+- 可以带中英文标点、空格和换行；搜索前会移除这些分隔符。
+- 去除分隔符后的字数必须为 5、7、10、14、20、28、40 或 56，且每个字都必须在内置字表中。
+- 搜索根据完整文字计算位置，自动逐层进入目录，滚动并高亮目标文本文件。
+- 定位完成后，页面显示目标诗在文本文件中的起止行号，以及包含空行的文件总行数。
+- 点击高亮的文件下载，再用文本编辑器跳到提示的行号查看。
+
+搜索是完整文字的精确定位，不支持按作者、标题或关键词模糊检索。搜索完成后需要手动点击文件才会下载。
+
+## 下载与文本格式
+
+诗词文本使用 UTF-8 编码，诗与诗之间空一行。单句诗直接输出文字；其他诗体按句分行并添加标点，其中七言八句诗每行排两句，共四行。
+
+点击文件后，顶部会显示生成进度，完成后交给浏览器下载。一次只能生成一个文件；保存位置由浏览器的下载设置决定。下载的是整个文件区间，包含目标诗及同一文件内的其他组合。
+
+根目录中的 README.md 就是这份说明，点击即可下载，列表大小按说明文本的实际 UTF-8 字节数计算。
+
+## 界面与使用范围
+
+- 支持桌面表格和手机卡片布局。
+- 支持浅色、深色主题；首次使用跟随系统，手动切换后会记住选择。
+- “最近”和“收藏”目前是空白占位视图，尚未实现记录或收藏功能；点击“文件”可返回文件视图。
+- 这是纯前端虚拟云盘，目前没有账号登录、文件上传或云端存储功能。
+
+保留 index.html、dictionary.js 和 az.js 的相对位置，用支持现代 JavaScript 的浏览器打开 index.html 即可使用，也可以放在静态网站服务中访问。
+`;
+const README_BYTES = new TextEncoder().encode(README_TEXT);
+
 // 根目录（8 种诗体 + README）
 const homeList = {
     kind: "home",
@@ -306,7 +370,7 @@ const homeList = {
             const t = POEM_TYPES[i];
             return { name: t.label, type: "dir", size: "", mtime: "", check: t.check };
         }
-        return { name: "README.md", type: "file", size: "114KB", mtime: "", check: "README.md" };
+        return { name: "README.md", type: "file", size: formatBytes(README_BYTES.byteLength), mtime: "", check: "README.md" };
     }
 };
 
@@ -450,7 +514,6 @@ async function downloadRange(segCheck, filename) {
 
 async function downloadfile(type, check) {
     if (type === "dir") { openDir(check); return; }
-    if (check === "README.md") return;
     if (downloadInProgress) {
         alert("已有文件正在生成，请稍候。");
         return;
@@ -459,7 +522,13 @@ async function downloadfile(type, check) {
     downloadInProgress = true;
     setDownloadStatus("准备下载…");
     try {
-        await downloadRange(check, format_to_punctuation(check) + ".txt");
+        if (check === "README.md") {
+            const sink = await createDownloadSink("README.md");
+            await sink.write(README_BYTES);
+            await sink.close();
+        } else {
+            await downloadRange(check, format_to_punctuation(check) + ".txt");
+        }
     } catch (error) {
         console.error(error);
         alert("下载失败：" + (error && error.message ? error.message : error));
@@ -521,62 +590,59 @@ function simulateClick(tr) {
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 // 平滑滚动到第 idx 行（行顶对齐到信息条下方），停稳后回调。
-// 动画用 easeOutCubic 逐帧驱动（setInterval 节拍 ~120fps 内插，
-// 视觉上接近浏览器原生平滑滚动），滚到目标即停、可被环境随时兜底
+// 沿用旧版的 requestAnimationFrame + 900ms easeOutCubic 动画。
 function scrollToRowSmooth(idx, cb) {
     const c = document.getElementById("scrollContainer");
-    const target = Math.max(0, idx * rowPitch - INFO_HEIGHT);
+    const maxTop = Math.max(0, c.scrollHeight - c.clientHeight);
+    const target = Math.min(maxTop, scrollTopForRow(idx));
     const from = c.scrollTop;
     const dist = target - from;
 
     if (Math.abs(dist) < 3) {
         c.scrollTop = target;
-        setTimeout(cb, 90);
+        lastStart = -1;
+        renderVirtual(idx);
+        requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(cb, 90)));
         return;
     }
 
-    // 距离越远动画越长；过长距离(跨屏)自动走快镜
-    const dur = Math.min(1600, Math.max(280, Math.abs(dist) * 0.12));
-    const FRAME = 10;                       // ms
-    const total = Math.max(1, Math.round(dur / FRAME));
-    let frame = 0;
+    const duration = 900;
+    const startedAt = performance.now();
     let done = false;
 
-    const iv = setInterval(function () {
-        frame++;
-        const k = Math.min(1, frame / total);
-        const e = 1 - Math.pow(1 - k, 3);   // easeOutCubic
-        c.scrollTop = from + dist * e;
-        if (k >= 1) {
-            clearInterval(iv);
-            if (done) return;
-            done = true;
-            c.scrollTop = target;
-            setTimeout(cb, 110);
-        }
-    }, FRAME);
+    function finish() {
+        if (done) return;
+        done = true;
+        c.scrollTop = target;
+        // 强制把精确目标行渲染出来，再等待两帧让 DOM 稳定。
+        lastStart = -1;
+        renderVirtual(idx);
+        requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(cb, 90)));
+    }
 
-    // 兜底：动画被环境打断/不回调时直接到位（保证搜索不卡死）
-    setTimeout(function () {
-        if (!done) {
-            clearInterval(iv);
-            done = true;
-            c.scrollTop = target;
-            setTimeout(cb, 110);
+    function step(now) {
+        if (done) return;
+        const k = Math.min(1, (now - startedAt) / duration);
+        const eased = 1 - Math.pow(1 - k, 3);
+        c.scrollTop = from + dist * eased;
+        if (k < 1) {
+            requestAnimationFrame(step);
+        } else {
+            finish();
         }
-    }, dur + 2000);
+    }
+    requestAnimationFrame(step);
+
+    // 标签页切到后台时 rAF 可能暂停，兜底保证搜索流程能继续。
+    setTimeout(function () {
+        if (!done) finish();
+    }, duration + 2000);
 }
 
-// 对当前列表第 idx 行执行：平滑滚动/就近显示 → 停住 → 高亮 →（可点击）。
-// 目标行距当前可见区在浏览器可滚动范围内 → 平滑滚动过去；
-// 超出可滚动范围（浏览器滚动高度有物理上限）→ 直接“钉住”目标窗口显示
+// 对当前列表第 idx 行执行：自然滚动 → 停住 → 高亮 →（可点击）。
 function actRow(idx, doClick, isLast) {
     return new Promise(resolve => {
         if (idx < 0 || idx >= countRows()) { console.warn("行号越界:", idx); resolve(); return; }
-        const c = document.getElementById("scrollContainer");
-        const maxTop = Math.max(0, c.scrollHeight - c.clientHeight - 2);
-        const target = Math.max(0, idx * rowPitch - INFO_HEIGHT);
-
         function afterShow() {
             const row = rowOf(idx);
             if (!row) { console.warn("行不存在:", idx); resolve(); return; }
@@ -604,12 +670,8 @@ function actRow(idx, doClick, isLast) {
             }
         }
 
-        if (target <= maxTop) {
-            scrollToRowSmooth(idx, afterShow);   // 可到达：平滑滚动（原生观感）
-        } else {
-            pinToRow(idx);                        // 太远：直接钉住目标行窗口
-            setTimeout(afterShow, 120);
-        }
+        // 超大目录已由 scrollTopForRow() 比例映射，不再因浏览器高度上限直接跳转。
+        scrollToRowSmooth(idx, afterShow);
     });
 }
 
