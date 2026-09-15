@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>az手写数字识别 · TF.js 静态版</title>
+  <link rel="stylesheet" href="./style.css">
+  <script defer src="./vendor/tf.min.js"></script>
+  <script defer src="./model-data.js"></script>
+  <script defer src="./app.js"></script>
+</head>
+<body>
+<main>
+  <h1>手写数字识别</h1>
+  <p class="instruction">在下面写一个 0–9 的数字，然后点击识别。</p>
+  <div class="workspace">
+    <section aria-label="手写输入">
+      <div class="canvas-wrap">
+        <canvas id="drawing" width="280" height="280" aria-label="手写数字画布，请使用鼠标或触屏写一个数字"></canvas>
+        <span id="hint">在这里写数字</span>
+      </div>
+      <div class="actions">
+        <button id="clear">清空</button>
+        <button id="predict" class="primary">识别</button>
+      </div>
+    </section>
+    <section class="output" aria-label="识别结果">
+      <h2>识别结果</h2>
+      <div id="digit">—</div>
+      <p id="message" role="status" aria-live="polite">等待输入</p>
+      <section class="probabilities" aria-labelledby="probabilities-title">
+        <h3 id="probabilities-title">Softmax 可信度</h3>
+        <div id="probability-list" class="probability-list"></div>
+      </section>
+      <figure>
+        <canvas id="preview" width="28" height="28" aria-label="浏览器预处理后的 28×28 图像"></canvas>
+        <figcaption>处理后的图像 · 28×28</figcaption>
+      </figure>
+    </section>
+  </div>
+</main>
+</body>
+</html>
