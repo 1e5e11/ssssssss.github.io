@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TensorFlow.js 入门示例</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f4f6fa; color: #17243a; font: 16px/1.7 system-ui, sans-serif; }
+    main { max-width: 880px; margin: 48px auto; padding: 0 20px; }
+    h1 { line-height: 1.3; } h2 { font-size: 21px; }
+    section { background: white; border: 1px solid #dce3ec; border-radius: 14px; padding: 24px; margin: 20px 0; }
+    pre { background: #142238; color: #d9edff; padding: 16px; border-radius: 8px; overflow: auto; }
+    code { font-family: Consolas, monospace; }
+    button { border: 0; border-radius: 6px; padding: 10px 18px; background: #235bd6; color: white; cursor: pointer; font: inherit; }
+    button:disabled { opacity: .5; cursor: wait; }
+    input { width: 100px; padding: 9px; border: 1px solid #aebccd; border-radius: 6px; font: inherit; }
+    progress { width: 100%; margin-top: 18px; accent-color: #235bd6; }
+    .result { white-space: pre-wrap; overflow-wrap: anywhere; }
+    #status { color: #375477; }
+    fieldset { border: 0; padding: 0; margin: 16px 0; }
+    .controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    select { font: inherit; padding: 9px; border: 1px solid #aebccd; border-radius: 6px; }
+    .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+    .metric { background: #f0f5fd; padding: 16px; border-radius: 8px; }
+    .metric strong { display: block; font-size: 24px; color: #235bd6; }
+    .secondary { background: #47566d; }
+    #bench-log { max-height: 260px; overflow: auto; font-size: 14px; }
+    #bench-report { width: 100%; min-height: 320px; padding: 14px; border: 1px solid #aebccd; border-radius: 8px; font: 14px/1.7 Consolas, monospace; resize: vertical; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>在浏览器里使用 TensorFlow.js</h1>
+  <p>无需安装 npm。通过 CDN 加载库后，使用全局变量 <code>tf</code> 进行计算、训练和预测。</p>
+  <p id="status" role="status">正在从 CDN 加载 TensorFlow.js，需要连接网络…</p>
+  <section aria-labelledby="bench-title">
+    <h2 id="bench-title">TF.js / 内存、显存与算力测试</h2>
+    <p>所有计算使用当前 CDN 的 TensorFlow.js。CPU 测试张量内存，WebGL 测试 GPU 后端张量容量；结果是本次通过校验的容量下限，不是设备总内存、总显存或模型容量上限。</p>
+    <p id="bench-env" class="result">等待 TF.js 就绪。</p>
+    <fieldset id="bench-controls" disabled>
+      <div class="controls">
+        <label>测试后端 <select id="bench-backend"><option value="webgl">WebGL（GPU）</option><option value="cpu">CPU（JavaScript）</option></select></label>
+        <label>容量上限 <select id="bench-cap"><option value="unlimited" selected>持续探测（不设上限）</option><option value="64">64 MiB</option><option value="256">256 MiB</option><option value="1024">1024 MiB</option><option value="custom">自定义</option></select></label>
+        <label>自定义上限（MiB，仅自定义模式生效） <input id="bench-custom-cap" type="number" min="1" step="1" value="4096"></label>
+        <label>矩阵边长 <select id="bench-size"><option value="128">128</option><option value="256" selected>256</option><option value="512">512</option></select></label>
+      </div>
+      <p class="controls"><button id="bench-memory">测试容量</button><button id="bench-speed">测试速度与算力</button><button id="bench-refresh" class="secondary">刷新资源信息</button></p>
+    </fieldset>
+    <button id="bench-stop" class="secondary" disabled>停止测试</button>
+    <p>持续探测每次增加 8 MiB，直到失败或手动停止，不设软件容量上限。耗尽资源可能使页面卡顿或被浏览器关闭；停止在当前计算完成后生效。每块校验后尝试在本机保存进度，重开同一地址可查看最近记录。测试结束会释放张量，后端缓存可能仍保留。</p>
+    <p id="bench-history" class="result">暂无容量测试记录。</p>
+    <progress id="bench-progress" value="0" max="100" aria-label="性能测试进度"></progress>
+    <p id="bench-status" role="status">尚未测试。分别选择 CPU 和 WebGL，可比较两种后端。</p>
+    <div class="metrics">
+      <div class="metric">CPU 已验证张量容量<strong id="bench-cpu">未测试</strong></div>
+      <div class="metric">WebGL 已验证张量容量<strong id="bench-webgl">未测试</strong></div>
+      <div class="metric">矩阵乘法中位耗时<strong id="bench-latency">未测试</strong></div>
+      <div class="metric">有效矩阵算力<strong id="bench-flops">未测试</strong></div>
+      <div class="metric">数据往返有效吞吐<strong id="bench-transfer">未测试</strong></div>
+    </div>
+    <p id="bench-method">算力按 2 × N³ / 耗时计算。计时包含运算与结果回读，排除预热；不代表显卡理论峰值或语言模型 tokens/s。TF.js float32 张量在 WebGL 上的实际精度取决于设备。</p>
+    <pre id="bench-log" aria-label="测试详细记录">测试记录将显示在这里。</pre>
+    <label for="bench-report">纯文字测试报告（每次测试结束后自动生成，可选中文字复制）</label>
+    <textarea id="bench-report" readonly placeholder="完成容量或性能测试后，这里会自动生成报告。"></textarea>
+    <button id="bench-download" class="secondary" disabled>下载纯文字报告（.txt）</button>
+  </section>
+  <section>
+    <h2>01 / 引入脚本</h2>
+    <p>先加载库，再加载自己的 JavaScript。src 中直接写网址。</p>
+    <pre><code>&lt;script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"&gt;&lt;/script&gt;
+&lt;script src="app.js"&gt;&lt;/script&gt;</code></pre>
+  </section>
+  <section>
+    <h2>02 / 张量运算</h2>
+    <p>张量可以理解为多维数值数组。这里将两个向量逐项相加，再计算矩阵乘法。</p>
+    <pre><code>tf.tidy(() =&gt; {
+  const a = tf.tensor1d([1, 2, 3]);
+  const b = tf.tensor1d([10, 20, 30]);
+  console.log(a.add(b).arraySync()); // [11, 22, 33]
+}); // 自动释放作用域内未返回的张量</code></pre>
+    <button id="tensor-button" disabled>运行张量示例</button>
+    <p id="tensor-output" class="result" role="status">等待运行。</p>
+  </section>
+  <section>
+    <h2>03 / 训练一个线性模型</h2>
+    <p>给模型提供 x 与 y 的样本，让它学习 <code>y = 2x + 1</code>。模型只有一个神经元，学习权重 w 和偏置 b，使 <code>y ≈ wx + b</code>。</p>
+    <pre><code>const model = tf.sequential();
+model.add(tf.layers.dense({ units: 1, inputShape: [1] }));
+model.compile({ optimizer: tf.train.sgd(0.1), loss: 'meanSquaredError' });
+await model.fit(xs, ys, { epochs: 100 });
+// 训练完成后：model.predict(tf.tensor2d([x], [1, 1]))</code></pre>
+    <button id="train-button" disabled>开始训练（100 轮）</button>
+    <progress id="progress" value="0" max="100" aria-label="模型训练进度"></progress>
+    <p id="train-output" class="result" role="status">尚未训练。</p>
+    <label for="prediction-input">输入 x：</label>
+    <input id="prediction-input" type="number" min="-1000" max="1000" step="any" value="3">
+    <button id="predict-button" disabled>预测 y</button>
+    <p id="predict-output" class="result" role="status">先训练，再预测。输入 3 时，结果应接近 7。</p>
+  </section>
+  <p>代码与中文注释见 <code>app.js</code>。训练在当前浏览器本地执行，刷新页面后模型会重置。</p>
+</main>
+<!-- 用户指定的 CDN 地址：加载完成后会提供全局 tf 对象。 -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="app.js"></script>
+<script src="benchmark.js"></script>
+</body>
+</html>
