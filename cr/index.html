@@ -5,15 +5,21 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>az 手写数字与字母识别</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./style.css?v=json-shards-v2">
   <script defer src="./vendor/tf.min.js"></script>
-  <script defer src="./app.js"></script>
+  <script defer src="./app.js?v=json-shards-v2"></script>
 </head>
 <body>
 <main>
   <div class="title-row">
     <h1>手写数字与字母识别</h1>
-    <span id="model-state">正在检查模型…</span>
+    <div class="model-status">
+      <span id="model-state">正在加载模型…</span>
+      <div class="model-progress" aria-label="模型加载进度">
+        <progress id="model-progress-bar" max="100" value="0">0%</progress>
+        <span id="model-progress-text">准备加载</span>
+      </div>
+    </div>
   </div>
   <p class="instruction">写一个 0–9、A–Z 或 a–z 字符，然后点击识别；识别成功后可继续写下一个字符。<span id="dataset-summary">正在加载静态模型…</span></p>
   <div class="workspace">

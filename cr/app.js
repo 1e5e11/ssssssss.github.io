@@ -201,6 +201,24 @@ function runModel(pixels) {
   });
 }
 
+function updateModelProgress(loadedBytes, totalBytes, loadedShards = 0, totalShards = 0) {
+  const percent = totalBytes > 0 ? Math.min(100, loadedBytes / totalBytes * 100) : 0;
+  $('model-progress-bar').value = percent;
+  $('model-progress-bar').textContent = `${percent.toFixed(0)}%`;
+  $('model-progress-text').textContent = totalShards
+    ? `${loadedShards}/${totalShards} · ${percent.toFixed(0)}%`
+    : `${percent.toFixed(0)}%`;
+}
+
+function decodeBase64(value) {
+  const decoded = atob(value);
+  const bytes = new Uint8Array(decoded.length);
+  for (let index = 0; index < decoded.length; index += 1) {
+    bytes[index] = decoded.charCodeAt(index);
+  }
+  return bytes;
+}
+
 async function predict() {
   if (!modelReady) {
     $('message').textContent = '静态模型尚未加载完成';
@@ -241,18 +259,55 @@ async function loadModel() {
   try {
     if (!globalThis.tf) throw new Error('TensorFlow.js 加载失败');
     await tf.ready();
-    const metadataResponse = await fetch('./model/model.json');
+    $('model-state').textContent = '正在读取模型描述…';
+    updateModelProgress(0, 0);
+    const metadataResponse = await fetch('./model/model.json', {cache: 'no-cache'});
     if (!metadataResponse.ok) throw new Error(`模型描述加载失败：HTTP ${metadataResponse.status}`);
     const metadata = await metadataResponse.json();
-    if (metadata.format !== 'azai-tfjs-dense-v1') throw new Error('不支持的静态模型格式');
+    if (metadata.format !== 'azai-tfjs-dense-json-v1') throw new Error('不支持的静态模型格式');
     if (typeof metadata.alphabet !== 'string' || metadata.alphabet.length !== 62) {
       throw new Error('模型字符表无效');
     }
-    const weightsResponse = await fetch(`./model/${metadata.weights_file}`);
-    if (!weightsResponse.ok) throw new Error(`模型权重加载失败：HTTP ${weightsResponse.status}`);
-    const buffer = await weightsResponse.arrayBuffer();
-    if (buffer.byteLength !== metadata.float_count * 4) throw new Error('模型权重文件大小不正确');
-    const values = new Float32Array(buffer);
+    if (!Array.isArray(metadata.shards) || !metadata.shards.length) {
+      throw new Error('模型分片列表无效');
+    }
+    if (metadata.byte_count !== metadata.float_count * 4) {
+      throw new Error('模型描述中的权重大小不一致');
+    }
+
+    const weightsBytes = new Uint8Array(metadata.byte_count);
+    let loadedBytes = 0;
+    updateModelProgress(0, metadata.byte_count, 0, metadata.shards.length);
+    for (let index = 0; index < metadata.shards.length; index += 1) {
+      const manifest = metadata.shards[index];
+      $('model-state').textContent = `正在加载模型分片 ${index + 1}/${metadata.shards.length}…`;
+      const response = await fetch(`./model/${manifest.file}`);
+      if (!response.ok) throw new Error(`${manifest.file} 加载失败：HTTP ${response.status}`);
+      const shard = await response.json();
+      if (shard.format !== 'azai-tfjs-weight-shard-v1') {
+        throw new Error(`${manifest.file} 格式无效`);
+      }
+      const bytes = decodeBase64(shard.data);
+      if (
+        shard.index !== index + 1
+        || shard.count !== metadata.shards.length
+        || shard.byte_offset !== manifest.byte_offset
+        || bytes.byteLength !== manifest.byte_length
+      ) {
+        throw new Error(`${manifest.file} 内容与模型描述不一致`);
+      }
+      weightsBytes.set(bytes, manifest.byte_offset);
+      loadedBytes += bytes.byteLength;
+      updateModelProgress(
+        loadedBytes,
+        metadata.byte_count,
+        index + 1,
+        metadata.shards.length,
+      );
+    }
+    if (loadedBytes !== metadata.byte_count) throw new Error('模型分片大小不完整');
+
+    const values = new Float32Array(weightsBytes.buffer);
     modelLayers = metadata.layers.map(layer => ({
       weight: tf.tensor2d(
         values.subarray(layer.weight_offset, layer.weight_offset + layer.weight_length),
@@ -269,9 +324,11 @@ async function loadModel() {
     $('predict').disabled = false;
     $('model-state').textContent = `模型已就绪 · TensorFlow.js ${tf.version.tfjs} · ${tf.getBackend()}`;
     $('model-state').classList.add('is-ready');
+    $('model-progress-text').textContent = `加载完成 · 100%`;
     $('dataset-summary').textContent = `${metadata.dataset} · ${metadata.architecture.join(' → ')} · 静态浏览器推理。`;
   } catch (error) {
     $('model-state').textContent = '静态模型加载失败';
+    $('model-progress-text').textContent = '加载失败';
     $('dataset-summary').textContent = error.message;
     $('message').textContent = error.message;
   }
