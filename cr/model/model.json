@@ -1,0 +1,59 @@
+{
+  "format": "azai-tfjs-dense-v1",
+  "source": "digit_model.pt",
+  "weights_file": "weights.bin",
+  "dtype": "float32",
+  "alphabet": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+  "input_shape": [
+    28,
+    28
+  ],
+  "architecture": [
+    784,
+    256,
+    150,
+    128,
+    62
+  ],
+  "layers": [
+    {
+      "name": "0",
+      "input": 784,
+      "output": 256,
+      "weight_offset": 0,
+      "weight_length": 200704,
+      "bias_offset": 200704,
+      "bias_length": 256
+    },
+    {
+      "name": "2",
+      "input": 256,
+      "output": 150,
+      "weight_offset": 200960,
+      "weight_length": 38400,
+      "bias_offset": 239360,
+      "bias_length": 150
+    },
+    {
+      "name": "4",
+      "input": 150,
+      "output": 128,
+      "weight_offset": 239510,
+      "weight_length": 19200,
+      "bias_offset": 258710,
+      "bias_length": 128
+    },
+    {
+      "name": "6",
+      "input": 128,
+      "output": 62,
+      "weight_offset": 258838,
+      "weight_length": 7936,
+      "bias_offset": 266774,
+      "bias_length": 62
+    }
+  ],
+  "epoch": 20000,
+  "dataset": "EMNIST ByClass",
+  "float_count": 266836
+}
