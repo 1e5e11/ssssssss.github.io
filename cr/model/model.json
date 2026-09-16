@@ -1,7 +1,6 @@
 {
-  "format": "azai-tfjs-dense-v1",
+  "format": "azai-tfjs-dense-json-v1",
   "source": "digit_model.pt",
-  "weights_file": "weights.bin",
   "dtype": "float32",
   "alphabet": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
   "input_shape": [
@@ -55,5 +54,98 @@
   ],
   "epoch": 20000,
   "dataset": "EMNIST ByClass",
-  "float_count": 266836
+  "float_count": 266836,
+  "byte_count": 1067344,
+  "shards": [
+    {
+      "file": "weights-001.json",
+      "byte_offset": 0,
+      "byte_length": 73728,
+      "json_bytes": 98409
+    },
+    {
+      "file": "weights-002.json",
+      "byte_offset": 73728,
+      "byte_length": 73728,
+      "json_bytes": 98413
+    },
+    {
+      "file": "weights-003.json",
+      "byte_offset": 147456,
+      "byte_length": 73728,
+      "json_bytes": 98414
+    },
+    {
+      "file": "weights-004.json",
+      "byte_offset": 221184,
+      "byte_length": 73728,
+      "json_bytes": 98414
+    },
+    {
+      "file": "weights-005.json",
+      "byte_offset": 294912,
+      "byte_length": 73728,
+      "json_bytes": 98414
+    },
+    {
+      "file": "weights-006.json",
+      "byte_offset": 368640,
+      "byte_length": 73728,
+      "json_bytes": 98414
+    },
+    {
+      "file": "weights-007.json",
+      "byte_offset": 442368,
+      "byte_length": 73728,
+      "json_bytes": 98414
+    },
+    {
+      "file": "weights-008.json",
+      "byte_offset": 516096,
+      "byte_length": 73728,
+      "json_bytes": 98414
+    },
+    {
+      "file": "weights-009.json",
+      "byte_offset": 589824,
+      "byte_length": 73728,
+      "json_bytes": 98414
+    },
+    {
+      "file": "weights-010.json",
+      "byte_offset": 663552,
+      "byte_length": 73728,
+      "json_bytes": 98415
+    },
+    {
+      "file": "weights-011.json",
+      "byte_offset": 737280,
+      "byte_length": 73728,
+      "json_bytes": 98415
+    },
+    {
+      "file": "weights-012.json",
+      "byte_offset": 811008,
+      "byte_length": 73728,
+      "json_bytes": 98415
+    },
+    {
+      "file": "weights-013.json",
+      "byte_offset": 884736,
+      "byte_length": 73728,
+      "json_bytes": 98415
+    },
+    {
+      "file": "weights-014.json",
+      "byte_offset": 958464,
+      "byte_length": 73728,
+      "json_bytes": 98415
+    },
+    {
+      "file": "weights-015.json",
+      "byte_offset": 1032192,
+      "byte_length": 35152,
+      "json_bytes": 46984
+    }
+  ]
 }
