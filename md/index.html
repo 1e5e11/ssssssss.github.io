@@ -6,9 +6,24 @@
   <meta name="referrer" content="no-referrer">
   <title>墨页 · Markdown 阅读与编辑</title>
   <script>if (['md','src'].some(key => new URLSearchParams(location.search).has(key) || new URLSearchParams(location.hash.slice(1)).has(key))) document.documentElement.classList.add('reader');</script>
+  <link rel="stylesheet" href="vendor/katex.min.css">
   <link rel="stylesheet" href="styles.css">
+  <style id="codeTheme">
+    .hljs{color:#242124;background:transparent}
+    .hljs-comment,.hljs-quote{color:#777;font-style:italic}
+    .hljs-keyword,.hljs-selector-tag,.hljs-tag,.hljs-doctag{color:#7c0a21}
+    .hljs-string,.hljs-regexp,.hljs-addition,.hljs-template-tag{color:#476341}
+    .hljs-number,.hljs-literal,.hljs-symbol,.hljs-bullet{color:#85501f}
+    .hljs-title,.hljs-section,.hljs-selector-class,.hljs-selector-id{color:#68477c}
+    .hljs-built_in,.hljs-type,.hljs-attr,.hljs-attribute,.hljs-variable,.hljs-name{color:#31596c}
+    .hljs-meta,.hljs-deletion{color:#9a3049}
+    .hljs-emphasis{font-style:italic}.hljs-strong{font-weight:bold}
+    .hljs-link{text-decoration:underline}
+  </style>
   <script defer src="vendor/marked.umd.js"></script>
   <script defer src="vendor/purify.min.js"></script>
+  <script defer src="vendor/highlight.min.js"></script>
+  <script defer src="vendor/katex.min.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
@@ -21,14 +36,24 @@
       <input type="file" id="file" accept=".md,.markdown,text/markdown,text/plain" hidden>
     </header>
     <main class="layout">
-      <section class="panel document-panel" aria-label="文档预览">
-        <div class="panel-bar"><span>文档预览</span><span id="documentName">未命名.md</span></div>
-        <div id="preview" class="preview"><article class="markdown" id="document"></article></div>
-        <nav class="pager" aria-label="预览分页" id="pager"></nav>
+      <section class="panel editor-panel" aria-label="Markdown 原文编辑器">
+        <div class="panel-bar">
+          <label for="editor">Markdown 原文</label>
+          <span class="panel-tools"><span id="charCount">0 字</span><button id="copySource" type="button">复制原文</button></span>
+        </div>
+        <div class="editor-stack">
+          <pre id="editorHighlight" aria-hidden="true"><code></code></pre>
+          <textarea id="editor" spellcheck="false" aria-describedby="editorHint" placeholder="在左侧粘贴或输入 Markdown…"></textarea>
+        </div>
+        <div class="editor-hint" id="editorHint">语法高亮 · 实时预览 · 支持 $…$ 与 $$…$$ 公式 · 可拖入 .md 文件</div>
       </section>
-      <aside class="sidebar">
+      <aside class="preview-column">
+        <section class="panel document-panel" aria-label="文档预览">
+          <div class="panel-bar"><span>实时预览</span><span id="documentName">未命名.md</span></div>
+          <div id="preview" class="preview"><article class="markdown" id="document"></article></div>
+          <nav class="pager" aria-label="预览分页" id="pager"></nav>
+        </section>
         <section class="panel outline-panel"><div class="panel-bar"><span>目录</span><span id="headingCount">0 节</span></div><nav id="outline" aria-label="文档目录"></nav></section>
-        <section class="panel editor-panel"><div class="panel-bar"><label for="editor">Markdown 源文</label><span id="charCount">0 字</span></div><textarea id="editor" spellcheck="false" placeholder="写下你的 Markdown…"></textarea><div class="editor-hint">实时预览 · 支持拖入 .md 文件</div></section>
       </aside>
     </main>
     <footer><span id="status" role="status">就绪</span><span>文字在这里，安静成页。</span></footer>
