@@ -944,16 +944,16 @@
       <div class="setting-row">
         <label for="transportSetting" id="transportSettingLabel">Connection</label>
         <select id="transportSetting" class="az-select">
-          <option value="auto">Auto (direct → local proxy)</option>
+          <option value="auto">Auto (OpenCode → same-origin relay)</option>
           <option value="direct">Browser direct</option>
-          <option value="proxy">Local CORS proxy</option>
+          <option value="proxy">Proxy / same-origin relay</option>
         </select>
       </div>
       <div class="setting-row">
         <label for="proxyUrlSetting" id="proxyUrlSettingLabel">Proxy URL</label>
-        <input id="proxyUrlSetting" class="az-input" placeholder="http://127.0.0.1:8787/api/proxy" />
+        <input id="proxyUrlSetting" class="az-input" placeholder="/api/proxy" />
       </div>
-      <div class="setting-note" id="proxySettingNote">Auto retries through the bundled local proxy when the browser blocks a direct request. Run az_llm_server.py to enable it.</div>
+      <div class="setting-note" id="proxySettingNote">Public sites use same-origin /api/proxy; local use can use the bundled Python relay.</div>
       <div class="setting-row">
         <label for="apiKeySetting" id="apiKeySettingLabel">API key</label>
         <input id="apiKeySetting" class="az-input" type="password" autocomplete="off" placeholder="sk-…" />
@@ -1019,9 +1019,16 @@
 (() => {
   'use strict';
 
+  const BUILD = '2026-09-17-cors-fix';
   const OPENCODE_ENDPOINT = 'https://opencode.ai/zen/v1/chat/completions';
   const OPENCODE_MODELS_ENDPOINT = 'https://opencode.ai/zen/v1/models';
   const LOCAL_PROXY_DEFAULT = 'http://127.0.0.1:8787/api/proxy';
+  const SAME_ORIGIN_PROXY_DEFAULT = '/api/proxy';
+  const IS_WEB_PAGE = location.protocol === 'http:' || location.protocol === 'https:';
+  const IS_LOOPBACK_PAGE = IS_WEB_PAGE && ['127.0.0.1', 'localhost', '::1'].includes(location.hostname);
+  const DEFAULT_PROXY_URL = location.protocol === 'file:' || IS_LOOPBACK_PAGE
+    ? LOCAL_PROXY_DEFAULT
+    : SAME_ORIGIN_PROXY_DEFAULT;
 
   // Free OpenCode Zen models that currently use the OpenAI-compatible
   // /chat/completions endpoint. Models using /messages or /responses are
@@ -1048,7 +1055,7 @@
     theme: 'light',
     language: 'zh',
     transport: 'auto',
-    proxyUrl: LOCAL_PROXY_DEFAULT,
+    proxyUrl: DEFAULT_PROXY_URL,
     openCodeModels: OPENCODE_FREE_PRESETS
   };
 
@@ -1070,7 +1077,7 @@
       apiConfigured: 'API 已配置', apiNotConfigured: 'API 未配置',
       renderNote: 'Markdown 会先安全清洗，再渲染；LaTeX 使用 KaTeX。',
       endpointNote: '填写完整的 Chat Completions 地址，而不是只填 /v1 基础地址。',
-      proxyNote: 'Auto 在浏览器直连因 CORS / 网络策略失败时自动重试本地代理。运行 az_llm_server.py 即可启用。',
+      proxyNote: '公网部署默认使用同源 /api/proxy，避免第三方 API 的 CORS 限制；本机打开时使用 127.0.0.1:8787。纯静态站点若没有 /api/proxy，OpenCode 跨域请求仍会被浏览器阻止。',
       keyNote: '若选择记住 Key，会把 Key 保存在本浏览器 IndexedDB；同源脚本理论上可能读取它。',
       modelSwitchWarn: '这个对话已经有历史消息。中途切换模型可能降低上下文一致性和性能。\n\n仍要切换模型吗？',
       modelSwitchToast: '已切换模型 · 旧上下文可能影响表现',
@@ -1082,9 +1089,9 @@
       apiFailed: 'API 请求失败', apiTestFailed: 'API 测试失败', apiTestOk: 'API 测试成功',
       missingEndpoint: '请先设置 API 接口', missingModel: '请先选择模型',
       emptyResponse: '[空回复]', stoppedText: '[生成已停止]',
-      failedFetch: '浏览器无法连接 API。常见原因：CORS、DNS、TLS/证书、网络拦截或接口地址错误。已尝试本地代理；若仍失败，请运行 az_llm_server.py，并在“连接方式”选择 Auto 或本地代理。',
-      directFailedProxyOk: '浏览器直连失败，已自动通过本地代理连接',
-      proxyUnavailable: '本地代理不可用。请运行 az_llm_server.py',
+      failedFetch: 'API 连接失败。公网 HTTPS 页面调用 OpenCode 时需要同源 /api/proxy；纯前端无法绕过第三方服务器的 CORS。若在本机使用，请运行 az_llm_server.py。',
+      directFailedProxyOk: '浏览器直连不可用，已自动通过代理连接',
+      proxyUnavailable: '代理不可用。公网部署请配置同源 /api/proxy；本机请运行 az_llm_server.py',
       testing: '正在测试 API…', refreshStart: '正在刷新 OpenCode 模型…',
       refreshDone: 'OpenCode 免费模型已刷新并缓存到本地',
       refreshFallback: '模型刷新失败 · 继续使用内置免费模型',
@@ -1098,8 +1105,8 @@
       input: '输入', output: '输出', total: '总计',
       draft: '草稿估算', localHistory: '本地记录',
       providerOpenCode: 'OpenCode Zen', providerCustom: '自定义 API',
-      connectionAuto: 'Auto（直连 → 本地代理）', connectionDirect: '浏览器直连',
-      connectionProxy: '本地 CORS 代理', rememberNo: '否', rememberYes: '是，保存在此浏览器',
+      connectionAuto: 'Auto（OpenCode 优先同源代理）', connectionDirect: '浏览器直连',
+      connectionProxy: '代理 / 同源 Relay', rememberNo: '否', rememberYes: '是，保存在此浏览器',
       on: '开', off: '关', themeLight: '浅色', themeDark: '深色',
       closeHistory: '关闭历史'
     },
@@ -1120,7 +1127,7 @@
       apiConfigured: 'API configured', apiNotConfigured: 'API not configured',
       renderNote: 'Markdown is sanitized before rendering. LaTeX is rendered with KaTeX.',
       endpointNote: 'Use the full Chat Completions endpoint, not only the /v1 base URL.',
-      proxyNote: 'Auto retries through the bundled local proxy if a browser-direct request is blocked by CORS or network policy. Run az_llm_server.py to enable it.',
+      proxyNote: 'Public deployments default to same-origin /api/proxy to avoid third-party CORS restrictions; local pages use 127.0.0.1:8787. A purely static deployment still cannot bypass OpenCode CORS without /api/proxy.',
       keyNote: 'A remembered key is stored locally in IndexedDB. Any script running on the same origin can potentially access it.',
       modelSwitchWarn: 'This conversation already has history. Switching models mid-conversation can reduce context consistency and performance.\n\nSwitch anyway?',
       modelSwitchToast: 'Model switched · earlier context may affect performance',
@@ -1132,9 +1139,9 @@
       apiFailed: 'API request failed', apiTestFailed: 'API test failed', apiTestOk: 'API test succeeded',
       missingEndpoint: 'Set API endpoint first', missingModel: 'Select a model first',
       emptyResponse: '[empty response]', stoppedText: '[generation stopped]',
-      failedFetch: 'The browser could not reach the API. Common causes are CORS, DNS, TLS/certificate errors, network blocking, or a wrong endpoint. The local proxy was also attempted; if it still fails, run az_llm_server.py and choose Auto or Local proxy.',
-      directFailedProxyOk: 'Browser-direct request failed; connected through the local proxy',
-      proxyUnavailable: 'Local proxy is unavailable. Run az_llm_server.py',
+      failedFetch: 'API connection failed. Public HTTPS pages need a same-origin /api/proxy for OpenCode; frontend JavaScript cannot bypass a third-party server’s CORS policy. For local use, run az_llm_server.py.',
+      directFailedProxyOk: 'Browser-direct request was unavailable; connected through the proxy',
+      proxyUnavailable: 'Proxy unavailable. Configure same-origin /api/proxy for public deployment, or run az_llm_server.py locally',
       testing: 'Testing API…', refreshStart: 'Refreshing OpenCode model list…',
       refreshDone: 'OpenCode free models refreshed and cached locally',
       refreshFallback: 'Model refresh failed · using built-in free-model presets',
@@ -1148,8 +1155,8 @@
       input: 'input', output: 'output', total: 'total',
       draft: 'draft est.', localHistory: 'local history',
       providerOpenCode: 'OpenCode Zen', providerCustom: 'Custom API',
-      connectionAuto: 'Auto (direct → local proxy)', connectionDirect: 'Browser direct',
-      connectionProxy: 'Local CORS proxy', rememberNo: 'No', rememberYes: 'Yes, in this browser',
+      connectionAuto: 'Auto (OpenCode prefers same-origin relay)', connectionDirect: 'Browser direct',
+      connectionProxy: 'Proxy / same-origin relay', rememberNo: 'No', rememberYes: 'Yes, in this browser',
       on: 'on', off: 'off', themeLight: 'Light', themeDark: 'Dark',
       closeHistory: 'Close history'
     }
@@ -1374,7 +1381,12 @@
       : OPENCODE_FREE_PRESETS;
     if (!['zh','en'].includes(settings.language)) settings.language = 'zh';
     if (!['auto','direct','proxy'].includes(settings.transport)) settings.transport = 'auto';
-    if (!settings.proxyUrl) settings.proxyUrl = LOCAL_PROXY_DEFAULT;
+    // Migrate v2's localhost proxy setting when this same file is deployed on a
+    // public HTTP(S) origin. 127.0.0.1 would otherwise point at each visitor's
+    // own machine and produce ERR_CONNECTION_REFUSED.
+    if (!settings.proxyUrl || (!IS_LOOPBACK_PAGE && IS_WEB_PAGE && String(settings.proxyUrl).trim() === LOCAL_PROXY_DEFAULT)) {
+      settings.proxyUrl = DEFAULT_PROXY_URL;
+    }
     if (!settings.rememberKey) settings.apiKey = '';
     sessionApiKey = settings.apiKey || '';
     applyTheme();
@@ -1393,7 +1405,7 @@
   function effectiveProxyUrl(cfg = settings) {
     const configured = String(cfg.proxyUrl || '').trim();
     if (configured) return configured;
-    return LOCAL_PROXY_DEFAULT;
+    return DEFAULT_PROXY_URL;
   }
   function applyTheme() {
     app.classList.toggle('az-dark', settings.theme === 'dark');
@@ -1847,6 +1859,15 @@
       ['127.0.0.1','localhost'].includes(location.hostname) &&
       location.port === '8787';
   }
+  function isOpenCodeTarget(target) {
+    try {
+      const u = new URL(target, location.href);
+      return u.hostname === 'opencode.ai' && u.pathname.startsWith('/zen/');
+    } catch { return false; }
+  }
+  function isPublicWebOrigin() {
+    return IS_WEB_PAGE && !IS_LOOPBACK_PAGE;
+  }
   async function networkFetch(target, init = {}, cfg = settings) {
     const transport = cfg.transport || 'auto';
     if (transport === 'direct') return fetch(target, init);
@@ -1860,8 +1881,22 @@
       }
     }
 
-    // When opened through the bundled server, proxy first to avoid a needless
-    // CORS failure. Otherwise try direct first and fall back to localhost.
+    // OpenCode does not expose a browser-readable CORS response for the models
+    // endpoint. On a public deployment, never fire a doomed cross-origin fetch
+    // first: use the site's own /api/proxy relay. This also prevents the old
+    // v2 behaviour of trying a visitor's 127.0.0.1 from an HTTPS website.
+    if (isPublicWebOrigin() && isOpenCodeTarget(target)) {
+      try { return await proxyFetch(target, init, cfg); }
+      catch (proxyError) {
+        const err = new Error(t('failedFetch'));
+        err.cause = proxyError;
+        err.code = 'NETWORK';
+        throw err;
+      }
+    }
+
+    // Bundled local server: relay first. Other providers: browser-direct first,
+    // then the configured relay if direct access is blocked.
     if (likelyLocalServerOrigin()) {
       try { return await proxyFetch(target, init, cfg); }
       catch {}
@@ -2270,6 +2305,12 @@
         headers:currentApiKey() ? { Authorization:`Bearer ${currentApiKey()}` } : {}
       });
       if (!response.ok) throw await apiError(response);
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.toLowerCase().includes('json')) {
+        throw new Error(settings.language === 'zh'
+          ? '同源 /api/proxy 未部署或返回的不是 JSON'
+          : 'Same-origin /api/proxy is missing or did not return JSON');
+      }
       const data = await response.json();
       const all = normalizeModelList(data);
       const free = all.filter(m => looksFreeModel(m.raw) && looksChatCompletionsModel(m));
