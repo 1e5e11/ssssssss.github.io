@@ -81,7 +81,28 @@ function clearResult() {
   if (busy) return;
   recognizedCharacters = [];
   renderRecognizedCharacters();
+  clearPreviewHistory();
   $('message').textContent = dirty ? '当前输入尚未识别' : '等待输入';
+}
+
+function appendPreview(preview, character) {
+  const item = document.createElement('div');
+  item.className = 'preview-history-item';
+  const image = document.createElement('canvas');
+  image.width = 28;
+  image.height = 28;
+  image.setAttribute('aria-label', `${character} 的模型输入`);
+  image.getContext('2d').drawImage(preview, 0, 0);
+  const label = document.createElement('span');
+  label.textContent = character;
+  item.append(image, label);
+  const history = $('preview-history');
+  history.append(item);
+  history.scrollTop = history.scrollHeight;
+}
+
+function clearPreviewHistory() {
+  $('preview-history').replaceChildren();
 }
 
 function point(event) {
@@ -195,7 +216,9 @@ function runModel(pixels) {
     let activation = tf.tensor2d(pixels, [1, 784]);
     modelLayers.forEach(({weight, bias}, index) => {
       activation = tf.matMul(activation, weight, false, true).add(bias);
-      if (index < modelLayers.length - 1) activation = tf.relu(activation);
+      if (index < modelLayers.length - 1) {
+        activation = activation.mul(tf.sigmoid(activation));
+      }
     });
     return Array.from(tf.softmax(activation).dataSync());
   });
@@ -244,6 +267,7 @@ async function predict() {
     const character = alphabet[predictedClass];
     recognizedCharacters.push(character);
     renderRecognizedCharacters();
+    appendPreview(preview, character);
     $('message').textContent = `已加入 ${character} · 类别 ${predictedClass} · 置信度 ${(probabilities[predictedClass] * 100).toFixed(1)}% · 可继续写下一个字符`;
     renderProbabilities(probabilities, predictedClass);
     clearDrawing();

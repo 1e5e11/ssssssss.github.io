@@ -45,6 +45,13 @@ h2 { margin: 0; font-size: 14px; font-weight: 500; color: #666; }
 figure { margin: 20px 0 0; }
 #preview { width: 84px; height: 84px; background: #000; image-rendering: pixelated; border-radius: 4px; }
 figcaption { margin-top: 8px; color: #777; font-size: 12px; }
+.preview-history-wrap { margin-top: 18px; text-align: left; }
+.preview-history-wrap h3 { margin: 0 0 8px; font-size: 12px; font-weight: 500; color: #666; }
+.preview-history { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 6px; min-height: 46px; max-height: 220px; padding: 6px; overflow-y: auto; border: 1px solid #eee; border-radius: 6px; }
+.preview-history:empty::before { content: "暂无历史"; align-self: center; color: #aaa; font-size: 12px; }
+.preview-history-item { display: grid; justify-items: center; gap: 2px; }
+.preview-history-item canvas { width: 44px; height: 44px; background: #000; image-rendering: pixelated; border-radius: 3px; }
+.preview-history-item span { font: 600 11px ui-monospace, Consolas, monospace; color: #555; }
 @media (max-width: 620px) {
   main { margin: 24px auto; padding: 20px; }
   .workspace { grid-template-columns: minmax(0, 1fr); gap: 28px; }

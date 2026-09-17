@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>az 手写数字与字母识别</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="./style.css?v=json-shards-v2">
+  <link rel="stylesheet" href="./style.css?v=json-shards-v3">
   <script defer src="./vendor/tf.min.js"></script>
-  <script defer src="./app.js?v=json-shards-v2"></script>
+  <script defer src="./app.js?v=json-shards-v3"></script>
 </head>
 <body>
 <main>
@@ -44,6 +44,10 @@
         <canvas id="preview" width="28" height="28" aria-label="浏览器预处理后的 28×28 图像"></canvas>
         <figcaption>模型输入 · 28×28</figcaption>
       </figure>
+      <div class="preview-history-wrap">
+        <h3>历史模型输入</h3>
+        <div id="preview-history" class="preview-history" aria-label="历史预处理图像"></div>
+      </div>
     </section>
   </div>
   <section class="probabilities" aria-labelledby="probabilities-title">
