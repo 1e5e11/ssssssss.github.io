@@ -952,6 +952,12 @@
       .mode-quick { min-width: 62px; flex-basis: 62px; }
     }
 
+
+    .agent-activity { margin-top: 7px; padding-top: 5px; border-top: 1px solid var(--az-grid); font-size: 11px; line-height: 16px; color: var(--az-muted); }
+    .agent-activity > summary { color: var(--az-accent); cursor: default; list-style-position: inside; }
+    .agent-activity-body { padding: 4px 0 0 10px; }
+    .agent-activity-row { overflow-wrap: anywhere; }
+    .server-id { font-size: 10px; overflow-wrap: anywhere; }
   </style>
 </head>
 <body>
@@ -967,32 +973,18 @@
   </svg>
 
   <section class="az-panel top-tools">
-    <div class="brand">AZ LLM Chat <span class="brand-small">local-first</span></div>
+    <div class="brand">AZ OpenCode <span class="brand-small">Session Agent</span></div>
     <div class="top-nav">
       <label class="model-quick-shell" for="modelQuick">
         <span id="modelQuickLabel">Model</span>
-        <select id="modelQuick" class="az-select"></select>
+        <select id="modelQuick" class="az-select"><option value="">—</option></select>
       </label>
-      <select id="requestModeQuick" class="az-select mode-quick" aria-label="request mode">
-        <option value="agent">Agent</option>
-        <option value="chat">Chat</option>
-      </select>
+      <select id="agentQuick" class="az-select mode-quick" aria-label="agent"><option value="">Agent</option></select>
       <button id="newChatBtn" class="az-button">New</button>
       <button id="historyMobileBtn" class="az-button">History</button>
-      <button id="settingsBtn" class="az-button">API / Key</button>
-      <select id="languageQuick" class="az-select language-quick">
-        <option value="zh">中文</option>
-        <option value="en">English</option>
-      </select>
+      <button id="settingsBtn" class="az-button">Settings</button>
+      <select id="languageQuick" class="az-select language-quick"><option value="zh">中文</option><option value="en">English</option></select>
       <button id="themeBtn" class="az-button">Dark</button>
-    </div>
-    <div class="legacy-quick-controls" aria-hidden="true">
-      <span id="providerQuickLabel">Provider</span>
-      <select id="providerQuick"><option value="opencode">OpenCode Zen</option><option value="custom">Custom API</option></select>
-      <span id="endpointQuickLabel">Endpoint</span><input id="endpointQuick" />
-      <span id="temperatureQuickLabel">Temperature</span><input id="temperatureQuick" type="number" />
-      <span id="streamQuickLabel">Stream</span><select id="streamQuick"><option value="true">on</option><option value="false">off</option></select>
-      <span id="storageQuickLabel">Storage</span>
     </div>
   </section>
 
@@ -1010,7 +1002,7 @@
     <div class="messages" id="messages"></div>
     <div id="dropOverlay" class="drop-overlay">Drop files or images here</div>
     <div class="composer">
-      <textarea id="promptInput" class="chat-input" placeholder="Message…"></textarea>
+      <textarea id="promptInput" class="chat-input" placeholder="Message the OpenCode agent…"></textarea>
       <button id="sendBtn" class="az-button send-button">Send</button>
       <div id="attachmentStrip" class="attachment-strip"></div>
       <input id="attachmentInput" type="file" multiple hidden />
@@ -1040,1679 +1032,631 @@
   <aside class="az-panel info-panel">
     <div class="panel-title" id="sessionPanelTitle">Session</div>
     <div class="info-body">
-      <div class="status-line"><span id="apiDot" class="status-dot"></span><span id="apiStatus">API not configured</span></div>
-      <div><span id="infoProviderLabel">Provider</span>: <span id="infoProvider" class="accent">OpenCode Zen</span></div>
+      <div class="status-line"><span id="apiDot" class="status-dot"></span><span id="apiStatus">OpenCode disconnected</span></div>
+      <div><span id="infoProviderLabel">Server</span>: <span id="infoProvider" class="accent">opencode serve</span></div>
+      <div><span id="infoAgentLabel">Agent</span>: <span id="infoAgent" class="accent">—</span></div>
       <div><span id="infoModelLabel">Model</span>: <span id="infoModel" class="accent">—</span></div>
+      <div><span id="infoSessionLabel">Session ID</span>: <span id="infoSession" class="accent server-id">—</span></div>
       <div><span id="infoMessagesLabel">Messages</span>: <span id="infoMessages">0</span></div>
       <div><span id="infoTokensLabel">Tokens</span>: <span id="infoTokens" class="accent">0</span></div>
       <div><span id="infoUpdatedLabel">Updated</span>: <span id="infoUpdated">—</span></div>
-      <div id="renderingNote" class="muted" style="margin-top:6px">Markdown is sanitized before rendering. LaTeX is rendered with KaTeX.</div>
+      <div id="renderingNote" class="muted" style="margin-top:6px">Markdown is sanitized before rendering. LaTeX uses KaTeX.</div>
     </div>
   </aside>
 
-  <div id="bottomStatus" class="bottom-status">Ready · conversations stay in this browser</div>
+  <div id="bottomStatus" class="bottom-status">Ready · browser-local history · OpenCode server session</div>
 
   <section id="settingsModal" class="az-panel modal" aria-modal="true" role="dialog">
     <button id="settingsClose" class="modal-close" aria-label="close">X</button>
     <div class="modal-title" id="settingsTitle">Settings</div>
     <div class="settings-list">
       <details class="setting-group" open>
-        <summary id="settingsApiGroup">API & Model</summary>
+        <summary id="settingsServerGroup">OpenCode Server</summary>
         <div class="setting-group-body">
-          <div class="setting-row"><label for="providerSetting" id="providerSettingLabel">Provider</label><select id="providerSetting" class="az-select"><option value="opencode">OpenCode Zen</option><option value="custom">Custom OpenAI-compatible</option></select></div>
-          <div class="setting-row"><label for="apiBaseSetting" id="apiBaseSettingLabel">API endpoint</label><input id="apiBaseSetting" class="az-input" placeholder="https://…/v1/chat/completions" /></div>
-          <div class="setting-note" id="endpointSettingNote">Use the full Chat Completions endpoint.</div>
-          <div class="setting-row"><label for="apiKeySetting" id="apiKeySettingLabel">API key</label><input id="apiKeySetting" class="az-input" type="password" autocomplete="off" placeholder="sk-…" /></div>
-          <div class="setting-row"><label for="rememberKeySetting" id="rememberKeySettingLabel">Remember key</label><select id="rememberKeySetting" class="az-select"><option value="false">No</option><option value="true">Yes, in this browser</option></select></div>
-          <div class="setting-note" id="keySettingNote">A remembered key is stored locally in IndexedDB.</div>
-          <div class="setting-row"><label for="modelSetting" id="modelSettingLabel">Model</label><select id="modelSetting" class="az-select"></select></div>
-          <div class="setting-row"><label for="customModelSetting" id="customModelSettingLabel">Custom model</label><input id="customModelSetting" class="az-input" placeholder="model-id" /></div>
-          <div class="setting-inline-actions"><button id="refreshModelsBtn" class="az-button">Refresh models</button></div>
+          <div class="setting-row"><label for="gatewayUrlSetting" id="gatewayUrlSettingLabel">Worker URL</label><input id="gatewayUrlSetting" class="az-input" placeholder="https://woui.realgeneral.eu.org/" /></div>
+          <div class="setting-row"><label for="gatewayTokenSetting" id="gatewayTokenSettingLabel">Worker access token</label><input id="gatewayTokenSetting" class="az-input" type="password" autocomplete="off" placeholder="optional bearer token" /></div>
+          <div class="setting-row"><label for="rememberTokenSetting" id="rememberTokenSettingLabel">Remember token</label><select id="rememberTokenSetting" class="az-select"><option value="false">Do not remember</option><option value="true">Store in this browser</option></select></div>
+          <div class="setting-note" id="tokenSettingNote">This token only protects the Worker; provider keys are managed by opencode serve.</div>
+          <div class="setting-row"><label for="agentSetting" id="agentSettingLabel">Agent</label><select id="agentSetting" class="az-select"><option value="">—</option></select></div>
+          <div class="setting-row"><label for="modelSetting" id="modelSettingLabel">Model</label><select id="modelSetting" class="az-select"><option value="">—</option></select></div>
+          <div class="setting-row setting-textarea"><label for="systemPromptSetting" id="systemPromptSettingLabel">System prompt</label><textarea id="systemPromptSetting" class="az-input" placeholder="optional"></textarea></div>
+          <div class="setting-note" id="systemSettingNote">Sent through the Session API system field.</div>
+          <div class="setting-inline-actions"><button id="refreshMetaBtn" class="az-button">Refresh agents / models</button></div>
         </div>
       </details>
-
-      <details class="setting-group" open>
-        <summary id="settingsGenerationGroup">Generation</summary>
-        <div class="setting-group-body">
-          <div class="setting-row"><label for="requestModeSetting" id="requestModeSettingLabel">Request mode</label><select id="requestModeSetting" class="az-select"><option value="agent">Agent</option><option value="chat">Chat</option></select></div>
-          <div class="setting-note" id="agentModeSettingNote">Agent mode adds an agent-style system instruction to Zen Chat Completions.</div>
-          <div class="setting-row"><label for="temperatureSetting" id="temperatureSettingLabel">Temperature</label><input id="temperatureSetting" class="az-input" type="number" min="0" max="2" step="0.1" /></div>
-          <div class="setting-row"><label for="streamSetting" id="streamSettingLabel">Streaming</label><select id="streamSetting" class="az-select"><option value="true">On</option><option value="false">Off</option></select></div>
-          <div class="setting-row setting-textarea"><label for="systemPromptSetting" id="systemPromptSettingLabel">System prompt</label><textarea id="systemPromptSetting" class="az-input" placeholder="optional system prompt"></textarea></div>
-        </div>
-      </details>
-
       <details class="setting-group">
-        <summary id="settingsNetworkGroup">Network & Interface</summary>
+        <summary id="settingsInterfaceGroup">Interface</summary>
         <div class="setting-group-body">
-          <div class="setting-row"><label for="transportSetting" id="transportSettingLabel">Connection</label><select id="transportSetting" class="az-select"><option value="auto">Auto</option><option value="direct">Browser direct</option><option value="proxy">Proxy</option></select></div>
-          <div class="setting-row"><label for="proxyUrlSetting" id="proxyUrlSettingLabel">Proxy URL</label><input id="proxyUrlSetting" class="az-input" placeholder="https://woui.realgeneral.eu.org/" /></div>
-          <div class="setting-note" id="proxySettingNote">OpenCode requests use your Cloudflare Worker relay by default.</div>
           <div class="setting-row"><label for="languageSetting" id="languageSettingLabel">Language</label><select id="languageSetting" class="az-select"><option value="zh">中文</option><option value="en">English</option></select></div>
           <div class="setting-row"><label for="themeSetting" id="themeSettingLabel">Appearance</label><select id="themeSetting" class="az-select"><option value="light">Light</option><option value="dark">Dark</option></select></div>
         </div>
       </details>
     </div>
-    <div class="modal-actions">
-      <button id="testApiBtn" class="az-button">Test API</button>
-      <button id="saveSettingsBtn" class="az-button">Save</button>
-    </div>
+    <div class="modal-actions"><button id="testApiBtn" class="az-button">Test server</button><button id="saveSettingsBtn" class="az-button">Save</button></div>
   </section>
 
   <section id="renameBox" class="az-panel rename-box">
     <div class="panel-title" id="renameBoxTitle">Rename chat</div>
     <input id="renameInput" class="az-input" maxlength="100" />
-    <div class="rename-actions">
-      <button id="renameCancel" class="az-button">Cancel</button>
-      <button id="renameSave" class="az-button">Save</button>
-    </div>
+    <div class="rename-actions"><button id="renameCancel" class="az-button">Cancel</button><button id="renameSave" class="az-button">Save</button></div>
   </section>
-
   <div id="toast" class="toast"></div>
 </div>
-
 <script>
 (() => {
   'use strict';
 
-  const BUILD = '2026-09-17-agent-ui';
-  const OPENCODE_ENDPOINT = 'https://opencode.ai/zen/v1/chat/completions';
-  const OPENCODE_MODELS_ENDPOINT = 'https://opencode.ai/zen/v1/models';
-  const LOCAL_PROXY_DEFAULT = 'http://127.0.0.1:8787/api/proxy';
+  const BUILD = '2026-09-17-opencode-session';
   const SAME_ORIGIN_PROXY_DEFAULT = 'https://woui.realgeneral.eu.org/';
-  const IS_WEB_PAGE = location.protocol === 'http:' || location.protocol === 'https:';
-  const IS_LOOPBACK_PAGE = IS_WEB_PAGE && ['127.0.0.1', 'localhost', '::1'].includes(location.hostname);
-  const DEFAULT_PROXY_URL = location.protocol === 'file:' || IS_LOOPBACK_PAGE
-    ? LOCAL_PROXY_DEFAULT
-    : SAME_ORIGIN_PROXY_DEFAULT;
-
-  // Free OpenCode Zen models that currently use the OpenAI-compatible
-  // /chat/completions endpoint. Models using /messages or /responses are
-  // intentionally not mixed into this frontend's preset list.
-  const OPENCODE_FREE_PRESETS = [
-    { id: 'big-pickle', name: 'Big Pickle · Free' },
-    { id: 'mimo-v2.5-free', name: 'MiMo-V2.5 · Free' },
-    { id: 'ling-3.0-flash-fin-free', name: 'Ling 3.0 Flash Fin · Free' },
-    { id: 'nemotron-3-ultra-free', name: 'Nemotron 3 Ultra · Free' },
-    { id: 'nemotron-3.5-lightning-free', name: 'Nemotron 3.5 Lightning · Free' }
-  ];
-  const OPENCODE_CHAT_FREE_IDS = new Set(OPENCODE_FREE_PRESETS.map(x => x.id));
-
-  const DEFAULT_SETTINGS = {
-    provider: 'opencode',
-    apiBase: OPENCODE_ENDPOINT,
-    apiKey: '',
-    rememberKey: false,
-    model: 'mimo-v2.5-free',
-    customModel: '',
-    temperature: 0.7,
-    stream: true,
-    requestMode: 'agent',
-    systemPrompt: '',
-    theme: 'light',
-    language: 'zh',
-    transport: 'auto',
-    proxyUrl: DEFAULT_PROXY_URL,
-    openCodeModels: OPENCODE_FREE_PRESETS
-  };
-
-  const I18N = {
-    zh: {
-      provider: '提供商', model: '模型', endpoint: '接口', temperature: '温度',
-      stream: '流式', storage: '存储', newChat: '新聊天', history: '历史',
-      apiKeyButton: 'API / Key', refreshModels: '刷新模型', dark: '深色', light: '浅色',
-      rename: '重命名', export: '导出', send: '发送', stop: '停止', clearInput: '清空输入',
-      attach: '附件', composerHint: 'Enter 发送 · Shift+Enter 换行 · 可粘贴 / 拖入文件',
-      attachmentEmpty: '可粘贴、选择或拖入文件 / 图片',
-      dropHere: '把文件或图片拖到这里', import: '导入', session: '会话',
-      messages: '消息', tokens: 'Tokens', updated: '更新', settings: '设置',
-      requestMode: '请求模式', agentMode: 'Agent', chatMode: 'Chat',
-      settingsApiGroup: 'API 与模型', settingsGenerationGroup: '生成', settingsNetworkGroup: '网络与界面',
-      agentModeNote: 'Agent 模式会给 Zen Chat Completions 加入代理式系统指令；它不是 opencode serve 的 Build/Plan 工具 Agent。',
-      language: '语言', apiEndpoint: 'API 接口', connection: '连接方式', proxyUrl: '代理地址',
-      apiKey: 'API Key', rememberKey: '记住 Key', customModel: '自定义模型',
-      streaming: '流式输出', systemPrompt: '系统提示词', appearance: '外观',
-      testApi: '测试 API', save: '保存', cancel: '取消', renameChat: '重命名聊天',
-      searchChats: '搜索聊天', messagePlaceholder: '输入消息…', optionalSystem: '可选系统提示词',
-      apiConfigured: 'API 已配置', apiNotConfigured: 'API 未配置',
-      renderNote: 'Markdown 会先安全清洗，再渲染；LaTeX 使用 KaTeX。',
-      endpointNote: '填写完整的 Chat Completions 地址，而不是只填 /v1 基础地址。',
-      proxyNote: 'OpenCode 默认通过你的 Cloudflare Worker https://woui.realgeneral.eu.org/ 转发，以避开浏览器 CORS；自定义 API 仍可选择浏览器直连。',
-      keyNote: '若选择记住 Key，会把 Key 保存在本浏览器 IndexedDB；同源脚本理论上可能读取它。',
-      modelSwitchWarn: '这个对话已经有历史消息。中途切换模型可能降低上下文一致性和性能。\n\n仍要切换模型吗？',
-      modelSwitchToast: '已切换模型 · 旧上下文可能影响表现',
-      deleteConfirm: '删除“{title}”？只会删除本浏览器中的本地副本。',
-      deleteDone: '已删除', settingsSaved: '设置已保存',
-      noMatching: '没有匹配的聊天', untitled: '未命名', newChatTitle: '新聊天',
-      ready: '就绪 · 对话保存在本浏览器 IndexedDB',
-      calling: '正在调用 {model}…', stopped: '已停止生成 · 部分回复已保存在本地',
-      apiFailed: 'API 请求失败', apiTestFailed: 'API 测试失败', apiTestOk: 'API 测试成功',
-      missingEndpoint: '请先设置 API 接口', missingModel: '请先选择模型',
-      emptyResponse: '[空回复]', stoppedText: '[生成已停止]',
-      failedFetch: 'API 连接失败。请检查 https://woui.realgeneral.eu.org/ Worker 是否已部署、CORS 是否允许本站域名，以及 API Key 是否有效。',
-      directFailedProxyOk: '浏览器直连不可用，已自动通过代理连接',
-      proxyUnavailable: 'Worker 代理不可用。请检查 https://woui.realgeneral.eu.org/ 是否可访问。',
-      testing: '正在测试 API…', refreshStart: '正在刷新 OpenCode 模型…',
-      refreshDone: 'OpenCode 免费模型已刷新并缓存到本地',
-      refreshFallback: '模型刷新失败 · 继续使用内置免费模型',
-      imported: '已导入 {count} 个聊天', importFailed: '导入失败',
-      fileTooLarge: '文件过大：{name}（单个文件上限 8 MB）',
-      tooManyFiles: '一次最多附加 10 个文件',
-      attachedCount: '已附加 {count} 个文件',
-      binaryLocalOnly: '二进制文件仅保存在本地；通用 Chat Completions 不保证能直接读取它。',
-      imageModelNote: '图片会以 image_url 发送；所选模型必须支持视觉输入。',
-      usageActual: 'API', usageEstimated: '估算',
-      input: '输入', output: '输出', total: '总计',
-      draft: '草稿估算', localHistory: '本地记录',
-      providerOpenCode: 'OpenCode Zen', providerCustom: '自定义 API',
-      connectionAuto: 'Auto（OpenCode 优先 Worker）', connectionDirect: '浏览器直连',
-      connectionProxy: '代理 / 同源 Relay', rememberNo: '否', rememberYes: '是，保存在此浏览器',
-      on: '开', off: '关', themeLight: '浅色', themeDark: '深色',
-      closeHistory: '关闭历史'
-    },
-    en: {
-      provider: 'Provider', model: 'Model', endpoint: 'Endpoint', temperature: 'Temperature',
-      stream: 'Stream', storage: 'Storage', newChat: 'New', history: 'History',
-      apiKeyButton: 'API / Key', refreshModels: 'Refresh models', dark: 'Dark', light: 'Light',
-      rename: 'Rename', export: 'Export', send: 'Send', stop: 'Stop', clearInput: 'Clear input',
-      attach: 'Attach', composerHint: 'Enter send · Shift+Enter newline · paste / drag files',
-      attachmentEmpty: 'Paste, choose, or drag files / images',
-      dropHere: 'Drop files or images here', import: 'Import', session: 'Session',
-      messages: 'Messages', tokens: 'Tokens', updated: 'Updated', settings: 'Settings',
-      requestMode: 'Request mode', agentMode: 'Agent', chatMode: 'Chat',
-      settingsApiGroup: 'API & Model', settingsGenerationGroup: 'Generation', settingsNetworkGroup: 'Network & Interface',
-      agentModeNote: 'Agent mode adds agent-style instructions to Zen Chat Completions; it is not the tool-enabled Build/Plan agent from opencode serve.',
-      language: 'Language', apiEndpoint: 'API endpoint', connection: 'Connection', proxyUrl: 'Proxy URL',
-      apiKey: 'API key', rememberKey: 'Remember key', customModel: 'Custom model',
-      streaming: 'Streaming', systemPrompt: 'System prompt', appearance: 'Appearance',
-      testApi: 'Test API', save: 'Save', cancel: 'Cancel', renameChat: 'Rename chat',
-      searchChats: 'search chats', messagePlaceholder: 'Message…', optionalSystem: 'optional system prompt',
-      apiConfigured: 'API configured', apiNotConfigured: 'API not configured',
-      renderNote: 'Markdown is sanitized before rendering. LaTeX is rendered with KaTeX.',
-      endpointNote: 'Use the full Chat Completions endpoint, not only the /v1 base URL.',
-      proxyNote: 'OpenCode uses your Cloudflare Worker at https://woui.realgeneral.eu.org/ by default to avoid browser CORS; custom APIs may still use browser-direct mode.',
-      keyNote: 'A remembered key is stored locally in IndexedDB. Any script running on the same origin can potentially access it.',
-      modelSwitchWarn: 'This conversation already has history. Switching models mid-conversation can reduce context consistency and performance.\n\nSwitch anyway?',
-      modelSwitchToast: 'Model switched · earlier context may affect performance',
-      deleteConfirm: 'Delete “{title}”? This only removes the local browser copy.',
-      deleteDone: 'Deleted', settingsSaved: 'Settings saved',
-      noMatching: 'No matching chats', untitled: 'Untitled', newChatTitle: 'New chat',
-      ready: 'Ready · conversations stay in IndexedDB on this browser',
-      calling: 'Calling {model}…', stopped: 'Generation stopped · partial response saved locally',
-      apiFailed: 'API request failed', apiTestFailed: 'API test failed', apiTestOk: 'API test succeeded',
-      missingEndpoint: 'Set API endpoint first', missingModel: 'Select a model first',
-      emptyResponse: '[empty response]', stoppedText: '[generation stopped]',
-      failedFetch: 'API connection failed. Check that https://woui.realgeneral.eu.org/ is deployed, allows this site origin through CORS, and that the API key is valid.',
-      directFailedProxyOk: 'Browser-direct request was unavailable; connected through the proxy',
-      proxyUnavailable: 'Worker proxy unavailable. Check https://woui.realgeneral.eu.org/.',
-      testing: 'Testing API…', refreshStart: 'Refreshing OpenCode model list…',
-      refreshDone: 'OpenCode free models refreshed and cached locally',
-      refreshFallback: 'Model refresh failed · using built-in free-model presets',
-      imported: 'Imported {count} chat(s)', importFailed: 'Import failed',
-      fileTooLarge: 'File too large: {name} (8 MB limit per file)',
-      tooManyFiles: 'Up to 10 attachments per message',
-      attachedCount: '{count} file(s) attached',
-      binaryLocalOnly: 'Binary files are stored locally; generic Chat Completions APIs are not guaranteed to read them directly.',
-      imageModelNote: 'Images are sent as image_url content; the selected model must support vision input.',
-      usageActual: 'API', usageEstimated: 'estimated',
-      input: 'input', output: 'output', total: 'total',
-      draft: 'draft est.', localHistory: 'local history',
-      providerOpenCode: 'OpenCode Zen', providerCustom: 'Custom API',
-      connectionAuto: 'Auto (OpenCode prefers Worker relay)', connectionDirect: 'Browser direct',
-      connectionProxy: 'Proxy / same-origin relay', rememberNo: 'No', rememberYes: 'Yes, in this browser',
-      on: 'on', off: 'off', themeLight: 'Light', themeDark: 'Dark',
-      closeHistory: 'Close history'
-    }
-  };
-
   const DB_NAME = 'az-llm-chat';
   const DB_VERSION = 1;
   const STORE_CONVERSATIONS = 'conversations';
   const STORE_SETTINGS = 'settings';
-  const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024;
-  const MAX_TEXT_BYTES = 2 * 1024 * 1024;
   const MAX_ATTACHMENTS = 10;
-
-  let db = null;
-  let settings = { ...DEFAULT_SETTINGS };
-  let conversations = [];
-  let activeConversation = null;
-  let abortController = null;
-  let isGenerating = false;
-  let renderTimer = null;
-  let sessionApiKey = '';
-  let pendingAttachments = [];
-  let dragDepth = 0;
+  const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
 
   const $ = id => document.getElementById(id);
   const app = $('app');
+  const promptInput = $('promptInput');
   const messagesEl = $('messages');
   const historyListEl = $('historyList');
-  const promptInput = $('promptInput');
   const sendBtn = $('sendBtn');
   const stopBtn = $('stopBtn');
 
-  const md = window.markdownit ? window.markdownit({
-    html: false,
-    breaks: true,
-    linkify: true,
-    typographer: false
-  }) : null;
+  const md = window.markdownit ? window.markdownit({ html:false, linkify:true, breaks:true }) : null;
 
-  function t(key, vars = {}) {
-    let value = (I18N[settings.language] || I18N.en)[key] ?? I18N.en[key] ?? key;
-    for (const [k, v] of Object.entries(vars)) value = value.replaceAll(`{${k}}`, String(v));
-    return value;
+  const I18N = {
+    zh: {
+      title:'AZ OpenCode', localFirst:'Session Agent', model:'模型', agent:'Agent', newChat:'新聊天', history:'记录', settings:'设置', dark:'深色', light:'浅色',
+      send:'发送', stop:'停止', attach:'附件', clearInput:'清空输入', composerHint:'Enter 发送 · Shift+Enter 换行 · 可粘贴 / 拖入文件',
+      dropHere:'把文件或图片拖到这里', searchChats:'搜索聊天', export:'导出', import:'导入', session:'会话', server:'服务器',
+      messages:'消息', tokens:'Tokens', updated:'更新', ready:'就绪', connecting:'连接 OpenCode…', connected:'OpenCode 已连接', disconnected:'OpenCode 未连接',
+      settingsTitle:'设置', serverGroup:'OpenCode Server', gatewayUrl:'Worker 地址', gatewayToken:'Worker 访问令牌', rememberToken:'记住令牌',
+      rememberNo:'不记住', rememberYes:'保存在此浏览器', tokenNote:'该令牌只用于保护你的 Cloudflare Worker；模型 API Key 由 opencode serve 自己管理。',
+      refreshMeta:'刷新 Agent / 模型', testServer:'测试服务器', interfaceGroup:'界面', language:'语言', appearance:'外观', systemPrompt:'System Prompt',
+      systemNote:'此提示词作为本轮 Session API 的 system 字段发送。', save:'保存', cancel:'取消', renameChat:'重命名聊天',
+      markdownNote:'Markdown 会先清洗再渲染；LaTeX 使用 KaTeX。', newChatTitle:'新聊天', untitled:'未命名', deleteConfirm:'删除这个聊天？对应的 OpenCode session 也会尝试删除。',
+      rename:'重命名', delete:'删除', apiError:'OpenCode 错误', missingModel:'还没有可用模型。请先连接 opencode serve 并刷新模型。', missingAgent:'还没有可用 Agent。请先刷新 Agent。',
+      workerMissing:'请先设置 Worker 地址。', modelSwitchWarn:'这个对话已经有历史消息。中途切换模型可能降低上下文一致性和性能。\n\n仍要切换模型吗？',
+      modelSwitchToast:'模型已切换 · 旧上下文可能影响表现', agentSwitchToast:'Agent 已切换', creatingSession:'正在创建 OpenCode session…',
+      calling:'{agent} 正在使用 {model}…', stopped:'已停止 Agent', stoppedText:'[Agent 已停止]', emptyResponse:'[OpenCode 没有返回文本内容]',
+      sessionId:'Session ID', exact:'精确', draft:'草稿', cost:'成本', input:'输入', output:'输出', reasoning:'推理', cache:'缓存',
+      imported:'已导入 {count} 个聊天', importFailed:'导入失败', fileTooLarge:'{name} 超过 10 MB', tooManyFiles:'每条消息最多 10 个附件',
+      attachmentEmpty:'可粘贴、选择或拖入文件 / 图片', fileReadFailed:'读取文件失败', testing:'正在测试 OpenCode…', refreshDone:'Agent / 模型已刷新',
+      refreshFailed:'刷新失败', serverVersion:'版本', noServerSession:'未创建', serverSessionGone:'原 OpenCode session 不存在，已创建新的 session。',
+      activity:'Agent 活动', tools:'工具', serverProvider:'opencode serve', focusHint:'对话由真实 opencode serve Session API 驱动。',
+      saveOk:'设置已保存', abortFailed:'服务器端停止请求失败', noToken:'无', health:'健康检查'
+    },
+    en: {
+      title:'AZ OpenCode', localFirst:'Session Agent', model:'Model', agent:'Agent', newChat:'New', history:'History', settings:'Settings', dark:'Dark', light:'Light',
+      send:'Send', stop:'Stop', attach:'Attach', clearInput:'Clear input', composerHint:'Enter send · Shift+Enter newline · paste / drag files',
+      dropHere:'Drop files or images here', searchChats:'search chats', export:'Export', import:'Import', session:'Session', server:'Server',
+      messages:'Messages', tokens:'Tokens', updated:'Updated', ready:'Ready', connecting:'Connecting to OpenCode…', connected:'OpenCode connected', disconnected:'OpenCode disconnected',
+      settingsTitle:'Settings', serverGroup:'OpenCode Server', gatewayUrl:'Worker URL', gatewayToken:'Worker access token', rememberToken:'Remember token',
+      rememberNo:'Do not remember', rememberYes:'Store in this browser', tokenNote:'This token only protects your Cloudflare Worker; model API credentials are managed by opencode serve.',
+      refreshMeta:'Refresh agents / models', testServer:'Test server', interfaceGroup:'Interface', language:'Language', appearance:'Appearance', systemPrompt:'System prompt',
+      systemNote:'This is sent in the Session API system field for each turn.', save:'Save', cancel:'Cancel', renameChat:'Rename chat',
+      markdownNote:'Markdown is sanitized before rendering. LaTeX uses KaTeX.', newChatTitle:'New chat', untitled:'Untitled', deleteConfirm:'Delete this chat? Its OpenCode session will also be deleted if possible.',
+      rename:'Rename', delete:'Delete', apiError:'OpenCode error', missingModel:'No model is available yet. Connect to opencode serve and refresh models first.', missingAgent:'No agent is available yet. Refresh agents first.',
+      workerMissing:'Set the Worker URL first.', modelSwitchWarn:'This conversation already has history. Switching models mid-conversation can reduce context consistency and performance.\n\nSwitch anyway?',
+      modelSwitchToast:'Model switched · earlier context may affect performance', agentSwitchToast:'Agent switched', creatingSession:'Creating OpenCode session…',
+      calling:'{agent} is working with {model}…', stopped:'Agent stopped', stoppedText:'[Agent stopped]', emptyResponse:'[OpenCode returned no text content]',
+      sessionId:'Session ID', exact:'exact', draft:'draft', cost:'cost', input:'input', output:'output', reasoning:'reasoning', cache:'cache',
+      imported:'Imported {count} chats', importFailed:'Import failed', fileTooLarge:'{name} exceeds 10 MB', tooManyFiles:'Up to 10 attachments per message',
+      attachmentEmpty:'Paste, choose, or drag files / images', fileReadFailed:'Failed to read file', testing:'Testing OpenCode…', refreshDone:'Agents / models refreshed',
+      refreshFailed:'Refresh failed', serverVersion:'version', noServerSession:'not created', serverSessionGone:'The old OpenCode session was missing; a new session was created.',
+      activity:'Agent activity', tools:'tools', serverProvider:'opencode serve', focusHint:'Conversation is powered by the real opencode serve Session API.',
+      saveOk:'Settings saved', abortFailed:'Server-side abort request failed', noToken:'none', health:'health'
+    }
+  };
+
+  const DEFAULT_SETTINGS = {
+    gatewayUrl: SAME_ORIGIN_PROXY_DEFAULT,
+    gatewayToken: '',
+    rememberToken: false,
+    language: 'zh',
+    theme: 'light',
+    agent: 'build',
+    modelProvider: '',
+    modelID: '',
+    systemPrompt: '',
+    agents: [],
+    models: [],
+    serverVersion: ''
+  };
+
+  let db;
+  let settings = { ...DEFAULT_SETTINGS };
+  let sessionGatewayToken = '';
+  let conversations = [];
+  let activeConversation = null;
+  let pendingAttachments = [];
+  let isGenerating = false;
+  let abortController = null;
+  let dragDepth = 0;
+  let toastTimer = null;
+  let lastServerHealth = false;
+
+  function t(key, vars={}) {
+    let s = I18N[settings.language]?.[key] ?? I18N.en[key] ?? key;
+    for (const [k,v] of Object.entries(vars)) s = s.replaceAll(`{${k}}`, String(v));
+    return s;
   }
-
-  function setText(id, key) {
-    const el = $(id);
-    if (el) el.textContent = t(key);
-  }
-
-  function setOptionText(selectId, value, text) {
-    const select = $(selectId);
-    const option = select ? [...select.options].find(o => o.value === value) : null;
-    if (option) option.textContent = text;
-  }
-
-  function applyLanguage() {
-    document.documentElement.lang = settings.language === 'zh' ? 'zh-CN' : 'en';
-    $('languageQuick').value = settings.language;
-    $('languageSetting').value = settings.language;
-
-    setText('providerQuickLabel', 'provider');
-    setText('modelQuickLabel', 'model');
-    setText('endpointQuickLabel', 'endpoint');
-    setText('temperatureQuickLabel', 'temperature');
-    setText('streamQuickLabel', 'stream');
-    setText('storageQuickLabel', 'storage');
-    setText('newChatBtn', 'newChat');
-    setText('historyMobileBtn', 'history');
-    setText('settingsBtn', 'apiKeyButton');
-    setText('refreshModelsBtn', 'refreshModels');
-    setText('renameBtn', 'rename');
-    setText('exportOneBtn', 'export');
-    setText('sendBtn', 'send');
-    setText('stopBtn', 'stop');
-    setText('clearDraftBtn', 'clearInput');
-    setText('attachBtn', 'attach');
-    setText('composerHint', 'composerHint');
-    setText('historyPanelTitle', 'history');
-    setText('exportAllBtn', 'export');
-    setText('importBtn', 'import');
-    setText('sessionPanelTitle', 'session');
-    setText('infoProviderLabel', 'provider');
-    setText('infoModelLabel', 'model');
-    setText('infoMessagesLabel', 'messages');
-    setText('infoTokensLabel', 'tokens');
-    setText('infoUpdatedLabel', 'updated');
-    setText('settingsTitle', 'settings');
-    setText('requestModeSettingLabel', 'requestMode');
-    setText('settingsApiGroup', 'settingsApiGroup');
-    setText('settingsGenerationGroup', 'settingsGenerationGroup');
-    setText('settingsNetworkGroup', 'settingsNetworkGroup');
-    setText('agentModeSettingNote', 'agentModeNote');
-    setText('languageSettingLabel', 'language');
-    setText('providerSettingLabel', 'provider');
-    setText('apiBaseSettingLabel', 'apiEndpoint');
-    setText('transportSettingLabel', 'connection');
-    setText('proxyUrlSettingLabel', 'proxyUrl');
-    setText('apiKeySettingLabel', 'apiKey');
-    setText('rememberKeySettingLabel', 'rememberKey');
-    setText('modelSettingLabel', 'model');
-    setText('customModelSettingLabel', 'customModel');
-    setText('temperatureSettingLabel', 'temperature');
-    setText('streamSettingLabel', 'streaming');
-    setText('systemPromptSettingLabel', 'systemPrompt');
-    setText('themeSettingLabel', 'appearance');
-    setText('testApiBtn', 'testApi');
-    setText('saveSettingsBtn', 'save');
-    setText('renameBoxTitle', 'renameChat');
-    setText('renameCancel', 'cancel');
-    setText('renameSave', 'save');
-    setText('renderingNote', 'renderNote');
-    setText('endpointSettingNote', 'endpointNote');
-    setText('proxySettingNote', 'proxyNote');
-    setText('keySettingNote', 'keyNote');
-
-    promptInput.placeholder = t('messagePlaceholder');
-    $('historySearch').placeholder = t('searchChats');
-    $('systemPromptSetting').placeholder = t('optionalSystem');
-    $('attachmentStrip').dataset.empty = t('attachmentEmpty');
-    $('dropOverlay').textContent = t('dropHere');
-    $('themeBtn').textContent = settings.theme === 'dark' ? t('light') : t('dark');
-
-    setOptionText('requestModeQuick', 'agent', t('agentMode'));
-    setOptionText('requestModeQuick', 'chat', t('chatMode'));
-    setOptionText('requestModeSetting', 'agent', t('agentMode'));
-    setOptionText('requestModeSetting', 'chat', t('chatMode'));
-    setOptionText('streamQuick', 'true', t('on'));
-    setOptionText('streamQuick', 'false', t('off'));
-    setOptionText('streamSetting', 'true', t('on'));
-    setOptionText('streamSetting', 'false', t('off'));
-    setOptionText('rememberKeySetting', 'false', t('rememberNo'));
-    setOptionText('rememberKeySetting', 'true', t('rememberYes'));
-    setOptionText('themeSetting', 'light', t('themeLight'));
-    setOptionText('themeSetting', 'dark', t('themeDark'));
-    setOptionText('transportSetting', 'auto', t('connectionAuto'));
-    setOptionText('transportSetting', 'direct', t('connectionDirect'));
-    setOptionText('transportSetting', 'proxy', t('connectionProxy'));
-
-    updateInfoPanel();
-    renderHistory();
-    renderPendingAttachments();
-    if (!isGenerating) setBottomStatus(t('ready'));
-  }
-
-  function uid() {
-    if (globalThis.crypto?.randomUUID) return crypto.randomUUID();
-    return Date.now().toString(36) + Math.random().toString(36).slice(2);
-  }
+  function setText(id, key) { const el=$(id); if (el) el.textContent=t(key); }
   function nowISO() { return new Date().toISOString(); }
-  function formatDate(iso) {
-    if (!iso) return '—';
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return '—';
-    const locale = settings.language === 'zh' ? 'zh-CN' : undefined;
-    return d.toLocaleString(locale, { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
-  }
-  function setBottomStatus(text) { $('bottomStatus').textContent = text; }
-  function toast(text, duration = 1900) {
-    const el = $('toast');
-    el.textContent = text;
-    el.classList.add('show');
-    clearTimeout(toast.timer);
-    toast.timer = setTimeout(() => el.classList.remove('show'), duration);
-  }
-  function clampNumber(value, min, max, fallback) {
-    const n = Number(value);
-    return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : fallback;
-  }
+  function uid() { return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`; }
+  function escapeHtml(s='') { return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  function formatDate(v) { if (!v) return '—'; const d=new Date(v); if (Number.isNaN(d.getTime())) return '—'; return d.toLocaleString(settings.language==='zh'?'zh-CN':'en-US',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}); }
+  function formatBytes(n=0) { if (n < 1024) return `${n} B`; if (n < 1024*1024) return `${Math.ceil(n/1024)} KB`; return `${(n/(1024*1024)).toFixed(1)} MB`; }
+  function safeFileName(name) { return (name || 'chat').replace(/[\\/:*?"<>|]+/g, '_').slice(0,80); }
+  function toast(msg, ms=2200) { const el=$('toast'); if (!el) return; el.textContent=msg; el.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),ms); }
+  function setBottomStatus(msg) { $('bottomStatus').textContent = msg; }
 
   function openDB() {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(DB_NAME, DB_VERSION);
-      request.onupgradeneeded = () => {
-        const database = request.result;
-        if (!database.objectStoreNames.contains(STORE_CONVERSATIONS)) {
-          const store = database.createObjectStore(STORE_CONVERSATIONS, { keyPath: 'id' });
-          store.createIndex('updatedAt', 'updatedAt', { unique: false });
+    return new Promise((resolve,reject)=>{
+      const req=indexedDB.open(DB_NAME,DB_VERSION);
+      req.onupgradeneeded=()=>{
+        const d=req.result;
+        if (!d.objectStoreNames.contains(STORE_CONVERSATIONS)) {
+          const s=d.createObjectStore(STORE_CONVERSATIONS,{keyPath:'id'});
+          s.createIndex('updatedAt','updatedAt');
         }
-        if (!database.objectStoreNames.contains(STORE_SETTINGS)) {
-          database.createObjectStore(STORE_SETTINGS, { keyPath: 'id' });
-        }
+        if (!d.objectStoreNames.contains(STORE_SETTINGS)) d.createObjectStore(STORE_SETTINGS,{keyPath:'id'});
       };
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error);
     });
   }
-  function idbGetAll(storeName) {
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(storeName, 'readonly');
-      const req = tx.objectStore(storeName).getAll();
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = () => reject(req.error);
-    });
-  }
-  function idbGet(storeName, key) {
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(storeName, 'readonly');
-      const req = tx.objectStore(storeName).get(key);
-      req.onsuccess = () => resolve(req.result || null);
-      req.onerror = () => reject(req.error);
-    });
-  }
-  function idbPut(storeName, value) {
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(storeName, 'readwrite');
-      tx.objectStore(storeName).put(value);
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-    });
-  }
-  function idbDelete(storeName, key) {
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(storeName, 'readwrite');
-      tx.objectStore(storeName).delete(key);
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-    });
-  }
+  function idbGet(store,key) { return new Promise((resolve,reject)=>{ const tx=db.transaction(store,'readonly'); const r=tx.objectStore(store).get(key); r.onsuccess=()=>resolve(r.result||null); r.onerror=()=>reject(r.error); }); }
+  function idbGetAll(store) { return new Promise((resolve,reject)=>{ const tx=db.transaction(store,'readonly'); const r=tx.objectStore(store).getAll(); r.onsuccess=()=>resolve(r.result||[]); r.onerror=()=>reject(r.error); }); }
+  function idbPut(store,value) { return new Promise((resolve,reject)=>{ const tx=db.transaction(store,'readwrite'); tx.objectStore(store).put(value); tx.oncomplete=()=>resolve(); tx.onerror=()=>reject(tx.error); }); }
+  function idbDelete(store,key) { return new Promise((resolve,reject)=>{ const tx=db.transaction(store,'readwrite'); tx.objectStore(store).delete(key); tx.oncomplete=()=>resolve(); tx.onerror=()=>reject(tx.error); }); }
 
-  function cleanSettingsForStorage(value) {
-    const copy = structuredClone(value);
-    if (!copy.rememberKey) copy.apiKey = '';
-    return { id: 'main', value: copy };
+  function cleanSettingsForStorage(v) {
+    const copy=structuredClone(v);
+    if (!copy.rememberToken) copy.gatewayToken='';
+    return { id:'main', value:copy };
   }
   async function loadSettings() {
-    const row = await idbGet(STORE_SETTINGS, 'main');
-    settings = { ...DEFAULT_SETTINGS, ...(row?.value || {}) };
-    settings.openCodeModels = Array.isArray(settings.openCodeModels) && settings.openCodeModels.length
-      ? settings.openCodeModels
-      : OPENCODE_FREE_PRESETS;
-    if (!['zh','en'].includes(settings.language)) settings.language = 'zh';
-    if (!['auto','direct','proxy'].includes(settings.transport)) settings.transport = 'auto';
-    if (!['agent','chat'].includes(settings.requestMode)) settings.requestMode = 'agent';
-    // Migrate v2's localhost proxy setting when this same file is deployed on a
-    // public HTTP(S) origin. 127.0.0.1 would otherwise point at each visitor's
-    // own machine and produce ERR_CONNECTION_REFUSED.
-    const oldProxy = String(settings.proxyUrl || '').trim();
-    if (!oldProxy || oldProxy === LOCAL_PROXY_DEFAULT || oldProxy === '/api/proxy' || oldProxy === `${location.origin}/api/proxy`) {
-      settings.proxyUrl = DEFAULT_PROXY_URL;
-    }
-    if (!settings.rememberKey) settings.apiKey = '';
-    sessionApiKey = settings.apiKey || '';
+    const row=await idbGet(STORE_SETTINGS,'main');
+    const old=row?.value || {};
+    settings={...DEFAULT_SETTINGS,...old};
+    // Migrate away from the old Zen / OpenAI-compatible settings without reusing
+    // an LLM API key as the Worker access token.
+    if (!settings.gatewayUrl || String(settings.gatewayUrl).includes('/api/proxy') || String(settings.gatewayUrl).startsWith('http://127.0.0.1')) settings.gatewayUrl=SAME_ORIGIN_PROXY_DEFAULT;
+    if (!Array.isArray(settings.agents)) settings.agents=[];
+    if (!Array.isArray(settings.models)) settings.models=[];
+    if (!['zh','en'].includes(settings.language)) settings.language='zh';
+    if (!['light','dark'].includes(settings.theme)) settings.theme='light';
+    if (!settings.rememberToken) settings.gatewayToken='';
+    sessionGatewayToken=settings.gatewayToken || '';
     applyTheme();
-    syncSettingsToUI();
   }
   async function saveSettings() {
-    settings.apiKey = settings.rememberKey ? sessionApiKey : '';
-    await idbPut(STORE_SETTINGS, cleanSettingsForStorage(settings));
+    settings.gatewayToken=settings.rememberToken ? sessionGatewayToken : '';
+    await idbPut(STORE_SETTINGS,cleanSettingsForStorage(settings));
   }
 
-  function currentApiKey() { return sessionApiKey.trim(); }
-  function currentModel() { return (settings.customModel || '').trim() || settings.model; }
-  function currentEndpoint() {
-    return (settings.apiBase || '').trim() || (settings.provider === 'opencode' ? OPENCODE_ENDPOINT : '');
-  }
-  function effectiveProxyUrl(cfg = settings) {
-    const configured = String(cfg.proxyUrl || '').trim();
-    if (configured) return configured;
-    return DEFAULT_PROXY_URL;
-  }
-  function applyTheme() {
-    app.classList.toggle('az-dark', settings.theme === 'dark');
-    if ($('themeBtn')) $('themeBtn').textContent = settings.theme === 'dark' ? t('light') : t('dark');
-  }
-
-  function buildModelOptions(select, selected, provider = settings.provider, modelList = settings.openCodeModels) {
-    const models = provider === 'opencode' ? modelList : [];
-    select.innerHTML = '';
-    if (provider === 'custom') {
-      const o = document.createElement('option');
-      o.value = selected || settings.model || '';
-      o.textContent = selected || settings.model || 'custom-model';
-      select.appendChild(o);
-    } else {
-      models.forEach(m => {
-        const o = document.createElement('option');
-        o.value = m.id;
-        o.textContent = m.name || m.id;
-        select.appendChild(o);
-      });
-      if (selected && !models.some(m => m.id === selected)) {
-        const o = document.createElement('option');
-        o.value = selected;
-        o.textContent = selected;
-        select.appendChild(o);
-      }
-    }
-    select.value = selected || models[0]?.id || '';
-  }
-
-  function syncSettingsToUI() {
-    $('providerQuick').value = settings.provider;
-    buildModelOptions($('modelQuick'), settings.model);
-    $('endpointQuick').value = currentEndpoint();
-    $('temperatureQuick').value = settings.temperature;
-    $('streamQuick').value = String(settings.stream);
-    $('requestModeQuick').value = settings.requestMode || 'agent';
-    $('languageQuick').value = settings.language;
-
-    $('languageSetting').value = settings.language;
-    $('providerSetting').value = settings.provider;
-    $('apiBaseSetting').value = settings.apiBase;
-    $('transportSetting').value = settings.transport;
-    $('proxyUrlSetting').value = settings.proxyUrl || DEFAULT_PROXY_URL;
-    $('apiKeySetting').value = sessionApiKey;
-    $('rememberKeySetting').value = String(settings.rememberKey);
-    buildModelOptions($('modelSetting'), settings.model);
-    $('customModelSetting').value = settings.customModel || '';
-    $('temperatureSetting').value = settings.temperature;
-    $('streamSetting').value = String(settings.stream);
-    $('requestModeSetting').value = settings.requestMode || 'agent';
-    $('systemPromptSetting').value = settings.systemPrompt || '';
-    $('themeSetting').value = settings.theme;
-    applyLanguage();
-    updateInfoPanel();
-  }
-
-  function collectSettingsFromModal() {
-    const provider = $('providerSetting').value;
-    const model = $('modelSetting').value || settings.model;
+  function makeConversation(title=t('newChatTitle')) {
+    const stamp=nowISO();
     return {
-      ...settings,
-      language: $('languageSetting').value,
-      provider,
-      apiBase: $('apiBaseSetting').value.trim() || (provider === 'opencode' ? OPENCODE_ENDPOINT : ''),
-      transport: $('transportSetting').value,
-      proxyUrl: $('proxyUrlSetting').value.trim() || DEFAULT_PROXY_URL,
-      rememberKey: $('rememberKeySetting').value === 'true',
-      model,
-      customModel: $('customModelSetting').value.trim(),
-      temperature: clampNumber($('temperatureSetting').value, 0, 2, 0.7),
-      stream: $('streamSetting').value === 'true',
-      requestMode: $('requestModeSetting').value === 'chat' ? 'chat' : 'agent',
-      systemPrompt: $('systemPromptSetting').value,
-      theme: $('themeSetting').value
+      id:uid(), title, createdAt:stamp, updatedAt:stamp,
+      messages:[], serverSessionID:null,
+      agent:settings.agent || '', modelProvider:settings.modelProvider || '', modelID:settings.modelID || ''
     };
-  }
-
-  function modelForConfig(cfg) { return (cfg.customModel || '').trim() || cfg.model; }
-  function shouldWarnModelSwitch(newModel) {
-    if (!activeConversation?.messages?.length) return false;
-    const previous = activeConversation.model || currentModel();
-    return !!previous && !!newModel && previous !== newModel;
-  }
-  function confirmModelSwitch(newModel) {
-    if (!shouldWarnModelSwitch(newModel)) return true;
-    return confirm(t('modelSwitchWarn'));
-  }
-
-  function makeConversation(title = t('newChatTitle')) {
-    const stamp = nowISO();
-    return {
-      id: uid(),
-      title,
-      createdAt: stamp,
-      updatedAt: stamp,
-      messages: [],
-      provider: settings.provider,
-      model: currentModel()
-    };
-  }
-  async function createNewChat() {
-    if (isGenerating) stopGeneration();
-    pendingAttachments = [];
-    renderPendingAttachments();
-    const convo = makeConversation();
-    conversations.unshift(convo);
-    activeConversation = convo;
-    await idbPut(STORE_CONVERSATIONS, convo);
-    $('historyPanel').classList.remove('mobile-open');
-    renderAll();
-    promptInput.focus();
   }
   async function loadConversations() {
-    conversations = await idbGetAll(STORE_CONVERSATIONS);
-    conversations.sort((a,b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+    conversations=await idbGetAll(STORE_CONVERSATIONS);
+    conversations=conversations.map(c=>({ ...c, messages:Array.isArray(c.messages)?c.messages:[], serverSessionID:c.serverSessionID||null }));
+    conversations.sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||''));
     if (!conversations.length) {
-      const convo = makeConversation();
-      conversations = [convo];
-      await idbPut(STORE_CONVERSATIONS, convo);
+      const c=makeConversation(); conversations=[c]; await idbPut(STORE_CONVERSATIONS,c);
     }
-    activeConversation = conversations[0];
+    activeConversation=conversations[0];
   }
   async function persistActive() {
     if (!activeConversation) return;
-    activeConversation.updatedAt = nowISO();
-    activeConversation.provider = settings.provider;
-    await idbPut(STORE_CONVERSATIONS, activeConversation);
-    conversations.sort((a,b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
-    renderHistory();
-    updateInfoPanel();
-  }
-  function autoTitle(text, attachments = []) {
-    const base = text.replace(/\s+/g, ' ').trim() || attachments[0]?.name || t('newChatTitle');
-    return base.length > 42 ? base.slice(0, 42) + '…' : base;
+    activeConversation.updatedAt=nowISO();
+    activeConversation.agent=settings.agent;
+    activeConversation.modelProvider=settings.modelProvider;
+    activeConversation.modelID=settings.modelID;
+    await idbPut(STORE_CONVERSATIONS,activeConversation);
+    conversations.sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||''));
+    renderHistory(); updateInfoPanel();
   }
 
-  function renderAll() {
-    renderMessages();
-    renderHistory();
-    renderPendingAttachments();
-    updateInfoPanel();
-    $('chatTitle').textContent = activeConversation?.title || t('newChatTitle');
+  function gatewayBase() {
+    let base=String(settings.gatewayUrl || SAME_ORIGIN_PROXY_DEFAULT).trim();
+    if (!base) return '';
+    if (!/^https?:\/\//i.test(base)) base=`https://${base}`;
+    return base.endsWith('/') ? base : `${base}/`;
   }
-  function renderHistory() {
-    const q = $('historySearch').value.trim().toLowerCase();
-    const filtered = conversations.filter(c => {
-      if (!q) return true;
-      const content = [
-        c.title, c.model,
-        ...(c.messages || []).map(m => `${m.content || ''} ${(m.attachments || []).map(a => a.name).join(' ')}`)
-      ].join('\n').toLowerCase();
-      return content.includes(q);
-    });
-    historyListEl.innerHTML = '';
-    filtered.forEach(c => {
-      const row = document.createElement('div');
-      row.className = 'history-row' + (activeConversation?.id === c.id ? ' selected' : '');
-      row.dataset.id = c.id;
+  function gatewayToken() { return String(sessionGatewayToken || '').trim(); }
+  async function serverFetch(path, init={}) {
+    const base=gatewayBase();
+    if (!base) throw new Error(t('workerMissing'));
+    const url=new URL(String(path).replace(/^\//,''),base);
+    const headers=new Headers(init.headers||{});
+    if (!headers.has('Accept')) headers.set('Accept','application/json');
+    if (init.body && !headers.has('Content-Type')) headers.set('Content-Type','application/json');
+    const tok=gatewayToken();
+    if (tok) headers.set('Authorization',`Bearer ${tok}`);
+    return fetch(url,{...init,headers});
+  }
+  async function apiError(response) {
+    let detail='';
+    try { const data=await response.clone().json(); detail=data?.error?.data?.message || data?.error?.message || data?.message || data?.detail || JSON.stringify(data); }
+    catch { try { detail=await response.text(); } catch {} }
+    return new Error(`HTTP ${response.status} ${response.statusText}${detail?` · ${String(detail).slice(0,700)}`:''}`);
+  }
+  async function serverJson(path, init={}) {
+    const res=await serverFetch(path,init);
+    if (!res.ok) throw await apiError(res);
+    if (res.status===204) return null;
+    const ct=res.headers.get('content-type')||'';
+    if (!ct.includes('json')) return res.text();
+    return res.json();
+  }
 
-      const title = document.createElement('div');
-      title.className = 'history-title';
-      title.textContent = c.title || t('untitled');
-
-      const meta = document.createElement('div');
-      meta.className = 'history-meta';
-      meta.textContent = `${formatDate(c.updatedAt)} · ${c.messages?.length || 0} msg · ${c.model || '—'}`;
-
-      const actions = document.createElement('div');
-      actions.className = 'row-actions';
-      const rename = document.createElement('button');
-      rename.className = 'tiny-action';
-      rename.textContent = settings.language === 'zh' ? '改' : 'edit';
-      rename.title = t('rename');
-      rename.addEventListener('click', e => { e.stopPropagation(); openRename(c); });
-      const del = document.createElement('button');
-      del.className = 'tiny-action danger';
-      del.textContent = settings.language === 'zh' ? '删' : 'del';
-      del.title = settings.language === 'zh' ? '删除' : 'Delete';
-      del.addEventListener('click', e => { e.stopPropagation(); deleteConversation(c.id); });
-      actions.append(rename, del);
-      row.append(title, meta, actions);
-      row.addEventListener('click', () => selectConversation(c.id));
-      historyListEl.appendChild(row);
-    });
-    if (!filtered.length) {
-      const empty = document.createElement('div');
-      empty.className = 'history-row muted';
-      empty.textContent = t('noMatching');
-      historyListEl.appendChild(empty);
+  function flattenModels(payload) {
+    const providers=Array.isArray(payload?.providers)?payload.providers:[];
+    const result=[];
+    for (const p of providers) {
+      const providerID=String(p?.id||'').trim();
+      if (!providerID) continue;
+      const models=p?.models && typeof p.models==='object'?p.models:{};
+      for (const [key,m] of Object.entries(models)) {
+        const modelID=String(m?.id||key||'').trim();
+        if (!modelID) continue;
+        result.push({
+          providerID, modelID,
+          providerName:String(p?.name||providerID),
+          name:String(m?.name||modelID),
+          attachment:!!m?.attachment,
+          reasoning:!!m?.reasoning,
+          toolCall:m?.tool_call!==false,
+          context:Number(m?.limit?.context||0),
+          output:Number(m?.limit?.output||0)
+        });
+      }
+    }
+    result.sort((a,b)=>`${a.providerName} ${a.name}`.localeCompare(`${b.providerName} ${b.name}`));
+    return result;
+  }
+  function normalizeAgents(payload) {
+    const arr=Array.isArray(payload)?payload:[];
+    return arr.filter(a=>a && a.name && a.disable!==true && a.hidden!==true).map(a=>({
+      name:String(a.name), description:String(a.description||''), mode:String(a.mode||''), color:String(a.color||'')
+    }));
+  }
+  function modelValue(m) { return JSON.stringify([m.providerID,m.modelID]); }
+  function selectedModel() { return settings.models.find(m=>m.providerID===settings.modelProvider && m.modelID===settings.modelID) || null; }
+  function chooseDefaults(providerPayload, agents) {
+    if (!agents.some(a=>a.name===settings.agent)) {
+      settings.agent=agents.find(a=>a.name==='build')?.name || agents.find(a=>a.mode==='primary')?.name || agents[0]?.name || '';
+    }
+    if (!settings.models.some(m=>m.providerID===settings.modelProvider && m.modelID===settings.modelID)) {
+      let picked=null;
+      const defs=providerPayload?.default || {};
+      for (const [providerID,modelID] of Object.entries(defs)) {
+        picked=settings.models.find(m=>m.providerID===providerID && m.modelID===modelID);
+        if (picked) break;
+      }
+      picked ||= settings.models[0] || null;
+      settings.modelProvider=picked?.providerID || '';
+      settings.modelID=picked?.modelID || '';
     }
   }
-  function selectConversation(id) {
-    if (isGenerating) stopGeneration();
-    const c = conversations.find(x => x.id === id);
-    if (!c) return;
-    activeConversation = c;
-    pendingAttachments = [];
-    $('historyPanel').classList.remove('mobile-open');
-    renderAll();
-  }
-  async function deleteConversation(id) {
-    const c = conversations.find(x => x.id === id);
-    if (!c) return;
-    if (!confirm(t('deleteConfirm', { title: c.title }))) return;
-    await idbDelete(STORE_CONVERSATIONS, id);
-    conversations = conversations.filter(x => x.id !== id);
-    if (!conversations.length) {
-      const fresh = makeConversation();
-      conversations = [fresh];
-      await idbPut(STORE_CONVERSATIONS, fresh);
+  async function refreshServerMetadata({quiet=false}={}) {
+    if (!quiet) setBottomStatus(t('connecting'));
+    try {
+      const [health,agentsPayload,providersPayload]=await Promise.all([
+        serverJson('/global/health'), serverJson('/agent'), serverJson('/config/providers')
+      ]);
+      settings.serverVersion=String(health?.version||'');
+      settings.agents=normalizeAgents(agentsPayload);
+      settings.models=flattenModels(providersPayload);
+      chooseDefaults(providersPayload,settings.agents);
+      lastServerHealth=!!health?.healthy;
+      await saveSettings();
+      syncSettingsToUI();
+      updateInfoPanel();
+      setBottomStatus(`${t('connected')}${settings.serverVersion?` · ${t('serverVersion')} ${settings.serverVersion}`:''}`);
+      if (!quiet) toast(t('refreshDone'));
+      return true;
+    } catch (e) {
+      lastServerHealth=false; updateInfoPanel();
+      setBottomStatus(`${t('refreshFailed')} · ${e.message}`);
+      if (!quiet) toast(`${t('refreshFailed')}: ${e.message}`,3200);
+      return false;
     }
-    if (activeConversation?.id === id) activeConversation = conversations[0];
-    renderAll();
-    toast(t('deleteDone'));
   }
 
-  function openRename(conversation = activeConversation) {
-    if (!conversation) return;
-    $('renameBox').dataset.id = conversation.id;
-    $('renameInput').value = conversation.title || '';
-    $('renameBox').classList.add('open');
-    setTimeout(() => $('renameInput').select(), 0);
+  function buildAgentOptions(select) {
+    const current=settings.agent;
+    select.innerHTML='';
+    for (const a of settings.agents) {
+      const o=document.createElement('option'); o.value=a.name; o.textContent=a.mode?`${a.name} · ${a.mode}`:a.name; o.title=a.description; select.appendChild(o);
+    }
+    if (current && !settings.agents.some(a=>a.name===current)) { const o=document.createElement('option'); o.value=current; o.textContent=current; select.appendChild(o); }
+    select.value=current || settings.agents[0]?.name || '';
   }
-  function closeRename() { $('renameBox').classList.remove('open'); }
-  async function saveRename() {
-    const id = $('renameBox').dataset.id;
-    const c = conversations.find(x => x.id === id);
-    if (!c) return closeRename();
-    c.title = $('renameInput').value.trim() || t('untitled');
-    c.updatedAt = nowISO();
-    await idbPut(STORE_CONVERSATIONS, c);
-    closeRename();
-    renderAll();
+  function buildModelOptions(select) {
+    const current=settings.modelProvider && settings.modelID ? JSON.stringify([settings.modelProvider,settings.modelID]) : '';
+    select.innerHTML='';
+    for (const m of settings.models) {
+      const o=document.createElement('option'); o.value=modelValue(m); o.textContent=`${m.providerName} · ${m.name}`; select.appendChild(o);
+    }
+    if (!settings.models.length) { const o=document.createElement('option'); o.value=''; o.textContent='—'; select.appendChild(o); }
+    select.value=current;
+  }
+  function parseModelValue(v) { try { const a=JSON.parse(v); return {providerID:String(a[0]||''),modelID:String(a[1]||'')}; } catch { return {providerID:'',modelID:''}; } }
+
+  function applyTheme() { app.classList.toggle('az-dark',settings.theme==='dark'); $('themeBtn').textContent=settings.theme==='dark'?t('light'):t('dark'); }
+  function applyLanguage() {
+    document.documentElement.lang=settings.language==='zh'?'zh-CN':'en';
+    setText('newChatBtn','newChat'); setText('historyMobileBtn','history'); setText('settingsBtn','settings'); setText('sendBtn','send'); setText('stopBtn','stop'); setText('attachBtn','attach'); setText('clearDraftBtn','clearInput');
+    setText('historyPanelTitle','history'); setText('exportAllBtn','export'); setText('importBtn','import'); setText('sessionPanelTitle','session'); setText('infoProviderLabel','server'); setText('infoModelLabel','model'); setText('infoAgentLabel','agent'); setText('infoMessagesLabel','messages'); setText('infoTokensLabel','tokens'); setText('infoUpdatedLabel','updated'); setText('infoSessionLabel','sessionId');
+    setText('settingsTitle','settingsTitle'); setText('settingsServerGroup','serverGroup'); setText('gatewayUrlSettingLabel','gatewayUrl'); setText('gatewayTokenSettingLabel','gatewayToken'); setText('rememberTokenSettingLabel','rememberToken'); setText('tokenSettingNote','tokenNote'); setText('agentSettingLabel','agent'); setText('modelSettingLabel','model'); setText('systemPromptSettingLabel','systemPrompt'); setText('systemSettingNote','systemNote'); setText('refreshMetaBtn','refreshMeta'); setText('settingsInterfaceGroup','interfaceGroup'); setText('languageSettingLabel','language'); setText('themeSettingLabel','appearance'); setText('testApiBtn','testServer'); setText('saveSettingsBtn','save');
+    setText('renameBoxTitle','renameChat'); setText('renameCancel','cancel'); setText('renameSave','save'); setText('renameBtn','rename'); setText('exportOneBtn','export');
+    $('historySearch').placeholder=t('searchChats'); $('promptInput').placeholder=settings.language==='zh'?'给 OpenCode Agent 发消息…':'Message the OpenCode agent…'; $('composerHint').textContent=t('composerHint'); $('attachmentStrip').dataset.empty=t('attachmentEmpty'); $('dropOverlay').textContent=t('dropHere'); $('renderingNote').textContent=t('markdownNote');
+    $('rememberTokenSetting').querySelector('option[value="false"]').textContent=t('rememberNo'); $('rememberTokenSetting').querySelector('option[value="true"]').textContent=t('rememberYes');
+    applyTheme(); renderAll();
+  }
+  function syncSettingsToUI() {
+    buildAgentOptions($('agentQuick')); buildAgentOptions($('agentSetting')); buildModelOptions($('modelQuick')); buildModelOptions($('modelSetting'));
+    $('languageQuick').value=settings.language; $('languageSetting').value=settings.language; $('themeSetting').value=settings.theme;
+    $('gatewayUrlSetting').value=settings.gatewayUrl || SAME_ORIGIN_PROXY_DEFAULT; $('gatewayTokenSetting').value=sessionGatewayToken; $('rememberTokenSetting').value=String(settings.rememberToken); $('systemPromptSetting').value=settings.systemPrompt||'';
+    applyLanguage();
   }
 
   function renderMarkdown(text) {
-    let rendered = md ? md.render(text || '') : escapeHtml(text || '').replace(/\n/g, '<br>');
-    if (window.DOMPurify) rendered = window.DOMPurify.sanitize(rendered, { USE_PROFILES: { html: true } });
-    return rendered;
+    const raw=md?md.render(String(text||'')):`<pre>${escapeHtml(text||'')}</pre>`;
+    return window.DOMPurify ? DOMPurify.sanitize(raw,{USE_PROFILES:{html:true}}) : raw;
   }
-  function escapeHtml(value) {
-    return String(value).replace(/[&<>'"]/g, c => ({
-      '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;'
-    }[c]));
+  function typesetMath(el) {
+    if (!el || typeof window.renderMathInElement!=='function') return;
+    try { renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\[',right:'\\]',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false}],throwOnError:false}); } catch {}
   }
-  function typesetMath(container) {
-    if (!container || !window.renderMathInElement || !window.katex) return;
-    try {
-      window.renderMathInElement(container, {
-        delimiters: [
-          { left: '$$', right: '$$', display: true },
-          { left: '\\[', right: '\\]', display: true },
-          { left: '$', right: '$', display: false },
-          { left: '\\(', right: '\\)', display: false }
-        ],
-        throwOnError: false,
-        strict: false
-      });
-    } catch (e) { console.warn('KaTeX render error', e); }
-  }
-
-  function formatBytes(n) {
-    if (!Number.isFinite(n)) return '';
-    if (n < 1024) return `${n} B`;
-    if (n < 1024*1024) return `${(n/1024).toFixed(1)} KB`;
-    return `${(n/1024/1024).toFixed(1)} MB`;
-  }
-  function renderMessageAttachments(container, attachments = []) {
+  function renderMessageAttachments(container,attachments=[]) {
     if (!attachments.length) return;
-    const group = document.createElement('div');
-    group.className = 'message-attachments';
+    const group=document.createElement('div'); group.className='message-attachments';
     for (const a of attachments) {
-      const item = document.createElement('div');
-      item.className = 'message-attachment';
-      const label = document.createElement('div');
-      label.textContent = `${a.kind === 'image' ? '▧' : '▤'} ${a.name} · ${formatBytes(a.size)}`;
-      item.appendChild(label);
-      if (a.kind === 'image' && a.dataUrl) {
-        const img = document.createElement('img');
-        img.src = a.dataUrl;
-        img.alt = a.name;
-        img.loading = 'lazy';
-        item.appendChild(img);
-      } else if (a.kind === 'binary') {
-        const note = document.createElement('div');
-        note.className = 'muted';
-        note.textContent = t('binaryLocalOnly');
-        item.appendChild(note);
-      }
+      const item=document.createElement('div'); item.className='message-attachment'; item.textContent=`${a.name||'file'} · ${formatBytes(a.size||0)}`;
+      if (a.type?.startsWith('image/') && a.dataUrl) { const img=document.createElement('img'); img.src=a.dataUrl; img.alt=a.name||'image'; item.appendChild(img); }
       group.appendChild(item);
     }
     container.appendChild(group);
   }
-  function formatUsage(usage) {
-    if (!usage) return '';
-    const kind = usage.estimated ? t('usageEstimated') : t('usageActual');
-    return `${kind} · ${t('input')} ${usage.prompt_tokens || 0} · ${t('output')} ${usage.completion_tokens || 0} · ${t('total')} ${usage.total_tokens || 0}`;
+  function renderActivity(container,activity=[]) {
+    if (!activity.length) return;
+    const details=document.createElement('details'); details.className='agent-activity';
+    const summary=document.createElement('summary'); summary.textContent=`${t('activity')} · ${activity.length}`; details.appendChild(summary);
+    const body=document.createElement('div'); body.className='agent-activity-body';
+    for (const a of activity) { const row=document.createElement('div'); row.className='agent-activity-row'; row.textContent=a; body.appendChild(row); }
+    details.appendChild(body); container.appendChild(details);
   }
-
   function renderMessages() {
-    messagesEl.innerHTML = '';
-    const list = activeConversation?.messages || [];
+    const list=activeConversation?.messages||[]; messagesEl.innerHTML='';
     if (!list.length) {
-      const empty = document.createElement('div');
-      empty.className = 'empty-state';
-      empty.innerHTML = settings.language === 'zh'
-        ? '<div class="formula">f(prompt) → response</div><div class="hint">在 API / Key 中填写接口与密钥。<br>聊天记录、附件与设置保存在当前浏览器；支持 Markdown、LaTeX、文件与图片。</div>'
-        : '<div class="formula">f(prompt) → response</div><div class="hint">Configure the endpoint and key under API / Key.<br>Chats, attachments, and settings stay in this browser; Markdown, LaTeX, files, and images are supported.</div>';
-      messagesEl.appendChild(empty);
+      messagesEl.innerHTML=`<div class="empty-state"><div class="formula">Agent → Session → Result</div><div class="hint">${escapeHtml(t('focusHint'))}<br>${escapeHtml(t('attachmentEmpty'))}</div></div>`;
       return;
     }
-
-    list.forEach((m, index) => {
-      const wrap = document.createElement('div');
-      wrap.className = `message-wrap ${m.role === 'user' ? 'user' : 'assistant'}`;
-      const name = document.createElement('div');
-      name.className = 'message-name';
-      name.textContent = m.role === 'user' ? (settings.language === 'zh' ? '你' : 'You') : (m.model || activeConversation.model || 'Assistant');
-      const box = document.createElement('div');
-      box.className = 'message-box' + (m.streaming ? ' streaming' : '');
-      box.dataset.messageIndex = String(index);
-
-      renderMessageAttachments(box, m.attachments || []);
-      const content = document.createElement('div');
-      content.className = 'message-content';
-      content.innerHTML = renderMarkdown(m.content || '');
-      box.appendChild(content);
-
+    list.forEach((m,index)=>{
+      const wrap=document.createElement('div'); wrap.className=`message-wrap ${m.role==='user'?'user':'assistant'}`;
+      const name=document.createElement('div'); name.className='message-name'; name.textContent=m.role==='user'?(settings.language==='zh'?'你':'You'):(m.agent||activeConversation.agent||settings.agent||'OpenCode');
+      const box=document.createElement('div'); box.className='message-box'+(m.streaming?' streaming':''); box.dataset.messageIndex=String(index);
+      renderMessageAttachments(box,m.attachments||[]);
+      const content=document.createElement('div'); content.className='message-content'; content.innerHTML=renderMarkdown(m.content||''); box.appendChild(content); typesetMath(content);
+      if (m.role==='assistant') renderActivity(box,m.activity||[]);
       if (m.usage) {
-        const usage = document.createElement('div');
-        usage.className = 'message-usage';
-        usage.textContent = formatUsage(m.usage);
-        box.appendChild(usage);
+        const u=m.usage; const line=document.createElement('div'); line.className='message-usage';
+        const total=Number(u.total_tokens||0); const cache=Number(u.cache_read||0)+Number(u.cache_write||0);
+        line.textContent=`${t('tokens')}: ${total} · ${t('input')} ${u.input_tokens||0} · ${t('output')} ${u.output_tokens||0}${u.reasoning_tokens?` · ${t('reasoning')} ${u.reasoning_tokens}`:''}${cache?` · ${t('cache')} ${cache}`:''}${Number.isFinite(u.cost)?` · ${t('cost')} $${Number(u.cost).toFixed(6)}`:''}`;
+        box.appendChild(line);
       }
-      wrap.append(name, box);
-      messagesEl.appendChild(wrap);
-      typesetMath(content);
+      wrap.append(name,box); messagesEl.appendChild(wrap);
     });
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+    messagesEl.scrollTop=messagesEl.scrollHeight;
   }
-  function scheduleAssistantRender(messageIndex) {
-    clearTimeout(renderTimer);
-    renderTimer = setTimeout(() => {
-      const box = messagesEl.querySelector(`[data-message-index="${messageIndex}"]`);
-      const msg = activeConversation?.messages?.[messageIndex];
-      if (!box || !msg) return;
-      let content = box.querySelector('.message-content');
-      if (!content) {
-        box.innerHTML = '';
-        renderMessageAttachments(box, msg.attachments || []);
-        content = document.createElement('div');
-        content.className = 'message-content';
-        box.appendChild(content);
-      }
-      content.innerHTML = renderMarkdown(msg.content || '');
-      box.classList.toggle('streaming', !!msg.streaming);
-      typesetMath(content);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
-    }, 45);
+  function renderHistory() {
+    const q=$('historySearch').value.trim().toLowerCase(); historyListEl.innerHTML='';
+    for (const c of conversations.filter(c=>!q || `${c.title} ${c.modelID||''} ${(c.messages||[]).map(m=>m.content).join(' ')}`.toLowerCase().includes(q))) {
+      const row=document.createElement('div'); row.className='history-row'+(c.id===activeConversation?.id?' selected':''); row.dataset.id=c.id;
+      const title=document.createElement('div'); title.className='history-title'; title.textContent=c.title||t('untitled');
+      const meta=document.createElement('div'); meta.className='history-meta'; meta.textContent=`${formatDate(c.updatedAt)} · ${(c.messages||[]).length} msg · ${c.agent||'—'} · ${c.modelID||'—'}`;
+      const actions=document.createElement('div'); actions.className='row-actions';
+      const rename=document.createElement('button'); rename.className='tiny-action'; rename.textContent=settings.language==='zh'?'改':'edit'; rename.onclick=e=>{e.stopPropagation();openRename(c);};
+      const del=document.createElement('button'); del.className='tiny-action danger'; del.textContent='×'; del.onclick=e=>{e.stopPropagation();deleteConversation(c.id);}; actions.append(rename,del);
+      row.append(title,meta,actions); row.onclick=()=>{activeConversation=c; $('historyPanel').classList.remove('mobile-open'); renderAll(); promptInput.focus();}; historyListEl.appendChild(row);
+    }
   }
+  function renderPendingAttachments() {
+    const strip=$('attachmentStrip'); strip.innerHTML=''; strip.dataset.empty=t('attachmentEmpty');
+    for (const a of pendingAttachments) {
+      const chip=document.createElement('div'); chip.className='attachment-chip'; chip.title=`${a.name} · ${formatBytes(a.size)}`; chip.textContent=a.name;
+      const x=document.createElement('button'); x.textContent='X'; x.onclick=()=>{pendingAttachments=pendingAttachments.filter(v=>v.id!==a.id);renderPendingAttachments();updateTokenHint();}; chip.appendChild(x); strip.appendChild(chip);
+    }
+  }
+  function renderAll() { renderMessages(); renderHistory(); renderPendingAttachments(); updateInfoPanel(); $('chatTitle').textContent=activeConversation?.title||t('newChatTitle'); }
 
-  function normalizeUsage(raw) {
-    if (!raw || typeof raw !== 'object') return null;
-    const prompt = Number(raw.prompt_tokens ?? raw.input_tokens ?? raw.inputTokens ?? 0);
-    const completion = Number(raw.completion_tokens ?? raw.output_tokens ?? raw.outputTokens ?? 0);
-    let total = Number(raw.total_tokens ?? raw.totalTokens ?? 0);
-    if (!total) total = prompt + completion;
-    if (!prompt && !completion && !total) return null;
-    return {
-      prompt_tokens: Math.max(0, Math.round(prompt || 0)),
-      completion_tokens: Math.max(0, Math.round(completion || 0)),
-      total_tokens: Math.max(0, Math.round(total || 0)),
-      estimated: false
-    };
+  function exactConversationUsage(c=activeConversation) {
+    const r={input:0,output:0,reasoning:0,cacheRead:0,cacheWrite:0,total:0,cost:0};
+    for (const m of c?.messages||[]) if (m.usage) { r.input+=Number(m.usage.input_tokens||0); r.output+=Number(m.usage.output_tokens||0); r.reasoning+=Number(m.usage.reasoning_tokens||0); r.cacheRead+=Number(m.usage.cache_read||0); r.cacheWrite+=Number(m.usage.cache_write||0); r.cost+=Number(m.usage.cost||0); }
+    r.total=r.input+r.output+r.reasoning; return r;
   }
-  function estimateTextTokens(text) {
-    text = String(text || '');
-    const cjk = (text.match(/[\u3400-\u9fff\u3040-\u30ff\uac00-\ud7af]/g) || []).length;
-    const other = text.length - cjk;
-    return Math.max(0, cjk + Math.ceil(other / 4));
-  }
-  function estimateAttachmentTokens(attachments = []) {
-    let n = 0;
-    for (const a of attachments) {
-      if (a.kind === 'text') n += estimateTextTokens(a.text || '');
-      else if (a.kind === 'image') n += 255; // rough placeholder; real image tokenization is provider/model-specific
-      else n += 12;
-    }
-    return n;
-  }
-  function estimateApiMessages(apiMessages) {
-    let total = 0;
-    for (const m of apiMessages) {
-      total += 4;
-      if (typeof m.content === 'string') total += estimateTextTokens(m.content);
-      else if (Array.isArray(m.content)) {
-        for (const part of m.content) {
-          if (part.type === 'text') total += estimateTextTokens(part.text || '');
-          if (part.type === 'image_url') total += 255;
-        }
-      }
-    }
-    return total + 2;
-  }
-  function conversationUsage(c = activeConversation) {
-    const result = { prompt_tokens:0, completion_tokens:0, total_tokens:0, estimated:false, hasEstimated:false };
-    for (const m of c?.messages || []) {
-      if (!m.usage) continue;
-      result.prompt_tokens += Number(m.usage.prompt_tokens || 0);
-      result.completion_tokens += Number(m.usage.completion_tokens || 0);
-      result.total_tokens += Number(m.usage.total_tokens || 0);
-      if (m.usage.estimated) result.hasEstimated = true;
-    }
-    result.estimated = result.hasEstimated;
-    return result;
-  }
-  function updateTokenHint() {
-    const usage = conversationUsage();
-    const draft = estimateTextTokens(promptInput.value) + estimateAttachmentTokens(pendingAttachments);
-    const prefix = usage.hasEstimated ? '~' : '';
-    $('tokenHint').textContent = `${prefix}${usage.total_tokens} ${t('tokens')}${draft ? ` · ${t('draft')} ~${draft}` : ''}`;
-  }
+  function estimateTextTokens(text) { text=String(text||''); const cjk=(text.match(/[\u3400-\u9fff\u3040-\u30ff\uac00-\ud7af]/g)||[]).length; return cjk+Math.ceil((text.length-cjk)/4); }
+  function updateTokenHint() { const u=exactConversationUsage(); const draft=estimateTextTokens(promptInput.value)+pendingAttachments.reduce((n,a)=>n+(a.type?.startsWith('image/')?255:Math.ceil((a.size||0)/4)),0); $('tokenHint').textContent=`${u.total} ${t('tokens')}${draft?` · ${t('draft')} ~${draft}`:''}`; }
   function updateInfoPanel() {
-    const keyReady = !!currentApiKey();
-    const endpointReady = !!currentEndpoint();
-    $('apiDot').classList.toggle('on', endpointReady && (keyReady || settings.provider === 'custom'));
-    $('apiStatus').textContent = endpointReady ? t('apiConfigured') : t('apiNotConfigured');
-    $('infoProvider').textContent = settings.provider === 'opencode' ? t('providerOpenCode') : t('providerCustom');
-    $('infoModel').textContent = currentModel() || '—';
-    $('infoMessages').textContent = activeConversation?.messages?.length || 0;
-    const usage = conversationUsage();
-    $('infoTokens').textContent = `${usage.hasEstimated ? '~' : ''}${usage.total_tokens}`;
-    $('infoUpdated').textContent = formatDate(activeConversation?.updatedAt);
-    $('endpointQuick').value = currentEndpoint();
-    $('chatTitle').textContent = activeConversation?.title || t('newChatTitle');
-    updateTokenHint();
+    $('apiDot').classList.toggle('on',lastServerHealth); $('apiStatus').textContent=lastServerHealth?t('connected'):t('disconnected'); $('infoProvider').textContent=t('serverProvider'); $('infoModel').textContent=selectedModel()?.name||settings.modelID||'—'; $('infoAgent').textContent=settings.agent||'—'; $('infoMessages').textContent=activeConversation?.messages?.length||0;
+    const u=exactConversationUsage(); $('infoTokens').textContent=String(u.total); $('infoUpdated').textContent=formatDate(activeConversation?.updatedAt); $('infoSession').textContent=activeConversation?.serverSessionID||t('noServerSession'); $('chatTitle').textContent=activeConversation?.title||t('newChatTitle'); updateTokenHint();
   }
 
-  function requestHeaders(key = currentApiKey()) {
-    const headers = { 'Content-Type': 'application/json' };
-    if (key) headers.Authorization = `Bearer ${key}`;
-    return headers;
+  async function createNewChat() {
+    if (isGenerating) await stopGeneration();
+    pendingAttachments=[]; const c=makeConversation(); conversations.unshift(c); activeConversation=c; await idbPut(STORE_CONVERSATIONS,c); $('historyPanel').classList.remove('mobile-open'); renderAll(); promptInput.focus({preventScroll:true});
   }
-  async function proxyFetch(target, init = {}, cfg = settings) {
-    const proxyUrl = effectiveProxyUrl(cfg);
-    const headers = new Headers(init.headers || {});
-    headers.set('X-AZ-Target', target);
-    headers.set('X-AZ-Mode', cfg.requestMode || 'agent');
-    return fetch(proxyUrl, { ...init, headers });
+  function autoTitle(text,attachments=[]) { const b=(text||'').replace(/\s+/g,' ').trim()||attachments[0]?.name||t('newChatTitle'); return b.length>42?`${b.slice(0,42)}…`:b; }
+  async function ensureServerSession() {
+    if (activeConversation?.serverSessionID) return activeConversation.serverSessionID;
+    setBottomStatus(t('creatingSession'));
+    const s=await serverJson('/session',{method:'POST',body:JSON.stringify({title:activeConversation?.title||t('newChatTitle')})});
+    if (!s?.id) throw new Error('OpenCode did not return a session id.');
+    activeConversation.serverSessionID=s.id; await persistActive(); return s.id;
   }
-  function likelyLocalServerOrigin() {
-    return location.protocol === 'http:' &&
-      ['127.0.0.1','localhost'].includes(location.hostname) &&
-      location.port === '8787';
+  async function ensureExistingSessionOrRecreate() {
+    if (!activeConversation.serverSessionID) return ensureServerSession();
+    try { await serverJson(`/session/${encodeURIComponent(activeConversation.serverSessionID)}`); return activeConversation.serverSessionID; }
+    catch (e) { if (!String(e.message).includes('404')) throw e; activeConversation.serverSessionID=null; toast(t('serverSessionGone'),3200); return ensureServerSession(); }
   }
-  function isOpenCodeTarget(target) {
-    try {
-      const u = new URL(target, location.href);
-      return u.hostname === 'opencode.ai' && u.pathname.startsWith('/zen/');
-    } catch { return false; }
-  }
-  function isPublicWebOrigin() {
-    return IS_WEB_PAGE && !IS_LOOPBACK_PAGE;
-  }
-  async function networkFetch(target, init = {}, cfg = settings) {
-    const transport = cfg.transport || 'auto';
-    if (transport === 'direct') return fetch(target, init);
-    if (transport === 'proxy') {
-      try { return await proxyFetch(target, init, cfg); }
-      catch (e) {
-        const err = new Error(t('proxyUnavailable'));
-        err.cause = e;
-        err.code = 'NETWORK';
-        throw err;
-      }
-    }
-
-    // OpenCode does not expose a browser-readable CORS response for the models
-    // endpoint. On a public deployment, never fire a doomed cross-origin fetch
-    // first: use the site's own /api/proxy relay. This also prevents the old
-    // v2 behaviour of trying a visitor's 127.0.0.1 from an HTTPS website.
-    if (isPublicWebOrigin() && isOpenCodeTarget(target)) {
-      try { return await proxyFetch(target, init, cfg); }
-      catch (proxyError) {
-        const err = new Error(t('failedFetch'));
-        err.cause = proxyError;
-        err.code = 'NETWORK';
-        throw err;
-      }
-    }
-
-    // Bundled local server: relay first. Other providers: browser-direct first,
-    // then the configured relay if direct access is blocked.
-    if (likelyLocalServerOrigin()) {
-      try { return await proxyFetch(target, init, cfg); }
-      catch {}
-    } else {
-      try { return await fetch(target, init); }
-      catch {}
-    }
-
-    try {
-      const response = await proxyFetch(target, init, cfg);
-      toast(t('directFailedProxyOk'), 2600);
-      return response;
-    } catch (proxyError) {
-      const err = new Error(t('failedFetch'));
-      err.cause = proxyError;
-      err.code = 'NETWORK';
-      throw err;
-    }
-  }
-
-  const AGENT_MODE_MARKER = '[AZ_AGENT_MODE]';
-  const AGENT_MODE_SYSTEM = `${AGENT_MODE_MARKER}\nYou are operating in agent mode. Work autonomously toward the user's requested outcome. Decompose multi-step work, use all conversation context and attached content, verify assumptions when possible, and continue until the task is complete. You do not have external execution tools through this Zen Chat Completions client, so never claim to have run commands, modified remote systems, or accessed resources that were not actually provided. Do not reveal private chain-of-thought; provide concise reasoning summaries and concrete results when useful.`;
-
-  function effectiveSystemPrompt(cfg = settings) {
-    const parts = [];
-    if ((cfg.requestMode || 'agent') === 'agent') parts.push(AGENT_MODE_SYSTEM);
-    if (String(cfg.systemPrompt || '').trim()) parts.push(String(cfg.systemPrompt).trim());
-    return parts.join('\n\n');
-  }
-
-  function apiContentForMessage(m) {
-    const attachments = m.attachments || [];
-    let text = m.content || '';
-    for (const a of attachments) {
-      if (a.kind === 'text') {
-        const clipped = String(a.text || '').slice(0, 700000);
-        text += `\n\n[Attached file: ${a.name}]\n${clipped}`;
-      } else if (a.kind === 'binary') {
-        text += `\n\n[Attached binary file: ${a.name}, ${formatBytes(a.size)}. The generic chat endpoint may not have access to its bytes.]`;
-      }
-    }
-    const images = attachments.filter(a => a.kind === 'image' && a.dataUrl);
-    if (!images.length) return text;
-    const parts = [{ type: 'text', text: text || 'Please analyze the attached image(s).' }];
-    for (const a of images) parts.push({ type:'image_url', image_url:{ url:a.dataUrl } });
+  function partsFromInput(text,attachments) {
+    const parts=[]; if (text) parts.push({type:'text',text}); else if (attachments.length) parts.push({type:'text',text:settings.language==='zh'?'请处理这些附件。':'Please process these attachments.'});
+    for (const a of attachments) parts.push({type:'file',mime:a.type||'application/octet-stream',filename:a.name||'file',url:a.dataUrl});
     return parts;
   }
-  function buildApiMessages(excludeId = '') {
-    const result = [];
-    const system = effectiveSystemPrompt(settings);
-    if (system) result.push({ role:'system', content:system });
-    for (const m of activeConversation?.messages || []) {
-      if (m.id === excludeId) continue;
-      if (m.role !== 'user' && m.role !== 'assistant') continue;
-      if (m.role === 'assistant' && m.streaming && !m.content) continue;
-      result.push({ role:m.role, content:apiContentForMessage(m) });
+  function extractAssistantResult(data) {
+    const parts=Array.isArray(data?.parts)?data.parts:[]; const texts=[]; const activity=[];
+    for (const p of parts) {
+      if (p?.type==='text' && p.text) texts.push(p.text);
+      else if (p?.type==='tool') {
+        const state=p.state||{}; const status=state.status||''; const title=state.title||p.tool||'tool'; const suffix=status==='error'&&state.error?` · ${state.error}`:''; activity.push(`${p.tool||'tool'} · ${status}${title&&title!==p.tool?` · ${title}`:''}${suffix}`);
+      } else if (p?.type==='agent' && p.name) activity.push(`@${p.name}`);
+      else if (p?.type==='subtask') activity.push(`${p.agent||'subtask'} · ${p.description||p.prompt||''}`.trim());
+      else if (p?.type==='patch' && Array.isArray(p.files)) activity.push(`patch · ${p.files.join(', ')}`);
+      else if (p?.type==='retry') activity.push(`retry ${p.attempt||''}`.trim());
     }
-    return result;
-  }
-  function extractNonStreamContent(data) {
-    const content = data?.choices?.[0]?.message?.content;
-    if (typeof content === 'string') return content;
-    if (Array.isArray(content)) return content.map(x => typeof x === 'string' ? x : (x?.text || '')).join('');
-    return '';
-  }
-  async function parseSSE(response, onDelta, onUsage) {
-    if (!response.body) throw new Error('Streaming body is not available in this browser.');
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-
-    const handleEvent = event => {
-      for (const line of event.split(/\r?\n/)) {
-        if (!line.startsWith('data:')) continue;
-        const raw = line.slice(5).trim();
-        if (!raw || raw === '[DONE]') continue;
-        let payload;
-        try { payload = JSON.parse(raw); } catch { continue; }
-        const usage = normalizeUsage(payload?.usage);
-        if (usage) onUsage?.(usage);
-        const delta = payload?.choices?.[0]?.delta;
-        const piece = typeof delta?.content === 'string'
-          ? delta.content
-          : Array.isArray(delta?.content)
-            ? delta.content.map(x => typeof x === 'string' ? x : (x?.text || '')).join('')
-            : '';
-        if (piece) onDelta(piece);
-      }
+    const info=data?.info||{}; const tok=info.tokens||{}; const usage={
+      input_tokens:Number(tok.input||0), output_tokens:Number(tok.output||0), reasoning_tokens:Number(tok.reasoning||0), cache_read:Number(tok.cache?.read||0), cache_write:Number(tok.cache?.write||0), total_tokens:Number(tok.input||0)+Number(tok.output||0)+Number(tok.reasoning||0), cost:Number(info.cost||0), estimated:false
     };
-
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream:true });
-      const events = buffer.split(/\r?\n\r?\n/);
-      buffer = events.pop() || '';
-      for (const event of events) handleEvent(event);
-    }
-    if (buffer.trim()) handleEvent(buffer);
-  }
-  async function apiError(response) {
-    let detail = '';
-    try {
-      const clone = response.clone();
-      const data = await clone.json();
-      detail = data?.error?.message || data?.message || JSON.stringify(data);
-    } catch {
-      try { detail = await response.text(); } catch {}
-    }
-    detail = detail ? ` · ${detail.slice(0, 500)}` : '';
-    return new Error(`HTTP ${response.status} ${response.statusText}${detail}`);
-  }
-  async function executeChatRequest(body, signal) {
-    const init = {
-      method:'POST',
-      headers:requestHeaders(),
-      body:JSON.stringify(body),
-      signal
-    };
-    let response = await networkFetch(currentEndpoint(), init);
-    if (!response.ok && body.stream_options && [400, 404, 422].includes(response.status)) {
-      // Some OpenAI-compatible servers reject stream_options. Retry once
-      // without it; the first request was rejected before generation began.
-      const retryBody = { ...body };
-      delete retryBody.stream_options;
-      response = await networkFetch(currentEndpoint(), {
-        ...init,
-        body:JSON.stringify(retryBody)
-      });
-    }
-    return response;
+    let content=texts.join('\n\n').trim();
+    if (info?.error) { const em=info.error?.data?.message||info.error?.message||JSON.stringify(info.error); content += `${content?'\n\n':''}> ${t('apiError')}: ${em}`; }
+    return {content:content||t('emptyResponse'),activity,usage,assistantInfo:info};
   }
 
   async function sendMessage() {
     if (isGenerating) return;
-    const text = promptInput.value.trim();
-    if (!text && !pendingAttachments.length) return;
-    if (!currentEndpoint()) { toast(t('missingEndpoint')); openSettings(); return; }
-    if (!currentModel()) { toast(t('missingModel')); openSettings(); return; }
-
+    const text=promptInput.value.trim(); if (!text && !pendingAttachments.length) return;
+    if (!settings.agent) { toast(t('missingAgent')); return; }
+    if (!settings.modelProvider || !settings.modelID) { toast(t('missingModel')); return; }
     if (!activeConversation) await createNewChat();
-    const attachments = structuredClone(pendingAttachments);
-    if (!activeConversation.messages.length && [t('newChatTitle'), 'New chat', '新聊天'].includes(activeConversation.title)) {
-      activeConversation.title = autoTitle(text, attachments);
-    }
-
-    const userMessage = {
-      id:uid(), role:'user', content:text, attachments,
-      createdAt:nowISO()
-    };
-    activeConversation.messages.push(userMessage);
-    promptInput.value = '';
-    pendingAttachments = [];
-    renderPendingAttachments();
-
-    const assistantMessage = {
-      id:uid(), role:'assistant', content:'', createdAt:nowISO(),
-      model:currentModel(), streaming:!!settings.stream
-    };
-    activeConversation.messages.push(assistantMessage);
-    activeConversation.model = currentModel();
-    activeConversation.provider = settings.provider;
-    await persistActive();
-    renderMessages();
-
-    isGenerating = true;
-    sendBtn.disabled = true;
-    stopBtn.disabled = false;
-    abortController = new AbortController();
-    setBottomStatus(`${t('calling', { model:currentModel() })} · ${(settings.requestMode || 'agent') === 'agent' ? t('agentMode') : t('chatMode')}`);
-
-    const assistantIndex = activeConversation.messages.length - 1;
-    const apiMessages = buildApiMessages(assistantMessage.id);
-    const inputEstimate = estimateApiMessages(apiMessages);
-    const body = {
-      model:currentModel(),
-      messages:apiMessages,
-      temperature:settings.temperature,
-      stream:!!settings.stream
-    };
-    if (settings.stream) body.stream_options = { include_usage:true };
-
-    let actualUsage = null;
+    const attachments=structuredClone(pendingAttachments);
+    if (!activeConversation.messages.length && [t('newChatTitle'),'New chat','新聊天'].includes(activeConversation.title)) activeConversation.title=autoTitle(text,attachments);
+    const userMsg={id:uid(),role:'user',content:text,attachments,createdAt:nowISO()}; activeConversation.messages.push(userMsg);
+    promptInput.value=''; pendingAttachments=[]; renderPendingAttachments();
+    const assistantMsg={id:uid(),role:'assistant',content:'',createdAt:nowISO(),agent:settings.agent,model:settings.modelID,streaming:true,activity:[]}; activeConversation.messages.push(assistantMsg);
+    activeConversation.agent=settings.agent; activeConversation.modelProvider=settings.modelProvider; activeConversation.modelID=settings.modelID; await persistActive(); renderMessages();
+    isGenerating=true; sendBtn.disabled=true; stopBtn.disabled=false; abortController=new AbortController();
+    setBottomStatus(t('calling',{agent:settings.agent,model:selectedModel()?.name||settings.modelID}));
     try {
-      const response = await executeChatRequest(body, abortController.signal);
+      let sessionID=await ensureExistingSessionOrRecreate();
+      const payload={agent:settings.agent,model:{providerID:settings.modelProvider,modelID:settings.modelID},parts:partsFromInput(text,attachments)};
+      if (String(settings.systemPrompt||'').trim()) payload.system=String(settings.systemPrompt).trim();
+      let response=await serverFetch(`/session/${encodeURIComponent(sessionID)}/message`,{method:'POST',body:JSON.stringify(payload),signal:abortController.signal});
+      if (response.status===404) {
+        activeConversation.serverSessionID=null; sessionID=await ensureServerSession();
+        response=await serverFetch(`/session/${encodeURIComponent(sessionID)}/message`,{method:'POST',body:JSON.stringify(payload),signal:abortController.signal});
+      }
       if (!response.ok) throw await apiError(response);
-
-      if (settings.stream) {
-        await parseSSE(response, piece => {
-          assistantMessage.content += piece;
-          scheduleAssistantRender(assistantIndex);
-        }, usage => { actualUsage = usage; });
-      } else {
-        const data = await response.json();
-        assistantMessage.content = extractNonStreamContent(data);
-        actualUsage = normalizeUsage(data?.usage);
-        if (!assistantMessage.content) throw new Error('The API returned no assistant text.');
-      }
-
-      assistantMessage.streaming = false;
-      if (!assistantMessage.content) assistantMessage.content = t('emptyResponse');
-      assistantMessage.usage = actualUsage || {
-        prompt_tokens:inputEstimate,
-        completion_tokens:estimateTextTokens(assistantMessage.content),
-        total_tokens:inputEstimate + estimateTextTokens(assistantMessage.content),
-        estimated:true
-      };
-      await persistActive();
-      renderMessages();
-      setBottomStatus(`${t('ready')} · ${currentModel()}`);
-    } catch (error) {
-      assistantMessage.streaming = false;
-      if (error?.name === 'AbortError') {
-        if (!assistantMessage.content) assistantMessage.content = t('stoppedText');
-        assistantMessage.usage = actualUsage || {
-          prompt_tokens:inputEstimate,
-          completion_tokens:estimateTextTokens(assistantMessage.content),
-          total_tokens:inputEstimate + estimateTextTokens(assistantMessage.content),
-          estimated:true
-        };
-        setBottomStatus(t('stopped'));
-      } else {
-        const message = error?.message || String(error);
-        assistantMessage.content += (assistantMessage.content ? '\n\n' : '') + `> API error: ${message}`;
-        assistantMessage.usage = actualUsage || {
-          prompt_tokens:inputEstimate,
-          completion_tokens:estimateTextTokens(assistantMessage.content),
-          total_tokens:inputEstimate + estimateTextTokens(assistantMessage.content),
-          estimated:true
-        };
-        setBottomStatus(`${t('apiFailed')} · ${message}`);
-        toast(t('apiFailed'), 2600);
-      }
-      await persistActive();
-      renderMessages();
+      const data=await response.json(); const result=extractAssistantResult(data); assistantMsg.content=result.content; assistantMsg.activity=result.activity; assistantMsg.usage=result.usage; assistantMsg.serverMessageID=result.assistantInfo?.id||null; assistantMsg.streaming=false;
+      await persistActive(); renderMessages(); setBottomStatus(`${t('ready')} · ${settings.agent} · ${settings.modelID}`);
+    } catch (e) {
+      assistantMsg.streaming=false;
+      if (e?.name==='AbortError') { if (!assistantMsg.content) assistantMsg.content=t('stoppedText'); setBottomStatus(t('stopped')); }
+      else { assistantMsg.content=`> ${t('apiError')}: ${e.message||e}`; setBottomStatus(`${t('apiError')} · ${e.message||e}`); toast(t('apiError'),2800); }
+      await persistActive(); renderMessages();
     } finally {
-      isGenerating = false;
-      sendBtn.disabled = false;
-      stopBtn.disabled = true;
-      abortController = null;
-      updateTokenHint();
-      promptInput.focus();
+      isGenerating=false; sendBtn.disabled=false; stopBtn.disabled=true; abortController=null; updateTokenHint(); promptInput.focus({preventScroll:true});
     }
   }
-  function stopGeneration() { if (abortController) abortController.abort(); }
+  async function stopGeneration() {
+    const sid=activeConversation?.serverSessionID;
+    if (sid) {
+      try { await serverJson(`/session/${encodeURIComponent(sid)}/abort`,{method:'POST',body:'{}'}); }
+      catch (e) { toast(`${t('abortFailed')}: ${e.message}`,2600); }
+    }
+    if (abortController) abortController.abort();
+  }
 
-  function isTextFile(file) {
-    if (file.type?.startsWith('text/')) return true;
-    return /\.(txt|md|markdown|json|jsonl|csv|tsv|xml|html?|css|js|mjs|cjs|ts|tsx|jsx|py|java|c|h|cpp|hpp|cc|cs|go|rs|php|rb|swift|kt|kts|sh|bat|cmd|ps1|sql|yaml|yml|toml|ini|cfg|log|tex|r|lua|vue|svelte)$/i.test(file.name);
-  }
-  function readFileDataUrl(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result || ''));
-      reader.onerror = () => reject(reader.error || new Error('FileReader failed'));
-      reader.readAsDataURL(file);
-    });
-  }
+  function readFileDataUrl(file) { return new Promise((resolve,reject)=>{ const r=new FileReader(); r.onload=()=>resolve(String(r.result||'')); r.onerror=()=>reject(r.error||new Error(t('fileReadFailed'))); r.readAsDataURL(file); }); }
   async function fileToAttachment(file) {
-    if (file.size > MAX_ATTACHMENT_BYTES) throw new Error(t('fileTooLarge', { name:file.name }));
-    if (file.type?.startsWith('image/')) {
-      return {
-        id:uid(), name:file.name || 'image', type:file.type || 'image/*',
-        size:file.size, kind:'image', dataUrl:await readFileDataUrl(file)
-      };
-    }
-    if (isTextFile(file)) {
-      if (file.size > MAX_TEXT_BYTES) throw new Error(t('fileTooLarge', { name:file.name }));
-      return {
-        id:uid(), name:file.name || 'file.txt', type:file.type || 'text/plain',
-        size:file.size, kind:'text', text:await file.text()
-      };
-    }
-    return {
-      id:uid(), name:file.name || 'file', type:file.type || 'application/octet-stream',
-      size:file.size, kind:'binary'
-    };
+    if (file.size>MAX_ATTACHMENT_BYTES) throw new Error(t('fileTooLarge',{name:file.name}));
+    return {id:uid(),name:file.name||'file',type:file.type||'application/octet-stream',size:file.size,kind:file.type?.startsWith('image/')?'image':'file',dataUrl:await readFileDataUrl(file)};
   }
   async function addFiles(fileList) {
-    const files = [...(fileList || [])];
-    if (!files.length) return;
-    const room = MAX_ATTACHMENTS - pendingAttachments.length;
-    if (room <= 0) return toast(t('tooManyFiles'));
-    for (const file of files.slice(0, room)) {
-      try {
-        pendingAttachments.push(await fileToAttachment(file));
-      } catch (e) {
-        toast(e.message || String(e), 3000);
-      }
-    }
-    if (files.length > room) toast(t('tooManyFiles'));
-    renderPendingAttachments();
-    updateTokenHint();
-    if (pendingAttachments.some(a => a.kind === 'image')) setBottomStatus(t('imageModelNote'));
-    else if (pendingAttachments.some(a => a.kind === 'binary')) setBottomStatus(t('binaryLocalOnly'));
-    else setBottomStatus(t('attachedCount', { count:pendingAttachments.length }));
-  }
-  function renderPendingAttachments() {
-    const strip = $('attachmentStrip');
-    strip.innerHTML = '';
-    strip.dataset.empty = t('attachmentEmpty');
-    for (const a of pendingAttachments) {
-      const chip = document.createElement('div');
-      chip.className = 'attachment-chip';
-      chip.title = `${a.name} · ${formatBytes(a.size)}`;
-      chip.append(document.createTextNode(`${a.kind === 'image' ? '▧' : '▤'} ${a.name}`));
-      const remove = document.createElement('button');
-      remove.type = 'button';
-      remove.textContent = 'X';
-      remove.addEventListener('click', () => {
-        pendingAttachments = pendingAttachments.filter(x => x.id !== a.id);
-        renderPendingAttachments();
-        updateTokenHint();
-      });
-      chip.appendChild(remove);
-      strip.appendChild(chip);
-    }
+    const files=[...(fileList||[])]; if (!files.length) return;
+    if (pendingAttachments.length+files.length>MAX_ATTACHMENTS) { toast(t('tooManyFiles')); return; }
+    for (const f of files) { try { pendingAttachments.push(await fileToAttachment(f)); } catch (e) { toast(e.message||String(e),3200); } }
+    renderPendingAttachments(); updateTokenHint(); promptInput.focus({preventScroll:true});
   }
 
-  function openSettings() {
-    syncSettingsToUI();
-    $('settingsModal').classList.add('open');
-    setTimeout(() => $('apiKeySetting').focus(), 0);
+  async function switchModelValue(v) {
+    const next=parseModelValue(v); const changed=next.providerID!==settings.modelProvider || next.modelID!==settings.modelID;
+    if (changed && activeConversation?.messages?.length && !confirm(t('modelSwitchWarn'))) { syncSettingsToUI(); return; }
+    settings.modelProvider=next.providerID; settings.modelID=next.modelID; await saveSettings(); syncSettingsToUI(); if (changed&&activeConversation?.messages?.length) toast(t('modelSwitchToast'),2600); promptInput.focus({preventScroll:true});
   }
-  function closeSettings() { $('settingsModal').classList.remove('open'); setTimeout(() => promptInput.focus({ preventScroll:true }), 0); }
+  async function switchAgent(name) { if (!name) return; settings.agent=name; await saveSettings(); syncSettingsToUI(); if (activeConversation?.messages?.length) toast(t('agentSwitchToast')); promptInput.focus({preventScroll:true}); }
 
+  function openSettings() { syncSettingsToUI(); $('settingsModal').classList.add('open'); setTimeout(()=>$('gatewayTokenSetting').focus(),0); }
+  function closeSettings() { $('settingsModal').classList.remove('open'); promptInput.focus({preventScroll:true}); }
   async function saveSettingsFromModal() {
-    const candidate = collectSettingsFromModal();
-    const nextModel = modelForConfig(candidate);
-    if (!confirmModelSwitch(nextModel)) {
-      syncSettingsToUI();
-      return;
-    }
-    const oldModel = currentModel();
-    settings = candidate;
-    sessionApiKey = $('apiKeySetting').value.trim();
-    settings.apiKey = settings.rememberKey ? sessionApiKey : '';
-    applyTheme();
-    await saveSettings();
-    syncSettingsToUI();
-    closeSettings();
-    if (oldModel !== nextModel && activeConversation?.messages?.length) toast(t('modelSwitchToast'), 2600);
-    renderAll();
-    toast(t('settingsSaved'));
+    settings.gatewayUrl=$('gatewayUrlSetting').value.trim()||SAME_ORIGIN_PROXY_DEFAULT; sessionGatewayToken=$('gatewayTokenSetting').value.trim(); settings.rememberToken=$('rememberTokenSetting').value==='true'; settings.agent=$('agentSetting').value||settings.agent; const m=parseModelValue($('modelSetting').value); if (m.providerID&&m.modelID) { settings.modelProvider=m.providerID; settings.modelID=m.modelID; } settings.systemPrompt=$('systemPromptSetting').value; settings.language=$('languageSetting').value; settings.theme=$('themeSetting').value;
+    await saveSettings(); syncSettingsToUI(); closeSettings(); toast(t('saveOk')); await refreshServerMetadata({quiet:true});
+  }
+  async function testServer() { setBottomStatus(t('testing')); try { const h=await serverJson('/global/health'); lastServerHealth=!!h?.healthy; settings.serverVersion=String(h?.version||''); updateInfoPanel(); toast(`${t('connected')}${settings.serverVersion?` · ${settings.serverVersion}`:''}`); setBottomStatus(t('connected')); } catch(e) { lastServerHealth=false; updateInfoPanel(); toast(`${t('apiError')}: ${e.message}`,3200); setBottomStatus(`${t('apiError')} · ${e.message}`); } }
+
+  function openRename(c=activeConversation) { if (!c) return; $('renameBox').dataset.id=c.id; $('renameInput').value=c.title||''; $('renameBox').classList.add('open'); setTimeout(()=>$('renameInput').focus(),0); }
+  function closeRename() { $('renameBox').classList.remove('open'); promptInput.focus({preventScroll:true}); }
+  async function saveRename() {
+    const id=$('renameBox').dataset.id; const c=conversations.find(x=>x.id===id); if (!c) return closeRename(); c.title=$('renameInput').value.trim()||t('untitled'); c.updatedAt=nowISO(); await idbPut(STORE_CONVERSATIONS,c);
+    if (c.serverSessionID) serverJson(`/session/${encodeURIComponent(c.serverSessionID)}`,{method:'PATCH',body:JSON.stringify({title:c.title})}).catch(()=>{});
+    closeRename(); renderAll();
+  }
+  async function deleteConversation(id) {
+    const c=conversations.find(x=>x.id===id); if (!c || !confirm(t('deleteConfirm'))) return;
+    if (c.serverSessionID) serverJson(`/session/${encodeURIComponent(c.serverSessionID)}`,{method:'DELETE'}).catch(()=>{});
+    await idbDelete(STORE_CONVERSATIONS,id); conversations=conversations.filter(x=>x.id!==id);
+    if (!conversations.length) { const n=makeConversation(); conversations=[n]; await idbPut(STORE_CONVERSATIONS,n); }
+    if (activeConversation?.id===id) activeConversation=conversations[0]; renderAll();
   }
 
-  async function testApi() {
-    const candidate = collectSettingsFromModal();
-    const key = $('apiKeySetting').value.trim();
-    const endpoint = candidate.apiBase || (candidate.provider === 'opencode' ? OPENCODE_ENDPOINT : '');
-    const model = modelForConfig(candidate);
-    if (!endpoint || !model) return toast(!endpoint ? t('missingEndpoint') : t('missingModel'));
-    $('testApiBtn').disabled = true;
-    setBottomStatus(t('testing'));
-    try {
-      const response = await networkFetch(endpoint, {
-        method:'POST',
-        headers:requestHeaders(key),
-        body:JSON.stringify({
-          model,
-          messages:[...(effectiveSystemPrompt(candidate) ? [{ role:'system', content:effectiveSystemPrompt(candidate) }] : []), { role:'user', content:'Reply with exactly: OK' }],
-          temperature:0,
-          stream:false,
-          max_tokens:16
-        })
-      }, candidate);
-      if (!response.ok) throw await apiError(response);
-      const data = await response.json();
-      const reply = extractNonStreamContent(data);
-      const usage = normalizeUsage(data?.usage);
-      toast(reply ? `API OK · ${reply.slice(0,60)}` : 'API OK');
-      setBottomStatus(`${t('apiTestOk')}${usage ? ` · ${formatUsage(usage)}` : ''}`);
-    } catch (e) {
-      toast(t('apiTestFailed'), 2600);
-      setBottomStatus(`${t('apiTestFailed')} · ${e.message}`);
-    } finally {
-      $('testApiBtn').disabled = false;
-      updateInfoPanel();
-    }
-  }
-
-  function isZeroPrice(value) {
-    if (value === 0 || value === '0' || value === '0.0') return true;
-    if (typeof value === 'string' && /^(?:free|\$?0(?:\.0+)?)$/i.test(value.trim())) return true;
-    return false;
-  }
-  function looksFreeModel(m) {
-    const id = String(m?.id || m?.model || '').toLowerCase();
-    const name = String(m?.name || m?.display_name || '').toLowerCase();
-    if (id.includes('free') || name.includes('free') || id === 'big-pickle') return true;
-    const pricing = m?.pricing || m?.price || m?.cost;
-    if (pricing && typeof pricing === 'object') {
-      const vals = Object.values(pricing).filter(v => v !== null && v !== undefined);
-      if (vals.length && vals.every(isZeroPrice)) return true;
-    }
-    return false;
-  }
-  function normalizeModelList(payload) {
-    const arr = Array.isArray(payload) ? payload : (payload?.data || payload?.models || []);
-    return arr.map(m => ({
-      id:String(m?.id || m?.model || '').trim(),
-      name:String(m?.name || m?.display_name || m?.id || m?.model || '').trim(),
-      raw:m
-    })).filter(m => m.id);
-  }
-  function looksChatCompletionsModel(m) {
-    if (OPENCODE_CHAT_FREE_IDS.has(m.id)) return true;
-    const raw = JSON.stringify(m.raw || m).toLowerCase();
-    return raw.includes('chat/completions') || raw.includes('openai-compatible');
-  }
-  async function refreshOpenCodeModels() {
-    if (settings.provider !== 'opencode') return toast(settings.language === 'zh' ? '请先切换到 OpenCode Zen' : 'Switch to OpenCode Zen first');
-    $('refreshModelsBtn').disabled = true;
-    setBottomStatus(t('refreshStart'));
-    try {
-      const response = await networkFetch(OPENCODE_MODELS_ENDPOINT, {
-        headers:currentApiKey() ? { Authorization:`Bearer ${currentApiKey()}` } : {}
-      });
-      if (!response.ok) throw await apiError(response);
-      const contentType = response.headers.get('content-type') || '';
-      if (!contentType.toLowerCase().includes('json')) {
-        throw new Error(settings.language === 'zh'
-          ? '同源 /api/proxy 未部署或返回的不是 JSON'
-          : 'Same-origin /api/proxy is missing or did not return JSON');
-      }
-      const data = await response.json();
-      const all = normalizeModelList(data);
-      const free = all.filter(m => looksFreeModel(m.raw) && looksChatCompletionsModel(m));
-      const merged = new Map(OPENCODE_FREE_PRESETS.map(m => [m.id, m]));
-      for (const m of free) merged.set(m.id, { id:m.id, name:`${m.name || m.id}${/free/i.test(m.name) ? '' : ' · Free'}` });
-      settings.openCodeModels = [...merged.values()].sort((a,b) => a.name.localeCompare(b.name));
-      if (!settings.openCodeModels.some(m => m.id === settings.model)) settings.model = settings.openCodeModels[0].id;
-      await saveSettings();
-      syncSettingsToUI();
-      toast(`${settings.openCodeModels.length} ${settings.language === 'zh' ? '个免费模型' : 'free models'}`);
-      setBottomStatus(t('refreshDone'));
-    } catch (e) {
-      setBottomStatus(`${t('refreshFallback')} · ${e.message}`);
-      toast(t('refreshFallback'), 2600);
-    } finally {
-      $('refreshModelsBtn').disabled = false;
-    }
-  }
-
-  async function switchProvider(provider) {
-    const previous = { ...settings };
-    settings.provider = provider;
-    if (provider === 'opencode') {
-      settings.apiBase = OPENCODE_ENDPOINT;
-      settings.customModel = '';
-      if (!settings.openCodeModels.some(m => m.id === settings.model)) settings.model = settings.openCodeModels[0]?.id || 'mimo-v2.5-free';
-    }
-    const nextModel = currentModel();
-    if (shouldWarnModelSwitch(nextModel) && !confirm(t('modelSwitchWarn'))) {
-      settings = previous;
-      syncSettingsToUI();
-      return false;
-    }
-    if (activeConversation?.messages?.length && activeConversation.model !== nextModel) toast(t('modelSwitchToast'), 2600);
-    syncSettingsToUI();
-    await saveSettings();
-    return true;
-  }
-
-  function safeFileName(name) {
-    return (name || 'chat').replace(/[\\/:*?"<>|]+/g, '_').slice(0,80);
-  }
-  function downloadJson(filename, data) {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }
-  async function exportConversation(conversation = activeConversation) {
-    if (!conversation) return;
-    downloadJson(`az-chat-${safeFileName(conversation.title)}.json`, {
-      format:'az-llm-chat/conversation-v2',
-      exportedAt:nowISO(),
-      conversation
-    });
-  }
-  function exportAll() {
-    downloadJson(`az-llm-chat-backup-${new Date().toISOString().slice(0,10)}.json`, {
-      format:'az-llm-chat/backup-v2',
-      exportedAt:nowISO(),
-      conversations,
-      settings:{ ...settings, apiKey:undefined, rememberKey:false }
-    });
-  }
+  function downloadJson(filename,data) { const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000); }
+  function exportConversation(c=activeConversation) { if (!c) return; downloadJson(`az-opencode-${safeFileName(c.title)}.json`,{format:'az-opencode-session/conversation-v1',exportedAt:nowISO(),conversation:c}); }
+  function exportAll() { downloadJson(`az-opencode-session-backup-${new Date().toISOString().slice(0,10)}.json`,{format:'az-opencode-session/backup-v1',exportedAt:nowISO(),conversations,settings:{...settings,gatewayToken:undefined,rememberToken:false}}); }
   async function importJsonFile(file) {
-    const payload = JSON.parse(await file.text());
-    let incoming = [];
-    if (/^az-llm-chat\/conversation-v[12]$/.test(payload?.format) && payload.conversation) incoming = [payload.conversation];
-    else if (/^az-llm-chat\/backup-v[12]$/.test(payload?.format) && Array.isArray(payload.conversations)) incoming = payload.conversations;
-    else if (Array.isArray(payload)) incoming = payload;
-    else throw new Error('Unsupported backup format.');
-
-    let count = 0;
-    for (const raw of incoming) {
-      if (!raw || !Array.isArray(raw.messages)) continue;
-      const c = {
-        id:raw.id && !conversations.some(x => x.id === raw.id) ? raw.id : uid(),
-        title:String(raw.title || 'Imported chat'),
-        createdAt:raw.createdAt || nowISO(),
-        updatedAt:nowISO(),
-        provider:raw.provider || 'custom',
-        model:raw.model || '',
-        messages:raw.messages.map(m => ({
-          id:m.id || uid(),
-          role:m.role === 'user' ? 'user' : 'assistant',
-          content:String(m.content || ''),
-          createdAt:m.createdAt || nowISO(),
-          model:m.model || undefined,
-          attachments:Array.isArray(m.attachments) ? m.attachments : [],
-          usage:m.usage || undefined
-        }))
-      };
-      await idbPut(STORE_CONVERSATIONS, c);
-      conversations.push(c);
-      count++;
-    }
-    conversations.sort((a,b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
-    if (count) activeConversation = conversations[0];
-    renderAll();
-    toast(t('imported', { count }));
+    const p=JSON.parse(await file.text()); let incoming=[];
+    if (p?.format==='az-opencode-session/conversation-v1'&&p.conversation) incoming=[p.conversation]; else if (p?.format==='az-opencode-session/backup-v1'&&Array.isArray(p.conversations)) incoming=p.conversations; else if (Array.isArray(p)) incoming=p; else throw new Error('Unsupported backup format.');
+    let count=0; for (const raw of incoming) { if (!raw||!Array.isArray(raw.messages)) continue; const c={...makeConversation(String(raw.title||'Imported chat')),id:raw.id&&!conversations.some(x=>x.id===raw.id)?raw.id:uid(),createdAt:raw.createdAt||nowISO(),updatedAt:nowISO(),serverSessionID:raw.serverSessionID||null,agent:raw.agent||settings.agent,modelProvider:raw.modelProvider||settings.modelProvider,modelID:raw.modelID||settings.modelID,messages:raw.messages}; await idbPut(STORE_CONVERSATIONS,c); conversations.push(c); count++; }
+    conversations.sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||'')); if (count) activeConversation=conversations[0]; renderAll(); toast(t('imported',{count}));
   }
 
   function bindEvents() {
-    $('settingsBtn').addEventListener('click', openSettings);
-    $('settingsClose').addEventListener('click', closeSettings);
-    $('saveSettingsBtn').addEventListener('click', saveSettingsFromModal);
-    $('testApiBtn').addEventListener('click', testApi);
-    $('newChatBtn').addEventListener('click', createNewChat);
-    $('sendBtn').addEventListener('click', sendMessage);
-    $('stopBtn').addEventListener('click', stopGeneration);
-    $('clearDraftBtn').addEventListener('click', () => {
-      promptInput.value = '';
-      pendingAttachments = [];
-      renderPendingAttachments();
-      updateTokenHint();
-      promptInput.focus();
-    });
-    $('attachBtn').addEventListener('click', () => $('attachmentInput').click());
-    $('attachmentInput').addEventListener('change', async e => {
-      await addFiles(e.target.files);
-      e.target.value = '';
-    });
-    $('renameBtn').addEventListener('click', () => openRename(activeConversation));
-    $('renameCancel').addEventListener('click', closeRename);
-    $('renameSave').addEventListener('click', saveRename);
-    $('renameInput').addEventListener('keydown', e => {
-      if (e.key === 'Enter') saveRename();
-      if (e.key === 'Escape') closeRename();
-    });
-    $('historySearch').addEventListener('input', renderHistory);
-    $('exportOneBtn').addEventListener('click', () => exportConversation(activeConversation));
-    $('exportAllBtn').addEventListener('click', exportAll);
-    $('importBtn').addEventListener('click', () => $('importFile').click());
-    $('importFile').addEventListener('change', async e => {
-      const file = e.target.files?.[0];
-      e.target.value = '';
-      if (!file) return;
-      try { await importJsonFile(file); }
-      catch (err) { toast(t('importFailed')); setBottomStatus(`${t('importFailed')} · ${err.message}`); }
-    });
-    $('refreshModelsBtn').addEventListener('click', refreshOpenCodeModels);
-
-    $('providerQuick').addEventListener('change', async e => {
-      const old = settings.provider;
-      if (!await switchProvider(e.target.value)) e.target.value = old;
-    });
-    $('modelQuick').addEventListener('change', async e => {
-      const oldModel = currentModel();
-      const next = e.target.value;
-      if (!confirmModelSwitch(next)) {
-        e.target.value = settings.model;
-        return;
-      }
-      settings.model = next;
-      settings.customModel = '';
-      await saveSettings();
-      syncSettingsToUI();
-      if (oldModel !== next && activeConversation?.messages?.length) toast(t('modelSwitchToast'), 2600);
-    });
-    $('temperatureQuick').addEventListener('change', async e => {
-      settings.temperature = clampNumber(e.target.value, 0, 2, settings.temperature);
-      await saveSettings(); syncSettingsToUI();
-    });
-    $('streamQuick').addEventListener('change', async e => {
-      settings.stream = e.target.value === 'true';
-      await saveSettings(); syncSettingsToUI();
-    });
-    $('requestModeQuick').addEventListener('change', async e => {
-      settings.requestMode = e.target.value === 'chat' ? 'chat' : 'agent';
-      await saveSettings();
-      syncSettingsToUI();
-      promptInput.focus({ preventScroll:true });
-    });
-    $('languageQuick').addEventListener('change', async e => {
-      settings.language = e.target.value;
-      await saveSettings();
-      applyLanguage();
-      renderAll();
-    });
-    $('themeBtn').addEventListener('click', async () => {
-      settings.theme = settings.theme === 'dark' ? 'light' : 'dark';
-      applyTheme();
-      $('themeSetting').value = settings.theme;
-      await saveSettings();
-      applyLanguage();
-    });
-
-    $('providerSetting').addEventListener('change', e => {
-      const provider = e.target.value;
-      if (provider === 'opencode') $('apiBaseSetting').value = OPENCODE_ENDPOINT;
-      buildModelOptions($('modelSetting'), provider === 'opencode' ? settings.model : ($('customModelSetting').value || settings.model), provider);
-    });
-    $('languageSetting').addEventListener('change', e => {
-      const previous = settings.language;
-      settings.language = e.target.value;
-      applyLanguage();
-      settings.language = previous;
-      $('languageSetting').value = e.target.value;
-    });
-
-    promptInput.addEventListener('input', updateTokenHint);
-    promptInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
-        e.preventDefault();
-        sendMessage();
-      }
-    });
-    promptInput.addEventListener('paste', e => {
-      const files = [...(e.clipboardData?.files || [])];
-      if (files.length) addFiles(files);
-    });
-
-    const chatPanel = document.querySelector('.chat-panel');
-    chatPanel.addEventListener('dragenter', e => {
-      if (![...(e.dataTransfer?.types || [])].includes('Files')) return;
-      e.preventDefault(); dragDepth++; chatPanel.classList.add('dragging');
-    });
-    chatPanel.addEventListener('dragover', e => {
-      if (![...(e.dataTransfer?.types || [])].includes('Files')) return;
-      e.preventDefault(); e.dataTransfer.dropEffect = 'copy';
-    });
-    chatPanel.addEventListener('dragleave', e => {
-      if (![...(e.dataTransfer?.types || [])].includes('Files')) return;
-      e.preventDefault(); dragDepth = Math.max(0, dragDepth - 1);
-      if (!dragDepth) chatPanel.classList.remove('dragging');
-    });
-    chatPanel.addEventListener('drop', e => {
-      e.preventDefault(); dragDepth = 0; chatPanel.classList.remove('dragging');
-      addFiles(e.dataTransfer?.files);
-    });
-
-    $('historyMobileBtn').addEventListener('click', () => $('historyPanel').classList.toggle('mobile-open'));
-    $('historyCloseMobileBtn').addEventListener('click', () => $('historyPanel').classList.remove('mobile-open'));
-
-    window.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        closeSettings(); closeRename();
-        $('historyPanel').classList.remove('mobile-open');
-      }
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        $('historyPanel').classList.add('mobile-open');
-        $('historySearch').focus();
-      }
-      if ((e.ctrlKey || e.metaKey) && e.key === ',') {
-        e.preventDefault(); openSettings();
-      }
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'o') {
-        e.preventDefault(); createNewChat();
-      }
-    });
+    $('settingsBtn').onclick=openSettings; $('settingsClose').onclick=closeSettings; $('saveSettingsBtn').onclick=saveSettingsFromModal; $('testApiBtn').onclick=testServer; $('refreshMetaBtn').onclick=()=>refreshServerMetadata();
+    $('newChatBtn').onclick=createNewChat; sendBtn.onclick=sendMessage; stopBtn.onclick=stopGeneration; $('clearDraftBtn').onclick=()=>{promptInput.value='';pendingAttachments=[];renderPendingAttachments();updateTokenHint();promptInput.focus();};
+    $('attachBtn').onclick=()=>$('attachmentInput').click(); $('attachmentInput').onchange=async e=>{await addFiles(e.target.files);e.target.value='';};
+    $('renameBtn').onclick=()=>openRename(activeConversation); $('renameCancel').onclick=closeRename; $('renameSave').onclick=saveRename; $('renameInput').onkeydown=e=>{if(e.key==='Enter')saveRename();if(e.key==='Escape')closeRename();};
+    $('historySearch').oninput=renderHistory; $('exportOneBtn').onclick=()=>exportConversation(activeConversation); $('exportAllBtn').onclick=exportAll; $('importBtn').onclick=()=>$('importFile').click(); $('importFile').onchange=async e=>{const f=e.target.files?.[0];e.target.value='';if(!f)return;try{await importJsonFile(f);}catch(err){toast(`${t('importFailed')}: ${err.message}`,3000);}};
+    $('modelQuick').onchange=e=>switchModelValue(e.target.value); $('modelSetting').onchange=e=>{}; $('agentQuick').onchange=e=>switchAgent(e.target.value); $('agentSetting').onchange=e=>{};
+    $('languageQuick').onchange=async e=>{settings.language=e.target.value;await saveSettings();syncSettingsToUI();promptInput.focus({preventScroll:true});}; $('themeBtn').onclick=async()=>{settings.theme=settings.theme==='dark'?'light':'dark';await saveSettings();syncSettingsToUI();promptInput.focus({preventScroll:true});};
+    $('languageSetting').onchange=e=>{const old=settings.language;settings.language=e.target.value;applyLanguage();settings.language=old;$('languageSetting').value=e.target.value;};
+    promptInput.oninput=updateTokenHint; promptInput.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();sendMessage();}}; promptInput.onpaste=e=>{const files=[...(e.clipboardData?.files||[])];if(files.length)addFiles(files);};
+    const chat=document.querySelector('.chat-panel'); chat.addEventListener('dragenter',e=>{if(![...(e.dataTransfer?.types||[])].includes('Files'))return;e.preventDefault();dragDepth++;chat.classList.add('dragging');}); chat.addEventListener('dragover',e=>{if(![...(e.dataTransfer?.types||[])].includes('Files'))return;e.preventDefault();e.dataTransfer.dropEffect='copy';}); chat.addEventListener('dragleave',e=>{e.preventDefault();dragDepth=Math.max(0,dragDepth-1);if(!dragDepth)chat.classList.remove('dragging');}); chat.addEventListener('drop',e=>{e.preventDefault();dragDepth=0;chat.classList.remove('dragging');addFiles(e.dataTransfer?.files);});
+    $('historyMobileBtn').onclick=()=>$('historyPanel').classList.toggle('mobile-open'); $('historyCloseMobileBtn').onclick=()=>$('historyPanel').classList.remove('mobile-open');
+    window.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSettings();closeRename();$('historyPanel').classList.remove('mobile-open');} if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$('historyPanel').classList.add('mobile-open');$('historySearch').focus();} if((e.ctrlKey||e.metaKey)&&e.key===','){e.preventDefault();openSettings();}});
   }
 
   async function init() {
     try {
-      db = await openDB();
-      await loadSettings();
-      await loadConversations();
-      bindEvents();
-      renderAll();
-      applyLanguage();
-      setBottomStatus(t('ready'));
-      requestAnimationFrame(() => { try { promptInput.focus({ preventScroll:true }); } catch { promptInput.focus(); } });
-    } catch (e) {
-      console.error(e);
-      document.body.innerHTML = `<pre style="white-space:pre-wrap;padding:20px;font-family:serif">Failed to initialize local database:\n${escapeHtml(e.message || e)}</pre>`;
+      db=await openDB(); await loadSettings(); await loadConversations(); bindEvents(); syncSettingsToUI(); renderAll();
+      requestAnimationFrame(()=>promptInput.focus({preventScroll:true})); window.addEventListener('load',()=>{promptInput.focus({preventScroll:true});renderMessages();},{once:true});
+      refreshServerMetadata({quiet:true});
+      console.info(`AZ OpenCode Session UI ${BUILD}`);
+    } catch(e) {
+      document.body.innerHTML=`<pre style="white-space:pre-wrap;padding:20px;font-family:serif">Failed to initialize:\n${escapeHtml(e.message||e)}</pre>`;
     }
   }
-
   init();
 })();
+
 </script>
 </body>
 </html>
