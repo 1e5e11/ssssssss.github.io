@@ -817,6 +817,141 @@
       .rename-box { width: calc(100vw - 32px); }
       .toast.show { width: calc(100vw - 24px); font-size: 22px; }
     }
+
+
+    /* 2026-09-17 compact workspace refinement. Keeps the SKILL.md glass/shadow language,
+       but moves secondary controls into drawers/disclosures instead of flattening them. */
+    .legacy-quick-controls { display: none !important; }
+    .top-tools {
+      left: 16px; right: 16px; top: 10px; height: 54px;
+      padding: 7px 10px; overflow: visible;
+    }
+    .brand { left: 12px; top: 8px; font-size: 28px; line-height: 30px; }
+    .brand-small { font-size: 11px; }
+    .top-nav {
+      position: absolute; left: 205px; right: 10px; top: 8px; height: 36px;
+      display: flex; align-items: center; justify-content: flex-end; gap: 6px;
+      min-width: 0;
+    }
+    .model-quick-shell {
+      height: 30px; min-width: 220px; max-width: 430px; flex: 1 1 360px;
+      display: flex; align-items: center; gap: 6px;
+      padding: 4px 7px;
+      border-radius: .15em;
+      background: var(--az-surface);
+      box-shadow: 0 0.7565932872px 5px var(--az-accent-alpha);
+      backdrop-filter: blur(15px);
+      font-size: 13px;
+      overflow: hidden;
+    }
+    .model-quick-shell > span { color: var(--az-accent); flex: 0 0 auto; }
+    .model-quick-shell .az-select {
+      flex: 1 1 auto; width: 100%; min-width: 0; box-shadow: none; backdrop-filter: none; background: transparent;
+    }
+    .model-quick-shell .az-select:hover { box-shadow: none; }
+    .mode-quick { min-width: 78px; }
+    .language-quick { width: 78px; }
+
+    .chat-panel { left: 16px; right: 16px; top: 74px; bottom: 42px; min-width: 0; }
+    .history-panel {
+      display: none; position: fixed; z-index: 72;
+      width: min(340px, calc(100vw - 32px));
+      right: 16px; left: auto; top: 74px; bottom: 16px; height: auto; min-height: 0;
+    }
+    .history-panel.mobile-open { display: block; }
+    .info-panel { display: none !important; }
+    .bottom-status { left: 16px; right: 16px; bottom: 6px; font-size: 14px; padding-left: 12px; }
+
+    .panel-title { padding-right: 54px; }
+    .chat-menu { position: relative; }
+    .chat-menu > summary {
+      list-style: none; width: 38px; height: 22px; line-height: 17px; text-align: center;
+      color: var(--az-accent); font-size: 18px; cursor: default;
+      border-radius: .15em; box-shadow: 0 0.7565932872px 5px var(--az-accent-alpha);
+      background: var(--az-surface); user-select: none;
+    }
+    .chat-menu > summary::-webkit-details-marker { display: none; }
+    .chat-menu-pop {
+      position: absolute; right: 0; top: 27px; width: 96px; padding: 6px;
+      display: grid; gap: 6px; z-index: 12;
+      background: var(--az-page); border-radius: .15em;
+      box-shadow: 0 1.7565932872px 9px var(--az-accent-alpha);
+    }
+    .chat-menu-pop .az-button { width: 100%; }
+
+    .settings-list { top: 118px; height: 414px; border: 0; background: transparent; overflow: auto; }
+    .setting-group {
+      width: calc(100% - 10px); margin: 0 5px 10px;
+      border-radius: .15em; background: var(--az-surface);
+      box-shadow: 0 0 10px var(--az-accent-alpha); overflow: hidden;
+    }
+    .setting-group > summary {
+      height: 34px; line-height: 34px; padding-left: 10px;
+      color: var(--az-accent); font-size: 17px; cursor: default; list-style: none;
+      user-select: none;
+    }
+    .setting-group > summary::-webkit-details-marker { display: none; }
+    .setting-group > summary::after { content: '+'; float: right; margin-right: 10px; }
+    .setting-group[open] > summary::after { content: '−'; }
+    .setting-group-body { border-top: 1px solid var(--az-grid); padding: 4px 0 7px; }
+    .setting-row { min-height: 44px; line-height: 34px; padding-top: 5px; padding-bottom: 5px; }
+    .setting-row:hover { background: rgba(124,10,33,.06); }
+    .setting-row label:first-child { width: 122px; }
+    .setting-row .az-input, .setting-row .az-select { width: 238px; }
+    .setting-row.setting-textarea { min-height: 94px; }
+    .setting-row textarea.az-input { height: 72px; }
+    .setting-inline-actions { padding: 4px 12px 8px 137px; }
+    .setting-note { margin-left: 137px; margin-right: 12px; }
+
+    @media (max-width: 700px) {
+      .top-tools { left: 7px; right: 7px; top: 7px; height: 52px; padding: 5px 6px; }
+      .brand { left: 8px; top: 6px; font-size: 22px; line-height: 28px; }
+      .brand-small { display: none; }
+      .top-nav { left: 145px; right: 6px; top: 7px; height: 34px; gap: 4px; overflow-x: auto; justify-content: flex-start; }
+      .model-quick-shell { min-width: 130px; flex: 1 0 145px; height: 28px; padding: 3px 5px; }
+      .model-quick-shell > span { display: none; }
+      .mode-quick { min-width: 70px; flex: 0 0 70px; }
+      .language-quick { display: none; }
+      #themeBtn { display: none; }
+      #settingsBtn, #newChatBtn, #historyMobileBtn { flex: 0 0 auto; padding: 0 6px; }
+
+      .chat-panel { left: 7px; right: 7px; top: 66px; bottom: 7px; }
+      .messages { bottom: 142px; }
+      .composer { height: 142px; grid-template-columns: 1fr 66px; grid-template-rows: 80px 34px 28px; }
+      .chat-input { height: 80px; font-size: 22px; }
+      .send-button { height: 80px; font-size: 15px; }
+      .composer-tools { font-size: 10px; }
+      #clearDraftBtn { display: none; }
+      .bottom-status { display: none; }
+
+      .history-panel { left: 7px; right: 7px; top: 66px; bottom: 7px; width: auto; }
+      .history-panel .panel-title { padding-right: 166px; }
+
+      .modal { width: calc(100vw - 14px); height: calc(100dvh - 14px); max-height: none; }
+      .modal-title { height: 76px; line-height: 70px; font-size: 40px; }
+      .settings-list { left: 10px; right: 10px; top: 78px; width: auto; height: calc(100% - 132px); }
+      .setting-group { width: calc(100% - 4px); margin: 0 2px 8px; }
+      .setting-group > summary { height: 32px; line-height: 32px; font-size: 16px; }
+      .setting-row { min-height: 50px; line-height: 20px; padding: 7px 8px; }
+      .setting-row label:first-child { width: 100%; margin-bottom: 4px; }
+      .setting-row .az-input, .setting-row .az-select { width: 100%; }
+      .setting-note { margin: 0 8px 7px; }
+      .setting-inline-actions { padding: 4px 8px 8px; text-align: right; }
+      .modal-actions { left: 12px; right: 12px; bottom: 10px; }
+    }
+
+    @media (max-width: 430px) {
+      .brand { width: 30px; overflow: hidden; color: var(--az-accent); }
+      .top-nav { left: 42px; }
+      #newChatBtn { font-size: 0; width: 30px; }
+      #newChatBtn::after { content: '+'; font-size: 18px; }
+      #historyMobileBtn { font-size: 0; width: 34px; }
+      #historyMobileBtn::after { content: '≡'; font-size: 16px; }
+      #settingsBtn { font-size: 0; width: 34px; }
+      #settingsBtn::after { content: '⚙'; font-size: 14px; }
+      .mode-quick { min-width: 62px; flex-basis: 62px; }
+    }
+
   </style>
 </head>
 <body>
@@ -832,46 +967,45 @@
   </svg>
 
   <section class="az-panel top-tools">
-    <div class="brand">AZ LLM Chat <span class="brand-small">browser local workspace</span></div>
-    <div class="tool-row">
-      <span class="tool-label" id="providerQuickLabel">Provider</span>
-      <select id="providerQuick" class="az-select w-120">
-        <option value="opencode">OpenCode Zen</option>
-        <option value="custom">Custom API</option>
+    <div class="brand">AZ LLM Chat <span class="brand-small">local-first</span></div>
+    <div class="top-nav">
+      <label class="model-quick-shell" for="modelQuick">
+        <span id="modelQuickLabel">Model</span>
+        <select id="modelQuick" class="az-select"></select>
+      </label>
+      <select id="requestModeQuick" class="az-select mode-quick" aria-label="request mode">
+        <option value="agent">Agent</option>
+        <option value="chat">Chat</option>
       </select>
-      <span class="tool-label" id="modelQuickLabel">Model</span>
-      <select id="modelQuick" class="az-select w-220"></select>
       <button id="newChatBtn" class="az-button">New</button>
-      <button id="historyMobileBtn" class="az-button mobile-only">History</button>
+      <button id="historyMobileBtn" class="az-button">History</button>
       <button id="settingsBtn" class="az-button">API / Key</button>
-      <button id="refreshModelsBtn" class="az-button">Refresh models</button>
-      <span class="tool-grow"></span>
-      <select id="languageQuick" class="az-select w-80">
+      <select id="languageQuick" class="az-select language-quick">
         <option value="zh">中文</option>
         <option value="en">English</option>
       </select>
       <button id="themeBtn" class="az-button">Dark</button>
     </div>
-    <div class="tool-row second">
-      <span class="tool-label" id="endpointQuickLabel">Endpoint</span>
-      <input id="endpointQuick" class="az-input w-220" readonly />
-      <span class="tool-label" id="temperatureQuickLabel">Temperature</span>
-      <input id="temperatureQuick" class="az-input w-80" type="number" min="0" max="2" step="0.1" />
-      <span class="tool-label" id="streamQuickLabel">Stream</span>
-      <select id="streamQuick" class="az-select w-80">
-        <option value="true">on</option>
-        <option value="false">off</option>
-      </select>
-      <span class="tool-label" id="storageQuickLabel">Storage</span>
-      <span class="accent">IndexedDB</span>
+    <div class="legacy-quick-controls" aria-hidden="true">
+      <span id="providerQuickLabel">Provider</span>
+      <select id="providerQuick"><option value="opencode">OpenCode Zen</option><option value="custom">Custom API</option></select>
+      <span id="endpointQuickLabel">Endpoint</span><input id="endpointQuick" />
+      <span id="temperatureQuickLabel">Temperature</span><input id="temperatureQuick" type="number" />
+      <span id="streamQuickLabel">Stream</span><select id="streamQuick"><option value="true">on</option><option value="false">off</option></select>
+      <span id="storageQuickLabel">Storage</span>
     </div>
   </section>
 
   <main class="az-panel chat-panel">
     <div class="panel-title" id="chatTitle">New chat</div>
     <div class="title-actions">
-      <button id="renameBtn" class="az-button">Rename</button>
-      <button id="exportOneBtn" class="az-button">Export</button>
+      <details class="chat-menu">
+        <summary aria-label="conversation menu">•••</summary>
+        <div class="chat-menu-pop">
+          <button id="renameBtn" class="az-button">Rename</button>
+          <button id="exportOneBtn" class="az-button">Export</button>
+        </div>
+      </details>
     </div>
     <div class="messages" id="messages"></div>
     <div id="dropOverlay" class="drop-overlay">Drop files or images here</div>
@@ -922,80 +1056,42 @@
     <button id="settingsClose" class="modal-close" aria-label="close">X</button>
     <div class="modal-title" id="settingsTitle">Settings</div>
     <div class="settings-list">
-      <div class="setting-row">
-        <label for="languageSetting" id="languageSettingLabel">Language</label>
-        <select id="languageSetting" class="az-select">
-          <option value="zh">中文</option>
-          <option value="en">English</option>
-        </select>
-      </div>
-      <div class="setting-row">
-        <label for="providerSetting" id="providerSettingLabel">Provider</label>
-        <select id="providerSetting" class="az-select">
-          <option value="opencode">OpenCode Zen</option>
-          <option value="custom">Custom OpenAI-compatible</option>
-        </select>
-      </div>
-      <div class="setting-row">
-        <label for="apiBaseSetting" id="apiBaseSettingLabel">API endpoint</label>
-        <input id="apiBaseSetting" class="az-input" placeholder="https://…/v1/chat/completions" />
-      </div>
-      <div class="setting-note" id="endpointSettingNote">Use the full Chat Completions endpoint, not only the /v1 base URL.</div>
-      <div class="setting-row">
-        <label for="transportSetting" id="transportSettingLabel">Connection</label>
-        <select id="transportSetting" class="az-select">
-          <option value="auto">Auto (OpenCode → same-origin relay)</option>
-          <option value="direct">Browser direct</option>
-          <option value="proxy">Proxy / same-origin relay</option>
-        </select>
-      </div>
-      <div class="setting-row">
-        <label for="proxyUrlSetting" id="proxyUrlSettingLabel">Proxy URL</label>
-        <input id="proxyUrlSetting" class="az-input" placeholder="/api/proxy" />
-      </div>
-      <div class="setting-note" id="proxySettingNote">Public sites use same-origin /api/proxy; local use can use the bundled Python relay.</div>
-      <div class="setting-row">
-        <label for="apiKeySetting" id="apiKeySettingLabel">API key</label>
-        <input id="apiKeySetting" class="az-input" type="password" autocomplete="off" placeholder="sk-…" />
-      </div>
-      <div class="setting-row">
-        <label for="rememberKeySetting" id="rememberKeySettingLabel">Remember key</label>
-        <select id="rememberKeySetting" class="az-select">
-          <option value="false">No</option>
-          <option value="true">Yes, in this browser</option>
-        </select>
-      </div>
-      <div class="setting-note" id="keySettingNote">A remembered key is stored locally in IndexedDB. Any script running on the same origin can potentially access it.</div>
-      <div class="setting-row">
-        <label for="modelSetting" id="modelSettingLabel">Model</label>
-        <select id="modelSetting" class="az-select"></select>
-      </div>
-      <div class="setting-row">
-        <label for="customModelSetting" id="customModelSettingLabel">Custom model</label>
-        <input id="customModelSetting" class="az-input" placeholder="model-id" />
-      </div>
-      <div class="setting-row">
-        <label for="temperatureSetting" id="temperatureSettingLabel">Temperature</label>
-        <input id="temperatureSetting" class="az-input" type="number" min="0" max="2" step="0.1" />
-      </div>
-      <div class="setting-row">
-        <label for="streamSetting" id="streamSettingLabel">Streaming</label>
-        <select id="streamSetting" class="az-select">
-          <option value="true">On</option>
-          <option value="false">Off</option>
-        </select>
-      </div>
-      <div class="setting-row" style="min-height:96px">
-        <label for="systemPromptSetting" id="systemPromptSettingLabel">System prompt</label>
-        <textarea id="systemPromptSetting" class="az-input" placeholder="optional system prompt"></textarea>
-      </div>
-      <div class="setting-row">
-        <label for="themeSetting" id="themeSettingLabel">Appearance</label>
-        <select id="themeSetting" class="az-select">
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-        </select>
-      </div>
+      <details class="setting-group" open>
+        <summary id="settingsApiGroup">API & Model</summary>
+        <div class="setting-group-body">
+          <div class="setting-row"><label for="providerSetting" id="providerSettingLabel">Provider</label><select id="providerSetting" class="az-select"><option value="opencode">OpenCode Zen</option><option value="custom">Custom OpenAI-compatible</option></select></div>
+          <div class="setting-row"><label for="apiBaseSetting" id="apiBaseSettingLabel">API endpoint</label><input id="apiBaseSetting" class="az-input" placeholder="https://…/v1/chat/completions" /></div>
+          <div class="setting-note" id="endpointSettingNote">Use the full Chat Completions endpoint.</div>
+          <div class="setting-row"><label for="apiKeySetting" id="apiKeySettingLabel">API key</label><input id="apiKeySetting" class="az-input" type="password" autocomplete="off" placeholder="sk-…" /></div>
+          <div class="setting-row"><label for="rememberKeySetting" id="rememberKeySettingLabel">Remember key</label><select id="rememberKeySetting" class="az-select"><option value="false">No</option><option value="true">Yes, in this browser</option></select></div>
+          <div class="setting-note" id="keySettingNote">A remembered key is stored locally in IndexedDB.</div>
+          <div class="setting-row"><label for="modelSetting" id="modelSettingLabel">Model</label><select id="modelSetting" class="az-select"></select></div>
+          <div class="setting-row"><label for="customModelSetting" id="customModelSettingLabel">Custom model</label><input id="customModelSetting" class="az-input" placeholder="model-id" /></div>
+          <div class="setting-inline-actions"><button id="refreshModelsBtn" class="az-button">Refresh models</button></div>
+        </div>
+      </details>
+
+      <details class="setting-group" open>
+        <summary id="settingsGenerationGroup">Generation</summary>
+        <div class="setting-group-body">
+          <div class="setting-row"><label for="requestModeSetting" id="requestModeSettingLabel">Request mode</label><select id="requestModeSetting" class="az-select"><option value="agent">Agent</option><option value="chat">Chat</option></select></div>
+          <div class="setting-note" id="agentModeSettingNote">Agent mode adds an agent-style system instruction to Zen Chat Completions.</div>
+          <div class="setting-row"><label for="temperatureSetting" id="temperatureSettingLabel">Temperature</label><input id="temperatureSetting" class="az-input" type="number" min="0" max="2" step="0.1" /></div>
+          <div class="setting-row"><label for="streamSetting" id="streamSettingLabel">Streaming</label><select id="streamSetting" class="az-select"><option value="true">On</option><option value="false">Off</option></select></div>
+          <div class="setting-row setting-textarea"><label for="systemPromptSetting" id="systemPromptSettingLabel">System prompt</label><textarea id="systemPromptSetting" class="az-input" placeholder="optional system prompt"></textarea></div>
+        </div>
+      </details>
+
+      <details class="setting-group">
+        <summary id="settingsNetworkGroup">Network & Interface</summary>
+        <div class="setting-group-body">
+          <div class="setting-row"><label for="transportSetting" id="transportSettingLabel">Connection</label><select id="transportSetting" class="az-select"><option value="auto">Auto</option><option value="direct">Browser direct</option><option value="proxy">Proxy</option></select></div>
+          <div class="setting-row"><label for="proxyUrlSetting" id="proxyUrlSettingLabel">Proxy URL</label><input id="proxyUrlSetting" class="az-input" placeholder="https://woui.realgeneral.eu.org/" /></div>
+          <div class="setting-note" id="proxySettingNote">OpenCode requests use your Cloudflare Worker relay by default.</div>
+          <div class="setting-row"><label for="languageSetting" id="languageSettingLabel">Language</label><select id="languageSetting" class="az-select"><option value="zh">中文</option><option value="en">English</option></select></div>
+          <div class="setting-row"><label for="themeSetting" id="themeSettingLabel">Appearance</label><select id="themeSetting" class="az-select"><option value="light">Light</option><option value="dark">Dark</option></select></div>
+        </div>
+      </details>
     </div>
     <div class="modal-actions">
       <button id="testApiBtn" class="az-button">Test API</button>
@@ -1019,7 +1115,7 @@
 (() => {
   'use strict';
 
-  const BUILD = '2026-09-17-cors-fix';
+  const BUILD = '2026-09-17-agent-ui';
   const OPENCODE_ENDPOINT = 'https://opencode.ai/zen/v1/chat/completions';
   const OPENCODE_MODELS_ENDPOINT = 'https://opencode.ai/zen/v1/models';
   const LOCAL_PROXY_DEFAULT = 'http://127.0.0.1:8787/api/proxy';
@@ -1051,6 +1147,7 @@
     customModel: '',
     temperature: 0.7,
     stream: true,
+    requestMode: 'agent',
     systemPrompt: '',
     theme: 'light',
     language: 'zh',
@@ -1069,6 +1166,9 @@
       attachmentEmpty: '可粘贴、选择或拖入文件 / 图片',
       dropHere: '把文件或图片拖到这里', import: '导入', session: '会话',
       messages: '消息', tokens: 'Tokens', updated: '更新', settings: '设置',
+      requestMode: '请求模式', agentMode: 'Agent', chatMode: 'Chat',
+      settingsApiGroup: 'API 与模型', settingsGenerationGroup: '生成', settingsNetworkGroup: '网络与界面',
+      agentModeNote: 'Agent 模式会给 Zen Chat Completions 加入代理式系统指令；它不是 opencode serve 的 Build/Plan 工具 Agent。',
       language: '语言', apiEndpoint: 'API 接口', connection: '连接方式', proxyUrl: '代理地址',
       apiKey: 'API Key', rememberKey: '记住 Key', customModel: '自定义模型',
       streaming: '流式输出', systemPrompt: '系统提示词', appearance: '外观',
@@ -1077,7 +1177,7 @@
       apiConfigured: 'API 已配置', apiNotConfigured: 'API 未配置',
       renderNote: 'Markdown 会先安全清洗，再渲染；LaTeX 使用 KaTeX。',
       endpointNote: '填写完整的 Chat Completions 地址，而不是只填 /v1 基础地址。',
-      proxyNote: '公网部署默认使用同源 /api/proxy，避免第三方 API 的 CORS 限制；本机打开时使用 127.0.0.1:8787。纯静态站点若没有 /api/proxy，OpenCode 跨域请求仍会被浏览器阻止。',
+      proxyNote: 'OpenCode 默认通过你的 Cloudflare Worker https://woui.realgeneral.eu.org/ 转发，以避开浏览器 CORS；自定义 API 仍可选择浏览器直连。',
       keyNote: '若选择记住 Key，会把 Key 保存在本浏览器 IndexedDB；同源脚本理论上可能读取它。',
       modelSwitchWarn: '这个对话已经有历史消息。中途切换模型可能降低上下文一致性和性能。\n\n仍要切换模型吗？',
       modelSwitchToast: '已切换模型 · 旧上下文可能影响表现',
@@ -1089,9 +1189,9 @@
       apiFailed: 'API 请求失败', apiTestFailed: 'API 测试失败', apiTestOk: 'API 测试成功',
       missingEndpoint: '请先设置 API 接口', missingModel: '请先选择模型',
       emptyResponse: '[空回复]', stoppedText: '[生成已停止]',
-      failedFetch: 'API 连接失败。公网 HTTPS 页面调用 OpenCode 时需要同源 /api/proxy；纯前端无法绕过第三方服务器的 CORS。若在本机使用，请运行 az_llm_server.py。',
+      failedFetch: 'API 连接失败。请检查 https://woui.realgeneral.eu.org/ Worker 是否已部署、CORS 是否允许本站域名，以及 API Key 是否有效。',
       directFailedProxyOk: '浏览器直连不可用，已自动通过代理连接',
-      proxyUnavailable: '代理不可用。公网部署请配置同源 /api/proxy；本机请运行 az_llm_server.py',
+      proxyUnavailable: 'Worker 代理不可用。请检查 https://woui.realgeneral.eu.org/ 是否可访问。',
       testing: '正在测试 API…', refreshStart: '正在刷新 OpenCode 模型…',
       refreshDone: 'OpenCode 免费模型已刷新并缓存到本地',
       refreshFallback: '模型刷新失败 · 继续使用内置免费模型',
@@ -1105,7 +1205,7 @@
       input: '输入', output: '输出', total: '总计',
       draft: '草稿估算', localHistory: '本地记录',
       providerOpenCode: 'OpenCode Zen', providerCustom: '自定义 API',
-      connectionAuto: 'Auto（OpenCode 优先同源代理）', connectionDirect: '浏览器直连',
+      connectionAuto: 'Auto（OpenCode 优先 Worker）', connectionDirect: '浏览器直连',
       connectionProxy: '代理 / 同源 Relay', rememberNo: '否', rememberYes: '是，保存在此浏览器',
       on: '开', off: '关', themeLight: '浅色', themeDark: '深色',
       closeHistory: '关闭历史'
@@ -1119,6 +1219,9 @@
       attachmentEmpty: 'Paste, choose, or drag files / images',
       dropHere: 'Drop files or images here', import: 'Import', session: 'Session',
       messages: 'Messages', tokens: 'Tokens', updated: 'Updated', settings: 'Settings',
+      requestMode: 'Request mode', agentMode: 'Agent', chatMode: 'Chat',
+      settingsApiGroup: 'API & Model', settingsGenerationGroup: 'Generation', settingsNetworkGroup: 'Network & Interface',
+      agentModeNote: 'Agent mode adds agent-style instructions to Zen Chat Completions; it is not the tool-enabled Build/Plan agent from opencode serve.',
       language: 'Language', apiEndpoint: 'API endpoint', connection: 'Connection', proxyUrl: 'Proxy URL',
       apiKey: 'API key', rememberKey: 'Remember key', customModel: 'Custom model',
       streaming: 'Streaming', systemPrompt: 'System prompt', appearance: 'Appearance',
@@ -1127,7 +1230,7 @@
       apiConfigured: 'API configured', apiNotConfigured: 'API not configured',
       renderNote: 'Markdown is sanitized before rendering. LaTeX is rendered with KaTeX.',
       endpointNote: 'Use the full Chat Completions endpoint, not only the /v1 base URL.',
-      proxyNote: 'Public deployments default to same-origin /api/proxy to avoid third-party CORS restrictions; local pages use 127.0.0.1:8787. A purely static deployment still cannot bypass OpenCode CORS without /api/proxy.',
+      proxyNote: 'OpenCode uses your Cloudflare Worker at https://woui.realgeneral.eu.org/ by default to avoid browser CORS; custom APIs may still use browser-direct mode.',
       keyNote: 'A remembered key is stored locally in IndexedDB. Any script running on the same origin can potentially access it.',
       modelSwitchWarn: 'This conversation already has history. Switching models mid-conversation can reduce context consistency and performance.\n\nSwitch anyway?',
       modelSwitchToast: 'Model switched · earlier context may affect performance',
@@ -1139,9 +1242,9 @@
       apiFailed: 'API request failed', apiTestFailed: 'API test failed', apiTestOk: 'API test succeeded',
       missingEndpoint: 'Set API endpoint first', missingModel: 'Select a model first',
       emptyResponse: '[empty response]', stoppedText: '[generation stopped]',
-      failedFetch: 'API connection failed. Public HTTPS pages need a same-origin /api/proxy for OpenCode; frontend JavaScript cannot bypass a third-party server’s CORS policy. For local use, run az_llm_server.py.',
+      failedFetch: 'API connection failed. Check that https://woui.realgeneral.eu.org/ is deployed, allows this site origin through CORS, and that the API key is valid.',
       directFailedProxyOk: 'Browser-direct request was unavailable; connected through the proxy',
-      proxyUnavailable: 'Proxy unavailable. Configure same-origin /api/proxy for public deployment, or run az_llm_server.py locally',
+      proxyUnavailable: 'Worker proxy unavailable. Check https://woui.realgeneral.eu.org/.',
       testing: 'Testing API…', refreshStart: 'Refreshing OpenCode model list…',
       refreshDone: 'OpenCode free models refreshed and cached locally',
       refreshFallback: 'Model refresh failed · using built-in free-model presets',
@@ -1155,7 +1258,7 @@
       input: 'input', output: 'output', total: 'total',
       draft: 'draft est.', localHistory: 'local history',
       providerOpenCode: 'OpenCode Zen', providerCustom: 'Custom API',
-      connectionAuto: 'Auto (OpenCode prefers same-origin relay)', connectionDirect: 'Browser direct',
+      connectionAuto: 'Auto (OpenCode prefers Worker relay)', connectionDirect: 'Browser direct',
       connectionProxy: 'Proxy / same-origin relay', rememberNo: 'No', rememberYes: 'Yes, in this browser',
       on: 'on', off: 'off', themeLight: 'Light', themeDark: 'Dark',
       closeHistory: 'Close history'
@@ -1245,6 +1348,11 @@
     setText('infoTokensLabel', 'tokens');
     setText('infoUpdatedLabel', 'updated');
     setText('settingsTitle', 'settings');
+    setText('requestModeSettingLabel', 'requestMode');
+    setText('settingsApiGroup', 'settingsApiGroup');
+    setText('settingsGenerationGroup', 'settingsGenerationGroup');
+    setText('settingsNetworkGroup', 'settingsNetworkGroup');
+    setText('agentModeSettingNote', 'agentModeNote');
     setText('languageSettingLabel', 'language');
     setText('providerSettingLabel', 'provider');
     setText('apiBaseSettingLabel', 'apiEndpoint');
@@ -1275,6 +1383,10 @@
     $('dropOverlay').textContent = t('dropHere');
     $('themeBtn').textContent = settings.theme === 'dark' ? t('light') : t('dark');
 
+    setOptionText('requestModeQuick', 'agent', t('agentMode'));
+    setOptionText('requestModeQuick', 'chat', t('chatMode'));
+    setOptionText('requestModeSetting', 'agent', t('agentMode'));
+    setOptionText('requestModeSetting', 'chat', t('chatMode'));
     setOptionText('streamQuick', 'true', t('on'));
     setOptionText('streamQuick', 'false', t('off'));
     setOptionText('streamSetting', 'true', t('on'));
@@ -1381,10 +1493,12 @@
       : OPENCODE_FREE_PRESETS;
     if (!['zh','en'].includes(settings.language)) settings.language = 'zh';
     if (!['auto','direct','proxy'].includes(settings.transport)) settings.transport = 'auto';
+    if (!['agent','chat'].includes(settings.requestMode)) settings.requestMode = 'agent';
     // Migrate v2's localhost proxy setting when this same file is deployed on a
     // public HTTP(S) origin. 127.0.0.1 would otherwise point at each visitor's
     // own machine and produce ERR_CONNECTION_REFUSED.
-    if (!settings.proxyUrl || (!IS_LOOPBACK_PAGE && IS_WEB_PAGE && String(settings.proxyUrl).trim() === LOCAL_PROXY_DEFAULT)) {
+    const oldProxy = String(settings.proxyUrl || '').trim();
+    if (!oldProxy || oldProxy === LOCAL_PROXY_DEFAULT || oldProxy === '/api/proxy' || oldProxy === `${location.origin}/api/proxy`) {
       settings.proxyUrl = DEFAULT_PROXY_URL;
     }
     if (!settings.rememberKey) settings.apiKey = '';
@@ -1443,19 +1557,21 @@
     $('endpointQuick').value = currentEndpoint();
     $('temperatureQuick').value = settings.temperature;
     $('streamQuick').value = String(settings.stream);
+    $('requestModeQuick').value = settings.requestMode || 'agent';
     $('languageQuick').value = settings.language;
 
     $('languageSetting').value = settings.language;
     $('providerSetting').value = settings.provider;
     $('apiBaseSetting').value = settings.apiBase;
     $('transportSetting').value = settings.transport;
-    $('proxyUrlSetting').value = settings.proxyUrl || LOCAL_PROXY_DEFAULT;
+    $('proxyUrlSetting').value = settings.proxyUrl || DEFAULT_PROXY_URL;
     $('apiKeySetting').value = sessionApiKey;
     $('rememberKeySetting').value = String(settings.rememberKey);
     buildModelOptions($('modelSetting'), settings.model);
     $('customModelSetting').value = settings.customModel || '';
     $('temperatureSetting').value = settings.temperature;
     $('streamSetting').value = String(settings.stream);
+    $('requestModeSetting').value = settings.requestMode || 'agent';
     $('systemPromptSetting').value = settings.systemPrompt || '';
     $('themeSetting').value = settings.theme;
     applyLanguage();
@@ -1471,12 +1587,13 @@
       provider,
       apiBase: $('apiBaseSetting').value.trim() || (provider === 'opencode' ? OPENCODE_ENDPOINT : ''),
       transport: $('transportSetting').value,
-      proxyUrl: $('proxyUrlSetting').value.trim() || LOCAL_PROXY_DEFAULT,
+      proxyUrl: $('proxyUrlSetting').value.trim() || DEFAULT_PROXY_URL,
       rememberKey: $('rememberKeySetting').value === 'true',
       model,
       customModel: $('customModelSetting').value.trim(),
       temperature: clampNumber($('temperatureSetting').value, 0, 2, 0.7),
       stream: $('streamSetting').value === 'true',
+      requestMode: $('requestModeSetting').value === 'chat' ? 'chat' : 'agent',
       systemPrompt: $('systemPromptSetting').value,
       theme: $('themeSetting').value
     };
@@ -1852,6 +1969,7 @@
     const proxyUrl = effectiveProxyUrl(cfg);
     const headers = new Headers(init.headers || {});
     headers.set('X-AZ-Target', target);
+    headers.set('X-AZ-Mode', cfg.requestMode || 'agent');
     return fetch(proxyUrl, { ...init, headers });
   }
   function likelyLocalServerOrigin() {
@@ -1917,6 +2035,16 @@
     }
   }
 
+  const AGENT_MODE_MARKER = '[AZ_AGENT_MODE]';
+  const AGENT_MODE_SYSTEM = `${AGENT_MODE_MARKER}\nYou are operating in agent mode. Work autonomously toward the user's requested outcome. Decompose multi-step work, use all conversation context and attached content, verify assumptions when possible, and continue until the task is complete. You do not have external execution tools through this Zen Chat Completions client, so never claim to have run commands, modified remote systems, or accessed resources that were not actually provided. Do not reveal private chain-of-thought; provide concise reasoning summaries and concrete results when useful.`;
+
+  function effectiveSystemPrompt(cfg = settings) {
+    const parts = [];
+    if ((cfg.requestMode || 'agent') === 'agent') parts.push(AGENT_MODE_SYSTEM);
+    if (String(cfg.systemPrompt || '').trim()) parts.push(String(cfg.systemPrompt).trim());
+    return parts.join('\n\n');
+  }
+
   function apiContentForMessage(m) {
     const attachments = m.attachments || [];
     let text = m.content || '';
@@ -1936,7 +2064,8 @@
   }
   function buildApiMessages(excludeId = '') {
     const result = [];
-    if (settings.systemPrompt.trim()) result.push({ role:'system', content:settings.systemPrompt.trim() });
+    const system = effectiveSystemPrompt(settings);
+    if (system) result.push({ role:'system', content:system });
     for (const m of activeConversation?.messages || []) {
       if (m.id === excludeId) continue;
       if (m.role !== 'user' && m.role !== 'assistant') continue;
@@ -2055,7 +2184,7 @@
     sendBtn.disabled = true;
     stopBtn.disabled = false;
     abortController = new AbortController();
-    setBottomStatus(t('calling', { model:currentModel() }));
+    setBottomStatus(`${t('calling', { model:currentModel() })} · ${(settings.requestMode || 'agent') === 'agent' ? t('agentMode') : t('chatMode')}`);
 
     const assistantIndex = activeConversation.messages.length - 1;
     const apiMessages = buildApiMessages(assistantMessage.id);
@@ -2210,7 +2339,7 @@
     $('settingsModal').classList.add('open');
     setTimeout(() => $('apiKeySetting').focus(), 0);
   }
-  function closeSettings() { $('settingsModal').classList.remove('open'); }
+  function closeSettings() { $('settingsModal').classList.remove('open'); setTimeout(() => promptInput.focus({ preventScroll:true }), 0); }
 
   async function saveSettingsFromModal() {
     const candidate = collectSettingsFromModal();
@@ -2246,7 +2375,7 @@
         headers:requestHeaders(key),
         body:JSON.stringify({
           model,
-          messages:[{ role:'user', content:'Reply with exactly: OK' }],
+          messages:[...(effectiveSystemPrompt(candidate) ? [{ role:'system', content:effectiveSystemPrompt(candidate) }] : []), { role:'user', content:'Reply with exactly: OK' }],
           temperature:0,
           stream:false,
           max_tokens:16
@@ -2480,6 +2609,12 @@
       settings.stream = e.target.value === 'true';
       await saveSettings(); syncSettingsToUI();
     });
+    $('requestModeQuick').addEventListener('change', async e => {
+      settings.requestMode = e.target.value === 'chat' ? 'chat' : 'agent';
+      await saveSettings();
+      syncSettingsToUI();
+      promptInput.focus({ preventScroll:true });
+    });
     $('languageQuick').addEventListener('change', async e => {
       settings.language = e.target.value;
       await saveSettings();
@@ -2569,6 +2704,7 @@
       renderAll();
       applyLanguage();
       setBottomStatus(t('ready'));
+      requestAnimationFrame(() => { try { promptInput.focus({ preventScroll:true }); } catch { promptInput.focus(); } });
     } catch (e) {
       console.error(e);
       document.body.innerHTML = `<pre style="white-space:pre-wrap;padding:20px;font-family:serif">Failed to initialize local database:\n${escapeHtml(e.message || e)}</pre>`;
